@@ -266,6 +266,33 @@ class DinnerController extends Controller
         return view('dashboard.dinner.manage', compact('dinners', 'timeframe', 'sidebarEvents', 'title'));
     }
 
+    public function edit($id)
+    {
+        $dinner = \App\Models\Dinner::findOrFail($id);
+        return view('dashboard.dinner.edit', compact('dinner'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'date' => 'required|date',
+        ]);
+
+        $dinner = \App\Models\Dinner::findOrFail($id);
+        
+        $data = $request->only(['name', 'company', 'date', 'is_active']);
+
+        if ($request->hasFile('image')) {
+            // Optional: Delete old image here
+            $data['image_path'] = $request->file('image')->store('dinners', 'public');
+        }
+
+        $dinner->update($data);
+
+        return redirect()->route('admin.dinner.manage', 'now')->with('success', 'Dinner updated!');
+    }
+
     public function create()
     {
         return view('dashboard.dinner.create');

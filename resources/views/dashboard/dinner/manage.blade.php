@@ -1,6 +1,6 @@
 @extends('dashboard.layouts.master')
 
-@section('content')        
+@section('content')      
     <div class="event-sidebar dz-scroll" id="eventSidebar">
         <div class="card shadow-none rounded-0 bg-transparent h-auto mb-0">
             <div class="card-body text-center event-calender pb-2">
@@ -13,7 +13,6 @@
                 <h4 class="text-black">Coming Soon</h4>
             </div>
             <div class="card-body">
-                {{-- sidebarEvents would be Dinners with is_active = 2 or 1 --}}
                 @forelse($sidebarEvents as $sidebarEvent)
                     <div class="d-flex mb-5 align-items-center event-list">
                         <div class="p-3 text-center rounded me-3 date-bx bgl-primary">
@@ -55,7 +54,6 @@
 
             <div class="row mb-5 align-items-center">
                 <div class="col-xl-3 mb-4 mb-xl-0">
-                    {{-- Updated to point to a dinner create route --}}
                     <a href="{{ route('admin.dinner.create') }}" class="btn btn-primary light btn-lg d-block rounded fs-18">+ Create New Dinner</a>
                 </div>
 
@@ -70,7 +68,6 @@
                                     </div>
                                 </div>
                                 <div class="col-md-7 text-md-end">
-                                    {{-- Filtering by the is_active logic (Now vs Past) --}}
                                     <a href="{{ route('admin.dinner.manage', 'now') }}" class="btn btn-success {{ $timeframe == 'now' ? '' : 'light' }} btn-xs px-4">Active</a>
                                     <a href="{{ route('admin.dinner.manage', 'past') }}" class="btn btn-secondary {{ $timeframe == 'past' ? '' : 'light' }} btn-xs px-4 ms-2">Past</a>
                                 </div>
@@ -122,9 +119,11 @@
                                         
                                         <td>
                                             <div class="d-flex">
-                                                <a href="{{ route('admin.dinner.edit', $dinner->id) }}" class="btn btn-primary shadow btn-xs btn-square me-1">
+                                                <a href="{{ route('admin.dinner.edit', $dinner->id) }}" 
+                                                class="btn btn-primary shadow btn-xs btn-square me-1">
                                                     <i class="fas fa-pencil-alt"></i>
                                                 </a>
+                                            </button>
                                                 <form action="{{ route('admin.dinner.destroy', $dinner->id) }}" method="POST" onsubmit="return confirm('Delete this dinner?')">
                                                     @csrf
                                                     @method('DELETE')

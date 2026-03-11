@@ -119,6 +119,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/dinner/create', [DinnerController::class, 'create'])->name('admin.dinner.create');
     Route::post('/dinner/store', [DinnerController::class, 'store'])->name('admin.dinner.store');
     Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
+    Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
     Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
     
     // Dinner Tickets (Master/Detail)

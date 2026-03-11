@@ -335,6 +335,8 @@
 .menu li a span {
     font-weight: bold;
 }
+
+
 </style>
     <link rel="stylesheet" type="text/css" href="{{ asset('stylesheets/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('stylesheets/style.css') }}">
