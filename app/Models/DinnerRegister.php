@@ -20,6 +20,7 @@ class DinnerRegister extends Model
         'last_name',
         'email',
         'phone',
+        'viber',
     ];
 
     /**

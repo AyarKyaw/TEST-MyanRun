@@ -112,4 +112,27 @@
 
     </div>
 </div>
+@if(session('success'))
+<div id="successModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[3rem] w-full max-w-sm p-10 shadow-2xl text-center transform transition-all animate-bounce-short">
+        <div class="w-24 h-24 bg-[#C3E92D] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-lime-200">
+            <i class="fas fa-check text-4xl text-slate-900"></i>
+        </div>
+        <h2 class="text-2xl font-black text-slate-800 uppercase italic mb-2">Registration Sent!</h2>
+        <p class="text-slate-500 text-sm font-semibold mb-8">{{ session('success') }}</p>
+        
+        <button onclick="document.getElementById('successModal').remove()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl uppercase tracking-widest text-xs hover:bg-slate-800 transition-all">
+            Awesome!
+        </button>
+    </div>
+</div>
+
+<style>
+    @keyframes bounce-short {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    .animate-bounce-short { animation: bounce-short 0.5s ease-in-out; }
+</style>
+@endif
 @endsection

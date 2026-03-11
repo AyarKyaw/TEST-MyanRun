@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\AthleteController;
@@ -10,7 +11,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\DinnerController;
-
+use App\Http\Controllers\SponsorController;
+use App\Models\SponsorCode;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -123,6 +125,43 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
     Route::get('/dinner-tickets/{id}', [DinnerController::class, 'showDinnerTickets'])->name('admin.dinner.tickets.show');
     Route::post('/dinner-tickets/{id}/approve', [DinnerController::class, 'adminApprove'])->name('admin.dinner.approve');
+    Route::post('/dinner-tickets/reject/{id}', [DinnerController::class, 'adminReject'])->name('admin.dinner.reject');
+
+    Route::get('/sponsors/{status}', [SponsorController::class, 'index'])
+    ->where('status', 'now|past') // Only allow these two words
+    ->name('admin.sponsor.index');
+    Route::get('/sponsors/create', [SponsorController::class, 'create'])->name('admin.sponsor.create');
+    Route::post('/sponsors/store', [SponsorController::class, 'store'])->name('admin.sponsor.store');
+    Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
+    Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
+    Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
+});
+
+
+Route::get('/api/validate-discount', function (Illuminate\Http\Request $request) {
+    // 1. Find the code in the new table
+    $codeRecord = \App\Models\SponsorCode::where('code', $request->code)->first();
+
+    if (!$codeRecord) {
+        return response()->json(['success' => false, 'message' => 'Invalid sponsor code.']);
+    }
+
+    // 2. NEW LOGIC: Check if quota is full instead of is_used
+    if ($codeRecord->used_count >= $codeRecord->max_uses) {
+        return response()->json(['success' => false, 'message' => 'This code has reached its guest limit.']);
+    }
+
+    // 3. Optional: Check if the sponsor is active
+    if ($codeRecord->sponsor->status !== 'active') {
+        return response()->json(['success' => false, 'message' => 'This sponsor is currently inactive.']);
+    }
+
+    // 4. Return the discount from the SponsorCode record
+    return response()->json([
+        'success' => true,
+        'discount' => $codeRecord->discount, // This is the % off
+        'message' => 'Code applied!'
+    ]);
 });
 
 /*

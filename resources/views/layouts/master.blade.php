@@ -373,6 +373,7 @@
     <script>
         window.mapboxToken = "{{ env('MAPBOX_ACCESS_TOKEN') }}";
     </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="{{ asset('javascript/jquery.min.js') }}"></script>
     <script src="{{ asset('javascript/magnific-popup.min.js') }}"></script>
     <script src="{{ asset('javascript/bootstrap.bundle.min.js') }}"></script>

@@ -50,6 +50,28 @@
                     <li><a href="{{ route('admin.dinner.manage', 'past') }}">Past Dinner</a></li>
                 </ul>
             </li>
+            <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="flaticon-381-layer-1"></i>
+                    <span class="nav-text" data-i18n="Sponsor">Sponsor</span>
+                </a>
+                <ul aria-expanded="false">
+                    {{-- We pass 'now' for active (1) and 'past' for inactive (0) --}}
+                    <li><a href="{{ route('admin.sponsor.index', 'now') }}">Now Sponsor</a></li>
+                    <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li>
+                </ul>
+            </li>
+            <!-- <li>
+                <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                    <i class="flaticon-381-layer-1"></i>
+                    <span class="nav-text" data-i18n="Sponsor">Sponsor</span>
+                </a>
+                <ul aria-expanded="false">
+                    {{-- We pass 'now' for active (1) and 'past' for inactive (0) --}}
+                    <li><a href="{{ route('admin.sponsor.index', 'now') }}">Now Sponsor</a></li>
+                    <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li>
+                </ul>
+            </li> -->
         </ul>
     </div>
     

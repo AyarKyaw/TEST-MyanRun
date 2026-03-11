@@ -29,13 +29,13 @@ class DinnerController extends Controller
 
     public function registerPage(Request $request)
     {
-        // Capture the ID from the URL (?dinner_id=3)
         $dinner = \App\Models\Dinner::findOrFail($request->dinner_id);
 
         return view('dinner.register', [
-            'dinner' => $dinner,
-            'selected_type' => $request->selected_type,
-            'selected_price' => $request->selected_price
+            'dinner'         => $dinner,
+            'selected_type'  => $request->selected_type,
+            'selected_price' => $request->selected_price,
+            'quantity'       => $request->quantity ?? 1 // Capture quantity
         ]);
     }
 
@@ -47,31 +47,23 @@ class DinnerController extends Controller
         return view('dinner.checkout', compact('dinner'));
     }
     
-    /**
-     * Final Step: Save to Database and show confirmation
-     */
     public function process(Request $request)
     {
-        // 1. Save or Update the person only
-        $registration = DinnerRegister::updateOrCreate(
-            ['email' => $request->email], 
-            [
-                'user_id'     => Auth::check() ? Auth::id() : null,
-                'first_name'  => $request->first_name,
-                'middle_name' => $request->middle_name,
-                'last_name'   => $request->last_name,
-                'phone'       => $request->phone,
-            ]
-        );
+        $data = [
+            'dinner_id'    => $request->dinner_id,
+            'type'         => $request->type,
+            'price'        => $request->total_price,
+            'quantity'     => $request->quantity,
+            'first_name'   => $request->first_name,
+            'middle_name'  => $request->middle_name,
+            'last_name'    => $request->last_name,
+            'email'        => $request->email,
+            'phone'        => $request->phone,
+            'viber'        => $request->viber, // Add this line
+            'applied_code' => $request->applied_code,
+        ];
 
-        // 2. Redirect to confirmation using ONLY registration data
-        // We pass dinner_id, type, and price in the URL so the next page knows what to bill
-        return redirect()->route('dinner.confirmation', [
-            'id' => $registration->id,
-            'dinner_id' => $request->dinner_id,
-            'type' => $request->type,
-            'price' => $request->price
-        ]);
+        return redirect()->route('dinner.confirmation', array_merge(['id' => 'new'], $data));
     }
 
     // This is used if you submit the register form directly to save 
@@ -98,11 +90,24 @@ class DinnerController extends Controller
         return redirect()->route('dinner.checkout', $request->all());
     }
 
-    public function confirmation($id)
+    public function confirmation(Request $request, $id)
     {
-        // Use 'with' to eager load the tickets relationship
-        $registration = \App\Models\DinnerRegister::with('tickets')->findOrFail($id);
+        if ($id === 'new') {
+            // Create a temporary object so the view doesn't crash
+            $registration = new \App\Models\DinnerRegister();
+            $registration->first_name = $request->first_name;
+            $registration->last_name = $request->last_name;
+            $registration->email = $request->email;
+            $registration->phone = $request->phone;
+            
+            // Mock the tickets relationship as an empty collection
+            $registration->setRelation('tickets', collect());
+            
+            return view('dinner.confirmation', compact('registration'));
+        }
 
+        // For existing records (post-upload view)
+        $registration = \App\Models\DinnerRegister::with('tickets')->findOrFail($id);
         return view('dinner.confirmation', compact('registration'));
     }
 
@@ -112,39 +117,132 @@ class DinnerController extends Controller
         return view('dashboard.dinner.tickets', compact('tickets'));
     }
 
-    // Approve a ticket
     public function adminApprove($id) {
-        $ticket = \App\Models\DinnerTicket::findOrFail($id);
-        $ticket->update(['status' => 'confirmed']);
+        $ticket = \App\Models\DinnerTicket::with('registration')->findOrFail($id);
         
-        return back()->with('success', 'Ticket approved successfully!');
-    }
+        // Optional: Auto-confirm status
+        $ticket->update(['status' => 'confirmed']);
 
-    public function uploadPayment(Request $request, $id) // $id is now DinnerRegister ID
-    {
-        $request->validate([
-            'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'dinner_id' => 'required'
-        ]);
+        $templatePath = public_path('images/ticket1.jpg');
+        $fontPath = public_path('assets/fonts/arial.ttf');
+        $saveDir = public_path('uploads/tickets');
 
-        if ($request->hasFile('payment_slip')) {
-            // 1. Save the Image
-            $imageName = 'slip_' . time() . '.' . $request->payment_slip->extension();
-            $request->payment_slip->move(public_path('uploads/payments'), $imageName);
-            
-            // 2. NOW create the ticket record for the first time
-            $ticket = \App\Models\DinnerTicket::create([
-                'dinner_register_id' => $id,
-                'dinner_id' => $request->dinner_id,
-                'ticket_no' => 'DIN-' . strtoupper(bin2hex(random_bytes(3))),
-                'type'      => $request->type ?? 'Standard',
-                'price'     => (int)str_replace(',', '', $request->price ?? 50000),
-                'status'    => 'pending',
-                'payment_slip' => $imageName
-            ]);
+        if (!\Illuminate\Support\Facades\File::exists($saveDir)) {
+            \Illuminate\Support\Facades\File::makeDirectory($saveDir, 0777, true);
         }
 
-        return back()->with('success', 'Payment slip uploaded! Your ticket has been created and is awaiting verification.');
+        $fileName = 'ticket_' . $ticket->id . '.png';
+        $filePath = $saveDir . '/' . $fileName;
+
+        if (file_exists($templatePath)) {
+            $image = @imagecreatefromjpeg($templatePath);
+            
+            if ($image) {
+                $white = imagecolorallocate($image, 255, 255, 255);
+
+                if (file_exists($fontPath)) {
+                    $fullName = $ticket->registration->first_name . ' ' . $ticket->registration->last_name;
+                    $phone = $ticket->registration->phone ?? 'N/A';
+                    $ticketNo = $ticket->ticket_no;
+
+                    // 1. Add Text Data
+                    imagettftext($image, 18, 0, 950, 86, $white, $fontPath, strtoupper($fullName));
+                    imagettftext($image, 18, 0, 950, 150, $white, $fontPath, $phone);
+                    
+                    imagettftext($image, 18, 0, 980, 40, $white, $fontPath, $ticket->ticket_no);
+
+                    // 2. GENERATE & MERGE QR CODE
+                    // We use a public API to get a QR code of the ticket number
+                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . $ticketNo;
+                    $qrCodeImage = @imagecreatefrompng($qrUrl);
+
+                    if ($qrCodeImage) {
+                        // Get dimensions of QR
+                        $qrWidth = imagesx($qrCodeImage);
+                        $qrHeight = imagesy($qrCodeImage);
+
+                        // Destination: Adjust these coordinates to fit your ticket layout
+                        // Example: Bottom right corner area
+                        $dstX = 960; 
+                        $dstY = 200; 
+
+                        imagecopy($image, $qrCodeImage, $dstX, $dstY, 0, 0, $qrWidth, $qrHeight);
+                        imagedestroy($qrCodeImage);
+                    }
+                }
+
+                imagepng($image, $filePath);
+                imagedestroy($image);
+            }
+        }
+
+        if (file_exists($filePath)) {
+            if (ob_get_level()) ob_end_clean();
+            return response()->download($filePath);
+        }
+        
+        return back()->with('success', 'Ticket approved, but file could not be generated.');
+    }
+
+    public function uploadPayment(Request $request, $id) 
+    {
+        // 1. Validate - Add viber to the validation rules
+        $request->validate([
+            'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'dinner_id'    => 'required',
+            'email'        => 'required|email',
+            'first_name'   => 'required',
+            'last_name'    => 'required',
+            'price'        => 'required',
+            'quantity'     => 'required',
+            'viber'        => 'nullable|string|max:20', // Add this line
+        ]);
+
+        $sponsorId = null;
+
+        // 2. Handle Quota-based Sponsor Code (Keep your existing logic)
+        if ($request->filled('applied_code')) {
+            $codeRecord = \App\Models\SponsorCode::where('code', $request->applied_code)->first();
+            if ($codeRecord && $codeRecord->used_count < $codeRecord->max_uses) {
+                $sponsorId = $codeRecord->sponsor_id;
+                $codeRecord->increment('used_count');
+            }
+        }
+
+        // 3. Create or Update the Guest Registration
+        // Ensure 'viber' is included in the update array
+        $registration = DinnerRegister::updateOrCreate(
+            ['email' => $request->email],
+            [
+                'user_id'     => Auth::check() ? Auth::id() : null,
+                'first_name'  => $request->first_name,
+                'middle_name' => $request->middle_name,
+                'last_name'   => $request->last_name,
+                'phone'       => $request->phone,
+                'viber'       => $request->viber, // Add this line to save Viber data
+            ]
+        );
+
+        // 4. Handle the Payment Slip Image (Keep your existing logic)
+        $imageName = 'slip_' . time() . '.' . $request->payment_slip->extension();
+        $request->payment_slip->move(public_path('uploads/payments'), $imageName);
+        
+        // 5. Save the Ticket
+        $rawPrice = (int)str_replace(',', '', $request->price);
+
+        \App\Models\DinnerTicket::create([
+            'dinner_register_id' => $registration->id,
+            'dinner_id'          => $request->dinner_id,
+            'sponsor_id'         => $sponsorId,
+            'ticket_no'          => 'DIN-' . strtoupper(bin2hex(random_bytes(3))),
+            'type'               => $request->type ?? 'Standard',
+            'price'              => $rawPrice,
+            'quantity'           => (int)$request->quantity,
+            'status'             => 'pending',
+            'payment_slip'       => $imageName
+        ]);
+
+        return redirect()->route('dinner.index')->with('success', 'Thank you! Your registration and payment have been submitted for review.');
     }
 
     public function manageDinners($timeframe)
@@ -217,19 +315,34 @@ class DinnerController extends Controller
     return view('dashboard.dinner.index_tickets', compact('dinners'));
 }
 
-    public function showDinnerTickets($id)
+    public function showDinnerTickets(Request $request, $id) // Added Request $request
     {
-        // 1. Find the dinner or fail
+        // 1. Find the dinner
         $dinner = \App\Models\Dinner::findOrFail($id);
 
-        // 2. Get tickets linked to this dinner 
-        // Assuming your relationship is defined in the Dinner model
-        $tickets = \App\Models\DinnerTicket::where('dinner_id', $id)
-                    ->with('registration') // Load Guest Name/Email info
-                    ->latest()
-                    ->get();
+        // 2. Start the query
+        $query = \App\Models\DinnerTicket::where('dinner_id', $id)
+                    ->with('registration')
+                    ->latest();
 
-        // 3. Return the tickets.blade.php you provided
+        // 3. Filter by status if provided in the URL (?status=pending)
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $tickets = $query->paginate(15);
+
+        // 4. Return view with dinner and filtered tickets
         return view('dashboard.dinner.tickets', compact('dinner', 'tickets'));
+    }
+
+    public function adminReject($id) 
+    {
+        $ticket = \App\Models\DinnerTicket::findOrFail($id);
+        
+        // Update status to rejected
+        $ticket->update(['status' => 'rejected']);
+
+        return back()->with('success', 'Ticket has been moved to the rejected list.');
     }
 }

@@ -6,9 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class DinnerTicket extends Model
 {
-    protected $fillable = ['dinner_register_id', 'ticket_no', 'type', 'price', 'status', 'payment_slip', 'dinner_id'];
+    protected $fillable = [
+    'ticket_no',
+    'registration_id',
+    'dinner_id',
+    'dinner_register_id',
+    'sponsor_id',
+    'type',
+    'price',
+    'quantity', // Add this
+    'status',
+    'payment_slip'
+];
 
-    public function registration() {
+    public function sponsor()
+    {
+        return $this->belongsTo(Sponsor::class, 'sponsor_id');
+    }
+
+    public function registration()
+    {
         return $this->belongsTo(DinnerRegister::class, 'dinner_register_id');
     }
 }
