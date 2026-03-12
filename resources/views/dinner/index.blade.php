@@ -135,4 +135,29 @@
     .animate-bounce-short { animation: bounce-short 0.5s ease-in-out; }
 </style>
 @endif
+
+@if(session('error'))
+<div id="errorModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
+    <div class="bg-white rounded-[3rem] w-full max-w-sm p-10 shadow-2xl text-center transform transition-all animate-shake">
+        <div class="w-24 h-24 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-red-200">
+            <i class="fas fa-times text-4xl text-white"></i>
+        </div>
+        <h2 class="text-2xl font-black text-slate-800 uppercase italic mb-2">Scan Failed!</h2>
+        <p class="text-slate-500 text-sm font-semibold mb-8">{{ session('error') }}</p>
+        
+        <button onclick="document.getElementById('errorModal').remove()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl uppercase tracking-widest text-xs hover:bg-red-700 transition-all">
+            Try Again
+        </button>
+    </div>
+</div>
+
+<style>
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+    .animate-shake { animation: shake 0.3s ease-in-out; }
+</style>
+@endif
 @endsection

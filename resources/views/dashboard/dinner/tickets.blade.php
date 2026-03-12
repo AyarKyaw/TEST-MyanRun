@@ -4,6 +4,7 @@
     <main class="content-body">
         <div class="container-fluid">
             
+            {{-- Header & Breadcrumbs --}}
             <div class="page-title">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -14,6 +15,7 @@
                 </nav>
             </div>
 
+            {{-- Summary Stats Card --}}
             <div class="row mb-5 align-items-center">
                 <div class="col-xl-12">
                     <div class="card m-0">
@@ -22,7 +24,9 @@
                                 <div class="col-md-5 d-flex align-items-center">
                                     <div class="ms-1">
                                         <p class="mb-0 fs-14">Total Dinner Requests for this Event</p>
-                                        <h3 class="mb-0 text-black fw-semibold fs-16">{{ $tickets->sum('quantity') }} Seats ({{ $tickets->count() }} Bookings)</h3>
+                                        <h3 class="mb-0 text-black fw-semibold fs-16">
+                                            {{ $tickets->sum('quantity') }} Seats ({{ $tickets->total() }} Bookings)
+                                        </h3>
                                     </div>
                                 </div>
                                 <div class="col-md-7 text-md-end">
@@ -34,28 +38,31 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Filter Tabs --}}
             <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">Tickets for {{ $dinner->name }}</h4>
-    
-    <div class="btn-group">
-        <a href="{{ route('admin.dinner.tickets.show', $dinner->id) }}" 
-           class="btn btn-outline-secondary {{ !request('status') ? 'active' : '' }}">
-            All
-        </a>
-        <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'pending']) }}" 
-           class="btn btn-outline-warning {{ request('status') == 'pending' ? 'active' : '' }}">
-            Pending
-        </a>
-        <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'confirmed']) }}" 
-           class="btn btn-outline-success {{ request('status') == 'confirmed' ? 'active' : '' }}">
-            Confirmed
-        </a>
-        <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'rejected']) }}" 
-       class="btn btn-outline-danger {{ request('status') == 'rejected' ? 'active' : '' }}">
-        Rejected
-    </a>
-    </div>
-</div>
+                <h4 class="mb-0">Tickets for {{ $dinner->name }}</h4>
+                <div class="btn-group">
+                    <a href="{{ route('admin.dinner.tickets.show', $dinner->id) }}" 
+                       class="btn btn-outline-secondary {{ !request('status') ? 'active' : '' }}">
+                        All
+                    </a>
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'pending']) }}" 
+                       class="btn btn-outline-warning {{ request('status') == 'pending' ? 'active' : '' }}">
+                        Pending
+                    </a>
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'confirmed']) }}" 
+                       class="btn btn-outline-success {{ request('status') == 'confirmed' ? 'active' : '' }}">
+                        Confirmed
+                    </a>
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'rejected']) }}" 
+                       class="btn btn-outline-danger {{ request('status') == 'rejected' ? 'active' : '' }}">
+                        Rejected
+                    </a>
+                </div>
+            </div>
+
+            {{-- Main Tickets Table --}}
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
@@ -66,6 +73,7 @@
                                         <th>Ticket No</th>
                                         <th>Guest Name</th>
                                         <th>Contact Info</th>
+                                        <th>Scan Status</th> {{-- Added this --}}
                                         <th>Payment Slip</th>
                                         <th>Status</th>
                                         <th>Qty / Total Price</th>
@@ -79,14 +87,12 @@
                                         
                                         <td>
                                             <div class="text-black fw-bold">
-                                                {{-- Added null-safe checks for Name --}}
                                                 {{ $ticket->registration?->first_name ?? 'SPONSOR' }} 
                                                 {{ $ticket->registration?->last_name ?? 'GUEST' }}
                                             </div>
                                         </td>
                                         
                                         <td>
-                                            {{-- Added null-safe checks for Email/Phone --}}
                                             <div class="text-primary font-w600 fs-13 mb-1">
                                                 <i class="far fa-envelope me-1"></i> {{ $ticket->registration?->email ?? 'N/A' }}
                                             </div>
@@ -94,7 +100,6 @@
                                                 <i class="fas fa-phone-alt me-1"></i> {{ $ticket->registration?->phone ?? 'N/A' }}
                                             </div>
                                             
-                                            {{-- Safe Viber Logic --}}
                                             @php
                                                 $viberNum = $ticket->registration?->viber ?? $ticket->registration?->phone;
                                             @endphp
@@ -108,7 +113,15 @@
                                                 <span class="badge badge-sm light badge-secondary">NO CONTACT</span>
                                             @endif
                                         </td>
-
+                                        <td>
+                                            @if($ticket->scanned_at)
+                                                <span class="badge bg-success">
+                                                    ✅ Scanned: {{ $ticket->scanned_at->format('h:i A') }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">Not Scanned</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             @if($ticket->payment_slip)
                                                 <div style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">
@@ -131,16 +144,15 @@
                                                                     {{-- Left Side: Guest & Ticket Info --}}
                                                                     <div class="col-md-5 border-end">
                                                                         <h6 class="text-primary fw-bold mb-3">Guest Information</h6>
-                                                                        
                                                                         <div class="mb-3">
-                                                                            <p class="mb-0 text-muted small uppercase">Full Name</p>
+                                                                            <p class="mb-0 text-muted small">FULL NAME</p>
                                                                             <p class="text-black fw-bold">
                                                                                 {{ $ticket->registration?->first_name ?? 'SPONSOR' }} {{ $ticket->registration?->last_name ?? 'GUEST' }}
                                                                             </p>
                                                                         </div>
 
                                                                         <div class="mb-3">
-                                                                            <p class="mb-0 text-muted small uppercase">Contact Details</p>
+                                                                            <p class="mb-0 text-muted small">CONTACT DETAILS</p>
                                                                             <p class="text-black mb-1"><i class="far fa-envelope me-2 text-primary"></i>{{ $ticket->registration?->email ?? 'N/A' }}</p>
                                                                             <p class="text-black mb-1"><i class="fas fa-phone-alt me-2 text-primary"></i>{{ $ticket->registration?->phone ?? 'N/A' }}</p>
                                                                             <p class="text-black">
@@ -148,9 +160,7 @@
                                                                                 <strong>{{ $ticket->registration?->viber ?? 'Not Provided' }}</strong>
                                                                             </p>
                                                                         </div>
-
                                                                         <hr>
-
                                                                         <h6 class="text-primary fw-bold mb-3">Ticket Summary</h6>
                                                                         <div class="d-flex justify-content-between mb-2 text-black">
                                                                             <span>Type:</span>
@@ -179,24 +189,20 @@
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer">
-                                                            <!-- <button type="button" class="btn btn-secondary light" data-bs-dismiss="modal">Close</button> -->
-                                                            
-                                                            @if($ticket->status == 'pending')
-                                                                {{-- REJECT BUTTON & FORM --}}
-                                                                <form action="{{ route('admin.dinner.reject', $ticket->id) }}" method="POST" 
-                                                                    onsubmit="return confirm('Reject this payment? It will be moved to the rejected list.');" 
-                                                                    class="d-inline">
-                                                                    @csrf
-                                                                    <button type="submit" class="btn btn-danger">Reject Payment</button>
-                                                                </form>
+                                                                @if($ticket->status == 'pending')
+                                                                    <form action="{{ route('admin.dinner.reject', $ticket->id) }}" method="POST" 
+                                                                          onsubmit="return confirm('Reject this payment?');" class="d-inline">
+                                                                        @csrf
+                                                                        <button type="submit" class="btn btn-danger">Reject Payment</button>
+                                                                    </form>
 
-                                                                {{-- APPROVE BUTTON & FORM --}}
-                                                                <form action="{{ route('admin.dinner.approve', $ticket->id) }}" method="POST" class="d-inline">
-                                                                    @csrf
-                                                                    <button type="submit" class="btn btn-primary">Approve Booking</button>
-                                                                </form>
-                                                            @endif
-                                                        </div>
+                                                                    <form action="{{ route('admin.dinner.approve', $ticket->id) }}" method="POST" class="d-inline">
+                                                                        @csrf
+                                                                        <button type="submit" class="btn btn-primary">Approve Booking</button>
+                                                                    </form>
+                                                                @endif
+                                                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -221,76 +227,61 @@
                                         </td>
 
                                         <td>
-    <div class="d-flex">
-        @if($ticket->status == 'pending')
-            <button type="button" class="btn btn-primary shadow btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">
-                REVIEW
-            </button>
-        @elseif($ticket->status == 'confirmed')
-            <button class="btn btn-success light btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">VERIFIED</button>
-        @else
-            {{-- Button for Rejected Status --}}
-            <button type="button" class="btn btn-danger light btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">
-                REJECTED
-            </button>
-        @endif
-        
-        <button class="btn btn-danger shadow btn-xs btn-square"><i class="fa fa-trash"></i></button>
-    </div>
-</td>
+                                            <div class="d-flex">
+                                                @if($ticket->status == 'pending')
+                                                    <button type="button" class="btn btn-primary shadow btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">
+                                                        REVIEW
+                                                    </button>
+                                                @elseif($ticket->status == 'confirmed')
+                                                    <button class="btn btn-success light btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">VERIFIED</button>
+                                                @else
+                                                    <button type="button" class="btn btn-danger light btn-xs px-3 me-1" data-bs-toggle="modal" data-bs-target="#viewSlip{{ $ticket->id }}">
+                                                        REJECTED
+                                                    </button>
+                                                @endif
+                                                <button class="btn btn-danger shadow btn-xs btn-square"><i class="fa fa-trash"></i></button>
+                                            </div>
+                                        </td>
                                     </tr>
                                     @empty
-                                        <tr><td colspan="7" class="text-center p-5">No tickets registered for this event yet.</td></tr>
+                                    <tr>
+                                        <td colspan="7" class="text-center p-5">No tickets registered for this event yet.</td>
+                                    </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- Pagination --}}
                         <div class="card-footer border-0 pt-0">
-    <div class="d-flex align-items-center justify-content-between flex-wrap">
-        <div class="mb-2">
-            <p class="mb-0 fs-13 text-muted">
-                Showing {{ $tickets->firstItem() }} to {{ $tickets->lastItem() }} of {{ $tickets->total() }} entries
-            </p>
-        </div>
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-primary pagination-circle mb-0">
-                {{-- Previous Page Link --}}
-                @if ($tickets->onFirstPage())
-                    <li class="page-item disabled"><span class="page-link"><i class="la la-angle-left"></i></span></li>
-                @else
-                    <li class="page-item page-indicator"><a class="page-link" href="{{ $tickets->previousPageUrl() }}"><i class="la la-angle-left"></i></a></li>
-                @endif
-
-                {{-- Pagination Elements --}}
-                @foreach ($tickets->render()->elements as $element)
-                    @if (is_string($element))
-                        <li class="page-item disabled"><span class="page-link">{{ $element }}</span></li>
-                    @endif
-
-                    @if (is_array($element))
-                        @foreach ($element as $page => $url)
-                            @if ($page == $tickets->currentPage())
-                                <li class="page-item active"><span class="page-link">{{ $page }}</span></li>
-                            @else
-                                <li class="page-item"><a class="page-link" href="{{ $url }}">{{ $page }}</a></li>
-                            @endif
-                        @endforeach
-                    @endif
-                @endforeach
-
-                {{-- Next Page Link --}}
-                @if ($tickets->hasMorePages())
-                    <li class="page-item page-indicator"><a class="page-link" href="{{ $tickets->nextPageUrl() }}"><i class="la la-angle-right"></i></a></li>
-                @else
-                    <li class="page-item disabled"><span class="page-link"><i class="la la-angle-right"></i></span></li>
-                @endif
-            </ul>
-        </nav>
-    </div>
-</div>
+                            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                <div class="mb-2">
+                                    <p class="mb-0 fs-13 text-muted">
+                                        Showing {{ $tickets->firstItem() ?? 0 }} to {{ $tickets->lastItem() ?? 0 }} of {{ $tickets->total() }} entries
+                                    </p>
+                                </div>
+                                <nav aria-label="Page navigation">
+                                    {{ $tickets->appends(request()->query())->links('pagination::bootstrap-4') }}
+                                </nav>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
+
+    {{-- Auto-Download Script --}}
+    @if(session('download_url'))
+        <script>
+            window.onload = function() {
+                const link = document.createElement('a');
+                link.href = "{{ session('download_url') }}";
+                link.download = ''; 
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+        </script>
+    @endif
 @endsection

@@ -138,6 +138,8 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
 });
 
+Route::get('/ticket/verify/{ticket_no}', [DinnerController::class, 'publicVerify'])
+    ->name('ticket.verify');
 
 Route::get('/api/validate-discount', function (Illuminate\Http\Request $request) {
     // 1. Find the code in the new table

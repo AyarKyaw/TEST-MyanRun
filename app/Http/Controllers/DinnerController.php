@@ -153,7 +153,9 @@ class DinnerController extends Controller
 
                     // 2. GENERATE & MERGE QR CODE
                     // We use a public API to get a QR code of the ticket number
-                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . $ticketNo;
+
+                    $checkInUrl = "https://test-myanrun.itplus.net.mm/ticket/verify/" . $ticket->ticket_no;
+                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($checkInUrl);
                     $qrCodeImage = @imagecreatefrompng($qrUrl);
 
                     if ($qrCodeImage) {
@@ -177,11 +179,40 @@ class DinnerController extends Controller
         }
 
         if (file_exists($filePath)) {
-            if (ob_get_level()) ob_end_clean();
-            return response()->download($filePath);
+            $downloadUrl = asset('uploads/tickets/' . $fileName);
+            
+            return back()
+                ->with('success', 'Ticket approved and generated!')
+                ->with('download_url', $downloadUrl);
         }
         
         return back()->with('success', 'Ticket approved, but file could not be generated.');
+    }
+
+    public function publicVerify($ticket_no)
+    {
+        $ticket = \App\Models\DinnerTicket::where('ticket_no', $ticket_no)->first();
+
+        if (!$ticket) {
+            return redirect()->route('dinner.index')->with('error', "Ticket not found.");
+        }
+
+        // NEW: Allow a 10-second grace period for double-scans
+        if ($ticket->scanned_at && $ticket->scanned_at->diffInSeconds(now()) > 10) {
+            return redirect()->route('dinner.index')
+                ->with('error', "ALREADY USED: Scanned at " . $ticket->scanned_at->timezone('Asia/Yangon')->format('h:i A'));
+        }
+
+        // Only update if it's currently NULL
+        if (!$ticket->scanned_at) {
+            $ticket->scanned_at = now();
+            $ticket->save();
+        }
+
+        $name = $ticket->registration->first_name ?? ($ticket->type === 'Sponsored' ? 'Sponsored Guest' : 'Guest');
+        
+        return redirect()->route('dinner.index')
+            ->with('success', "Ticket {$ticket_no} Verified! Welcome, {$name}");
     }
 
     public function uploadPayment(Request $request, $id) 
@@ -342,24 +373,23 @@ class DinnerController extends Controller
     return view('dashboard.dinner.index_tickets', compact('dinners'));
 }
 
-    public function showDinnerTickets(Request $request, $id) // Added Request $request
+    public function showDinnerTickets(Request $request, $id)
     {
-        // 1. Find the dinner
         $dinner = \App\Models\Dinner::findOrFail($id);
 
-        // 2. Start the query
         $query = \App\Models\DinnerTicket::where('dinner_id', $id)
                     ->with('registration')
+                    // Add this line to put the most recent scans at the very top
+                    ->orderByRaw('scanned_at IS NULL ASC') 
+                    ->orderBy('scanned_at', 'desc')
                     ->latest();
 
-        // 3. Filter by status if provided in the URL (?status=pending)
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         $tickets = $query->paginate(15);
 
-        // 4. Return view with dinner and filtered tickets
         return view('dashboard.dinner.tickets', compact('dinner', 'tickets'));
     }
 

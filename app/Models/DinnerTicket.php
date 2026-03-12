@@ -16,7 +16,12 @@ class DinnerTicket extends Model
     'price',
     'quantity', // Add this
     'status',
-    'payment_slip'
+    'payment_slip',
+    'scanned_at'
+];
+
+protected $casts = [
+    'scanned_at' => 'datetime',
 ];
 
     public function sponsor()
