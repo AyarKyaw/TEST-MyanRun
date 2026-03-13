@@ -100,7 +100,7 @@
 
         <div class="max-w-6xl mx-auto">
             <header class="text-center mb-16">
-                <h2 class="text-[#f59e0b] font-black uppercase tracking-widest text-lg mb-2">Yangon International 2026</h2>
+                <h2 class="text-[#f59e0b] font-black uppercase tracking-widest text-lg mb-2">{{ $dinner->name ?? 'MYANRUN' }}</h2>
                 <h1 class="text-6xl font-black italic tracking-tighter uppercase text-slate-900">
                     Gala <span class="text-[#f59e0b]">Dinner</span>
                 </h1>
@@ -123,34 +123,48 @@
             </div>
 
             <div class="mt-16 bg-slate-900 p-8 text-white flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl rounded-[40px]">
-                
-                <div class="flex items-center gap-6">
-                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-2xl">
+    
+                <div class="flex items-center gap-6 w-full lg:w-auto">
+                    <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center text-2xl shrink-0">
                         <i class="fas fa-wine-glass text-[#f59e0b]"></i>
                     </div>
                     <div>
                         <h4 class="text-2xl font-black uppercase italic tracking-tighter">
                             <span id="summary-name" class="text-[#f59e0b]">Standard Guest</span>
                         </h4>
-                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Lotte Hotel Yangon • Dec 2026</p>
+                        <div class="flex flex-col gap-1">
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                <i class="fas fa-map-marker-alt mr-1"></i> {{ $dinner->location ?? 'Venue TBD' }}
+                            </p>
+                            <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                <i class="fas fa-calendar mr-1"></i> {{ $dinner->date ? $dinner->date->format('d M, Y') : 'Date TBD' }}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-6 bg-white/5 px-6 py-3 rounded-3xl border border-white/10">
-                    <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Quantity</p>
-                    <div class="flex items-center gap-5">
-                        <button type="button" onclick="updateQty(-1)" class="qty-btn"><i class="fas fa-minus"></i></button>
-                        <span id="display-qty" class="text-2xl font-black w-8 text-center">1</span>
-                        <button type="button" onclick="updateQty(1)" class="qty-btn"><i class="fas fa-plus"></i></button>
+                <div class="flex items-center justify-center gap-4 bg-white/5 px-4 py-3 rounded-3xl border border-white/10 w-fit mx-auto lg:mx-0">
+                    <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest mr-2">Qty</p>
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="updateQty(-1)" class="qty-btn w-8 h-8">
+                            <i class="fas fa-minus text-xs"></i>
+                        </button>
+                        
+                        <span id="display-qty" class="text-xl font-black w-6 text-center">1</span>
+                        
+                        <button type="button" onclick="updateQty(1)" class="qty-btn w-8 h-8">
+                            <i class="fas fa-plus text-xs"></i>
+                        </button>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-10">
-                    <div class="text-right">
+                <div class="flex flex-col lg:flex-row items-center gap-6 lg:gap-10 w-full lg:w-auto">
+                    <div class="text-center lg:text-right">
                         <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Total Price</p>
                         <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#f59e0b]">55,000 MMK</div>
                     </div>
-                    <button type="submit" class="bg-[#f59e0b] hover:scale-105 active:scale-95 text-white px-12 py-5 font-black uppercase tracking-widest text-sm transition-all shadow-xl rounded-full">
+                    
+                     <button type="submit" class="w-40 lg:w-auto bg-[#f59e0b] hover:scale-105 active:scale-95 text-white px-8 py-3.5 font-black uppercase tracking-widest text-xs transition-all shadow-lg rounded-full">
                         CONFIRM
                     </button>
                 </div>

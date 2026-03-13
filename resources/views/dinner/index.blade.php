@@ -5,6 +5,7 @@
 @section('content')
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
 
 <style>
     .font-kanit { font-family: 'Kanit', sans-serif !important; }
@@ -41,6 +42,16 @@
         object-fit: cover;
         width: 100%;
     }
+
+    /* Modal Animation */
+    @keyframes bounce-short {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    .animate-modal { animation: bounce-short 0.3s ease-in-out; }
+    
+    .info-btn:hover { background-color: #f8fafc !important; transform: scale(1.1); }
+    .info-btn { transition: all 0.2s ease; }
 </style>
 
 <div class="page-title">
@@ -68,18 +79,23 @@
         <div class="mb-5">
             <div class="event-section-title d-flex align-items-center">
                 <span class="d-inline-block bg-warning rounded-pill mr-2" style="width: 8px; height: 32px;"></span>
-                <h2 class="h3 font-weight-bold mb-0 text-dark">AVAILABLE DINNERS</h2>
+                <h2 class="h3 font-weight-bold mb-0 text-dark uppercase">Available Dinners</h2>
             </div>
             
             <div class="row">
                 @forelse($dinners as $dinner)
                     <div class="col-lg-4 col-md-6 mb-4">
-                        {{-- Assuming you have a route to show specific dinner ticket details --}}
-                        <a href="{{ route('dinner.tickets', $dinner->id) }}" class="event-link">
-                            <div class="card border-0 rounded-lg overflow-hidden thairun-shadow position-relative h-100 event-card">
-                                <div class="ribbon-gold status-ribbon">{{ $dinner->company }}</div>
-                                
-                                {{-- Use the stored image path --}}
+                        <div class="card border-0 rounded-lg overflow-hidden thairun-shadow position-relative h-100 event-card">
+                            <div class="ribbon-gold status-ribbon">{{ $dinner->company }}</div>
+                            
+                            <button type="button" 
+                                    onclick="openImageModal('{{ asset('storage/' . $dinner->info_image) }}', '{{ $dinner->name }}')" 
+                                    class="info-btn position-absolute border-0 rounded-circle d-flex align-items-center justify-content-center bg-white text-dark shadow-sm" 
+                                    style="top: 12px; right: 12px; width: 35px; height: 35px; z-index: 20; cursor: pointer;">
+                                <i class="fas fa-info-circle text-warning"></i>
+                            </button>
+
+                            <a href="{{ route('dinner.tickets', $dinner->id) }}" class="event-link">
                                 <img src="{{ asset('storage/' . $dinner->image_path) }}" 
                                      class="card-img-top event-card-img" 
                                      alt="{{ $dinner->name }}">
@@ -97,8 +113,8 @@
                                         <span class="btn btn-warning btn-sm font-weight-bold px-3 py-2 text-white">BOOK NOW</span>
                                     </div>
                                 </div>
-                            </div>
-                        </a>
+                            </a>
+                        </div>
                     </div>
                 @empty
                     <div class="col-md-12">
@@ -109,9 +125,26 @@
                 @endforelse
             </div>
         </div>
-
     </div>
 </div>
+
+<div id="imageInfoModal" class="hidden fixed inset-0 bg-slate-900/80 z-[9999] flex items-center justify-center p-4" onclick="if(event.target === this) closeImageModal()">
+    
+    <div class="relative w-fit h-fit mx-auto transform transition-all animate-modal">
+        
+        <button onclick="closeImageModal()" 
+                class="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white transition-all z-[100]">
+            <i class="fas fa-times text-lg"></i>
+        </button>
+
+        <div class="shadow-2xl">
+            <img id="modalImg" src="" 
+                 class="block h-auto w-auto max-w-[95vw] max-h-[85vh] rounded-[1.5rem] object-contain" 
+                 alt="Info Image">
+        </div>
+    </div>
+</div>
+
 @if(session('success'))
 <div id="successModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
     <div class="bg-white rounded-[3rem] w-full max-w-sm p-10 shadow-2xl text-center transform transition-all animate-bounce-short">
@@ -120,20 +153,11 @@
         </div>
         <h2 class="text-2xl font-black text-slate-800 uppercase italic mb-2">Registration Sent!</h2>
         <p class="text-slate-500 text-sm font-semibold mb-8">{{ session('success') }}</p>
-        
         <button onclick="document.getElementById('successModal').remove()" class="w-full py-4 bg-slate-900 text-white font-black rounded-2xl uppercase tracking-widest text-xs hover:bg-slate-800 transition-all">
             Awesome!
         </button>
     </div>
 </div>
-
-<style>
-    @keyframes bounce-short {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-    .animate-bounce-short { animation: bounce-short 0.5s ease-in-out; }
-</style>
 @endif
 
 @if(session('error'))
@@ -144,20 +168,33 @@
         </div>
         <h2 class="text-2xl font-black text-slate-800 uppercase italic mb-2">Scan Failed!</h2>
         <p class="text-slate-500 text-sm font-semibold mb-8">{{ session('error') }}</p>
-        
         <button onclick="document.getElementById('errorModal').remove()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl uppercase tracking-widest text-xs hover:bg-red-700 transition-all">
             Try Again
         </button>
     </div>
 </div>
-
-<style>
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
-    .animate-shake { animation: shake 0.3s ease-in-out; }
-</style>
 @endif
+
+<script>
+    function openImageModal(imageSrc) {
+    const modal = document.getElementById('imageInfoModal');
+    const img = document.getElementById('modalImg');
+    
+    img.src = imageSrc;
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden'; 
+}
+
+    function closeImageModal() {
+        const modal = document.getElementById('imageInfoModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on clicking the dark background
+    document.getElementById('imageInfoModal').addEventListener('click', function(e) {
+        if (e.target === this) closeImageModal();
+    });
+</script>
 @endsection

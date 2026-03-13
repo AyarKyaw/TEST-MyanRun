@@ -24,6 +24,16 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Location / Venue</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                                <input type="text" name="location" class="form-control" 
+                                    placeholder="e.g. Lotte Hotel, Yangon" 
+                                    value="{{ old('location', $dinner->location) }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label">Date</label>
                             <input type="date" name="date" class="form-control" value="{{ $dinner->date ? $dinner->date->format('Y-m-d') : '' }}" style="position: relative; z-index: 5;">
                         </div>
@@ -36,17 +46,34 @@
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Current Image</label>
+                        <hr class="my-4">
+
+                        <div class="mb-4">
+                            <label class="form-label font-weight-bold">Card Display Image (Thumbnail)</label>
                             <div class="mb-2">
                                 @if($dinner->image_path)
-                                    <img src="{{ asset('storage/' . $dinner->image_path) }}" width="150" class="rounded">
+                                    <img src="{{ asset('storage/' . $dinner->image_path) }}" width="150" class="rounded shadow-sm border">
                                 @else
-                                    <p class="text-muted">No image uploaded</p>
+                                    <p class="text-muted small italic">No card image uploaded</p>
                                 @endif
                             </div>
-                            <label class="form-label">Replace Image</label>
-                            <input type="file" name="image" class="form-control">
+                            <input type="file" name="image" class="form-control" accept="image/*">
+                            <small class="text-muted">This image appears on the ticket listing cards.</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label font-weight-bold">Detailed Info Image (Modal Poster)</label>
+                            <div class="mb-2">
+                                @if($dinner->info_image)
+                                    <img src="{{ asset('storage/' . $dinner->info_image) }}" width="150" class="rounded shadow-sm border">
+                                @else
+                                    <div class="p-3 bg-light rounded text-muted small italic" style="width: 150px;">
+                                        No info image uploaded
+                                    </div>
+                                @endif
+                            </div>
+                            <input type="file" name="info_image" class="form-control" accept="image/*">
+                            <small class="text-muted">This image appears when users click the "Info" icon (Menu/Poster).</small>
                         </div>
 
                         <div class="mt-4">

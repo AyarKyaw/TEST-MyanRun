@@ -5,7 +5,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Dinner extends Model
 {
-    protected $fillable = ['company', 'name', 'image_path', 'date', 'is_active', 'location'];
+    protected $fillable = ['company', 'name', 'image_path', 'info_image', 'date', 'is_active', 'location'];
 
     protected $casts = [
         'date' => 'date',

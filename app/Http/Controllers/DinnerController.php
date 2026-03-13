@@ -131,7 +131,9 @@ class DinnerController extends Controller
             \Illuminate\Support\Facades\File::makeDirectory($saveDir, 0777, true);
         }
 
-        $fileName = 'ticket_' . $ticket->id . '.png';
+        $fullName = $ticket->registration->first_name . ' ' . $ticket->registration->last_name;
+        $phone = $ticket->registration->phone ?? 'N/A';
+        $fileName = $fullName . $phone . '.png';
         $filePath = $saveDir . '/' . $fileName;
 
         if (file_exists($templatePath)) {
@@ -141,8 +143,6 @@ class DinnerController extends Controller
                 $white = imagecolorallocate($image, 255, 255, 255);
 
                 if (file_exists($fontPath)) {
-                    $fullName = $ticket->registration->first_name . ' ' . $ticket->registration->last_name;
-                    $phone = $ticket->registration->phone ?? 'N/A';
                     $ticketNo = $ticket->ticket_no;
 
                     // 1. Add Text Data
@@ -308,20 +308,35 @@ class DinnerController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'date' => 'required|date',
+            'location' => 'nullable|string|max:255',
+            'image' => 'nullable|image|max:2048',      // Added image validation
+            'info_image' => 'nullable|image|max:2048', // Added info_image validation
         ]);
 
         $dinner = \App\Models\Dinner::findOrFail($id);
         
-        $data = $request->only(['name', 'company', 'date', 'is_active']);
+        $data = $request->only(['name', 'company', 'location', 'date', 'is_active']);
 
+        // Handle Main Card Image
         if ($request->hasFile('image')) {
-            // Optional: Delete old image here
+            if ($dinner->image_path && \Storage::disk('public')->exists($dinner->image_path)) {
+                \Storage::disk('public')->delete($dinner->image_path);
+            }
             $data['image_path'] = $request->file('image')->store('dinners', 'public');
+        }
+
+        // Handle Detailed Info Image (The Modal Image)
+        if ($request->hasFile('info_image')) {
+            // Delete old info image if it exists
+            if ($dinner->info_image && \Storage::disk('public')->exists($dinner->info_image)) {
+                \Storage::disk('public')->delete($dinner->info_image);
+            }
+            $data['info_image'] = $request->file('info_image')->store('dinners/info', 'public');
         }
 
         $dinner->update($data);
 
-        return redirect()->route('admin.dinner.manage', 'now')->with('success', 'Dinner updated!');
+        return redirect()->route('admin.dinner.manage', 'now')->with('success', 'Dinner updated successfully!');
     }
 
     public function create()

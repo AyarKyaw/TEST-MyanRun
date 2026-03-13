@@ -85,44 +85,50 @@ class TicketController extends Controller
             'status'    => 'pending',
         ]);
 
-        // --- FOR LOCAL TESTING ONLY: WE SKIP THE REAL API CALL ---
-        /* $kbzData = [
-            'merch_code'     => env('KBZ_MERCH_CODE'),
-            'appid'          => env('KBZ_APP_ID'),
+        // 2. Prepare KBZ API request data
+        $kbzData = [
+            'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
+            'appid'          => env('KBZ_PAY_APP_ID'),
             'merch_order_id' => (string)$ticket->id,
-            'total_amount'   => (string)$orderData['price'],
+            'total_amount'   => (string)$price,
             'trade_type'     => 'PAY_BY_QRCODE',
             'title'          => 'MyanRun Registration',
             'nonce_str'      => Str::random(32),
             'method'         => 'precreate',
-            'notify_url'     => url('/payment/kbz/callback'),
+            'notify_url'     => env('KBZ_PAY_NOTIFY_URL'),
         ];
 
+        // 3. Generate signature
         $kbzData['sign'] = $this->generateKbzSignature($kbzData);
 
-        // This line is what caused the error because env('KBZ_API_URL') is null
-        $response = \Illuminate\Support\Facades\Http::post(env('KBZ_API_URL'), [
-            'Request' => $kbzData
-        ]);
-        $result = $response->json();
-        */
+        try {
+            // 4. Call KBZ UAT API
+            $response = Http::post(env('KBZ_PAY_API_URL'), [
+                'Request' => $kbzData
+            ]);
 
-        // --- MANUALLY CREATE A SUCCESS RESULT FOR TESTING ---
-        $result = [
-            'Response' => [
-                'return_code' => 'SUCCESS', 
-                'qr_code' => 'TEST_PAYMENT_DATA_FOR_' . $ticket->id
-            ]
-        ];
+            $result = $response->json();
 
-        if (isset($result['Response']['return_code']) && $result['Response']['return_code'] === 'SUCCESS') {
-            session()->forget('checkout_data');
-            $qrString = $result['Response']['qr_code'];
+            if (isset($result['Response']['return_code']) && $result['Response']['return_code'] === 'SUCCESS') {
+                // 5. Payment initialized, save QR code string
+                $qrString = $result['Response']['qr_code'] ?? 'TEST_PAYMENT_DATA_FOR_' . $ticket->id;
+                $ticket->update(['qr_code_str' => $qrString]);
+
+                // 6. Clear session and show QR page
+                session()->forget('checkout_data');
+                return view('payment.kbz_qr', compact('qrString', 'ticket'));
+            }
+
+            // 7. If API call failed
+            return back()->with('error', 'KBZPay Initialization Failed: ' . ($result['Response']['return_msg'] ?? 'Unknown error'));
+
+        } catch (\Exception $e) {
+            // 8. Fallback for local testing
+            $qrString = 'TEST_PAYMENT_DATA_FOR_' . $ticket->id;
             $ticket->update(['qr_code_str' => $qrString]);
-            return view('payment.kbz_qr', compact('qrString', 'ticket'));
+            return view('payment.kbz_qr', compact('qrString', 'ticket'))
+                ->with('error', 'KBZPay API not reachable, using test QR code.');
         }
-
-        return back()->with('error', 'KBZPay Initialization Failed.');
     }
     /**
      * Signature helper for KBZPay

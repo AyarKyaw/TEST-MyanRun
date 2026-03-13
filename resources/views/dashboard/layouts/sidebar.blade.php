@@ -21,7 +21,19 @@
                 </a>
                 <ul aria-expanded="false">
                     <li><a href="/dashboard/events/ticket" data-i18n="Event Tickets">Event Tickets</a></li>
-                    <li><a href="/dashboard/dinner-tickets" data-i18n="Dinner Tickets">Dinner Tickets</a></li>
+                    <li>
+                        <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Dinner Tickets</a>
+                        <ul aria-expanded="false">
+                            <li><a href="/dashboard/dinner-tickets">Sales Tickets</a></li>
+                            <li>
+                                <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Present Tickets</a>
+                                <ul aria-expanded="false">
+                                    <li><a href="{{ route('admin.sponsor.index', 'now') }}">Now Present</a></li>
+                                    <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Present</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </li>
 
@@ -57,8 +69,8 @@
                 </a>
                 <ul aria-expanded="false">
                     {{-- We pass 'now' for active (1) and 'past' for inactive (0) --}}
-                    <li><a href="{{ route('admin.sponsor.index', 'now') }}">Now Sponsor</a></li>
-                    <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li>
+                    <!-- <li><a href="{{ route('admin.sponsor.index', 'now') }}">Now Sponsor</a></li>
+                    <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li> -->
                 </ul>
             </li>
             <!-- <li>

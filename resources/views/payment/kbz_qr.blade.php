@@ -1,5 +1,6 @@
 <title>MyanRun || QR CODE</title>
 <link rel="icon" type="image/x-icon" href="{{ asset('images/icon/Myan Run icon.png') }}">
+
 <div class="payment-container" style="max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #fff;">
     
     <div style="margin-bottom: 20px;">
@@ -8,6 +9,7 @@
     </div>
 
     <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #eee;">
+        {{-- Render QR code from KBZ API --}}
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ $qrString }}" 
              alt="KBZPay QR" 
              style="display: block; mix-blend-mode: multiply;">
@@ -29,7 +31,6 @@
 </div>
 
 <style>
-    /* Simple CSS Spinner */
     .spinner {
         width: 30px;
         height: 30px;
@@ -44,37 +45,52 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-    
-    body {
+
+    body.waiting-payment {
+        overflow: hidden;
         background-color: #f4f7f6;
     }
 </style>
 
 <script>
-    const checkInterval = setInterval(async () => {
+    document.body.classList.add('waiting-payment');
+
+    const ticketId = {{ $ticket->id }};
+    const checkUrl = "{{ url('/payment/status/' . $ticket->id) }}";
+    const redirectUrl = "{{ route('user.dashboard') }}?success=PaymentReceived";
+
+    let elapsed = 0;
+    const pollInterval = 3000; // 3 seconds
+    const timeoutLimit = 15 * 60 * 1000; // 15 minutes
+
+    const checkPayment = async () => {
         try {
-            const response = await fetch("{{ url('/payment/status/' . $ticket->id) }}");
-            
-            // Check if response is actually JSON
-            if (!response.ok) throw new Error('Network response was not ok');
-            
+            const response = await fetch(checkUrl);
+            if (!response.ok) throw new Error('Network response not ok');
             const data = await response.json();
-            
+
             if (data.paid) {
-                clearInterval(checkInterval);
-                
-                // Visual feedback before redirect
+                clearInterval(polling);
                 document.getElementById('status-text').innerHTML = "✅ <strong>Payment Successful!</strong>";
                 document.getElementById('status-text').style.color = "#28a745";
                 document.getElementById('loading-spinner').style.display = "none";
-                
-                setTimeout(() => {
-                    window.location.href = "{{ route('user.dashboard') }}?success=PaymentReceived";
-                }, 1500);
+                document.body.classList.remove('waiting-payment');
+
+                setTimeout(() => window.location.href = redirectUrl, 1500);
             }
-        } catch (error) {
-            // Silently wait for the route to be ready
-            console.log("Waiting for connection...");
+        } catch (err) {
+            console.log("Waiting for connection...", err);
         }
-    }, 3000);
+
+        elapsed += pollInterval;
+        if (elapsed >= timeoutLimit) {
+            clearInterval(polling);
+            document.getElementById('status-text').innerHTML = "⚠️ Payment timed out. Please try again.";
+            document.getElementById('status-text').style.color = "#dc3545";
+            document.getElementById('loading-spinner').style.display = "none";
+            document.body.classList.remove('waiting-payment');
+        }
+    };
+
+    const polling = setInterval(checkPayment, pollInterval);
 </script>
