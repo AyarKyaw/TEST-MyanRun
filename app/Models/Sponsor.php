@@ -2,38 +2,46 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Sponsor extends Model
 {
-    protected $fillable = [
-    'company', 
-    'contact_name', 
-    'phone', 
-    'email', 
-    'viber', 
-    'quantity'
-    // Remove 'status' and 'transaction_date' from here
-];
+    use HasFactory;
 
+    protected $fillable = [
+        'dinner_id',      // Ensure this is here
+        'company',
+        'contact_name',
+        'email',
+        'phone',
+        'viber',
+        'quantity',
+        'status'
+    ];
+
+    /**
+     * Get the dinner that this sponsor is assigned to.
+     */
+    public function dinner()
+    {
+        return $this->belongsTo(Dinner::class, 'dinner_id');
+    }
+
+    /**
+     * Get the invitation codes for this sponsor.
+     */
     public function codes()
     {
+        // Assuming your table is sponsor_codes and has a sponsor_id column
         return $this->hasMany(SponsorCode::class);
     }
 
-    // Add this helper to make it easy to get only the ones already used
-    public function usages()
-    {
-        return $this->hasMany(SponsorCode::class)->where('is_used', true);
-    }
-
-    public function sponsorCode() {
-        return $this->hasOne(SponsorCode::class);
-    }
-
+    /**
+     * Get the actual tickets generated for this sponsor.
+     */
     public function tickets()
     {
-        // A Sponsor has many tickets linked by sponsor_id
-        return $this->hasMany(\App\Models\DinnerTicket::class, 'sponsor_id');
+        return $this->hasMany(DinnerTicket::class);
     }
 }

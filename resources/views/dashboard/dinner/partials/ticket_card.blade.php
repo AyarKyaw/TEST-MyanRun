@@ -6,10 +6,13 @@
              onerror="this.src='{{ asset('images/default-dinner.jpg') }}'">
         
         <div class="card-body d-flex flex-column">
-            <div class="mb-2">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="badge badge-date px-3 py-2">
                     <i class="far fa-calendar-alt mr-1"></i> 
                     {{ \Carbon\Carbon::parse($dinner->date)->format('d M Y') }}
+                </span>
+                <span class="badge badge-success px-3 py-2">
+                    {{ number_format($dinner->total_balance ?? 0) }} <small>MMK</small>
                 </span>
             </div>
 
@@ -19,18 +22,46 @@
             </p>
 
             <div class="bg-light p-3 rounded mb-4 mt-auto">
+                {{-- Public Seats Remaining --}}
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-success stat-label">
-                        <i class="fas fa-check-circle mr-1"></i> Sold / Confirmed
+                    <span class="text-muted stat-label">
+                        <i class="fas fa-users mr-1"></i> Public Seats
                     </span>
-                    <span class="h6 mb-0 font-weight-bold text-dark">{{ $dinner->confirmed_count }}</span>
+                    <span class="h6 mb-0 font-weight-bold">
+                        @php
+                            $publicLeft = ($dinner->public_capacity ?? 0) - ($dinner->public_seats_count ?? 0);
+                        @endphp
+                        <span class="{{ $publicLeft <= 0 ? 'text-danger' : 'text-success' }}">
+                            {{ $publicLeft }} Left
+                        </span>
+                        <small class="text-muted">/ {{ $dinner->public_capacity ?? 0 }}</small>
+                    </span>
                 </div>
+
+                {{-- Sponsor Seats Remaining --}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-info stat-label">
+                        <i class="fas fa-handshake mr-1"></i> Sponsor Seats
+                    </span>
+                    <span class="h6 mb-0 font-weight-bold">
+                        @php
+                            $sponsorLeft = $dinner->sponsor_capacity - ($dinner->sponsor_seats_count ?? 0);
+                        @endphp
+                        <span class="{{ $sponsorLeft <= 0 ? 'text-danger' : 'text-info' }}">
+                            {{ $dinner->sponsor_capacity }} Left
+                        </span>
+                        <small class="text-muted">/ {{ $dinner->sponsor_capacity}}</small>
+                    </span>
+                </div>
+
                 <div style="height: 1px; background: #e2e8f0; margin: 8px 0;"></div>
+
+                {{-- Pending Count --}}
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-warning stat-label">
-                        <i class="fas fa-clock mr-1"></i> Pending Approval
+                        <i class="fas fa-clock mr-1"></i> Pending
                     </span>
-                    <span class="h6 mb-0 font-weight-bold text-dark">{{ $dinner->pending_count }}</span>
+                    <span class="h6 mb-0 font-weight-bold text-dark">{{ $dinner->pending_count ?? 0 }}</span>
                 </div>
             </div>
 

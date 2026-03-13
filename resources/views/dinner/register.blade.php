@@ -13,7 +13,9 @@
         .section-card { background: white; padding: 40px; border-radius: 40px; box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.05); border: 1px solid #f1f5f9; }
         .input-field { width: 100%; padding: 16px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; outline: none; transition: all 0.3s; font-weight: 600; color: #334155; }
         .input-field:focus { border-color: #f59e0b; background-color: white; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1); }
+        .input-field.error { border-color: #ef4444; background-color: #fef2f2; }
         .label-text { font-size: 10px; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-left: 8px; margin-bottom: 8px; display: block; }
+        .error-msg { font-size: 9px; color: #ef4444; font-weight: 800; text-transform: uppercase; margin-top: 6px; margin-left: 8px; display: none; }
     </style>
 </head>
 
@@ -28,7 +30,7 @@
             Registering for: <span class="text-slate-900">{{ $dinner->name }}</span>
         </div>
 
-        <form action="{{ route('dinner.checkout') }}" method="GET">
+        <form action="{{ route('dinner.checkout') }}" method="GET" id="registrationForm">
             <input type="hidden" name="selected_type" value="{{ $selected_type }}">
             <input type="hidden" name="selected_price" value="{{ $selected_price }}">
             <input type="hidden" name="dinner_id" value="{{ request('dinner_id') }}">
@@ -39,7 +41,6 @@
                 $totalToDisplay = (int)str_replace(',', '', $selected_price);
             @endphp
 
-            {{-- Price Summary Card --}}
             <div class="mb-8 p-6 bg-slate-900 rounded-[32px] text-white flex items-center justify-between shadow-xl border-b-4 border-[#f59e0b]">
                 <div class="flex items-center gap-4">
                     <div class="w-12 h-12 bg-[#f59e0b] rounded-2xl flex items-center justify-center text-white text-lg shadow-lg shadow-amber-500/20">
@@ -69,7 +70,6 @@
                 </div>
 
                 <div class="space-y-6">
-                    {{-- Name Fields --}}
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="label-text">First Name</label>
@@ -85,30 +85,27 @@
                         </div>
                     </div>
 
-                    {{-- Contact Fields --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="label-text">Phone Number</label>
-                            <input type="tel" name="guest_phone" value="{{ old('guest_phone') }}" class="input-field numeric-only" placeholder="Phone Number" required>
+                            <input type="tel" id="guest_phone" name="guest_phone" maxlength="11" value="{{ old('guest_phone') }}" class="input-field numeric-only" placeholder="eg. 09123456789" required>
+                            <p id="phone_error" class="error-msg">Must be exactly 11 digits</p>
                         </div>
                         <div>
                             <label class="label-text">Viber Number</label>
                             <div class="relative">
-                                <input type="tel" name="viber" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="Viber Number">
+                                <input type="tel" id="viber" name="viber" maxlength="11" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="eg. 09123456789">
                                 <div class="absolute right-5 top-1/2 -translate-y-1/2 text-[#7360F2] text-xl">
                                     <i class="fab fa-viber"></i>
                                 </div>
                             </div>
+                            <p id="viber_error" class="error-msg">Must be exactly 11 digits</p>
                         </div>
                     </div>
 
-                    {{-- Email Field --}}
                     <div>
                         <label class="label-text">Email Address</label>
                         <input type="email" name="guest_email" value="{{ old('guest_email') }}" class="input-field" placeholder="email@example.com" required>
-                        <p class="text-[9px] text-slate-400 mt-3 ml-2 font-bold uppercase tracking-wider">
-                            * We will use this to send your digital ticket and event updates.
-                        </p>
                     </div>
                 </div>
             </div>
@@ -117,18 +114,53 @@
                 Proceed to Review & Pay
             </button>
         </form>
-
-        <p class="text-center text-slate-400 text-[10px] mt-8 uppercase font-bold tracking-widest">
-            Secured by Myan Run Registration System
-        </p>
     </div>
 
     <script>
-        // Restrict input to numbers only for specific fields
+        const form = document.getElementById('registrationForm');
+        const phoneInput = document.getElementById('guest_phone');
+        const viberInput = document.getElementById('viber');
+        const phoneError = document.getElementById('phone_error');
+        const viberError = document.getElementById('viber_error');
+
+        // 1. Live Numeric Restriction & Cleanup
         document.querySelectorAll('.numeric-only').forEach(input => {
-            input.addEventListener('input', function(e) {
+            input.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
+                
+                // Remove error state as user types
+                if (this.value.length === 11) {
+                    this.classList.remove('error');
+                    const errorId = this.id === 'guest_phone' ? 'phone_error' : 'viber_error';
+                    document.getElementById(errorId).style.display = 'none';
+                }
             });
+        });
+
+        // 2. Form Submission Validation
+        form.addEventListener('submit', function(e) {
+            let hasError = false;
+
+            // Check Phone
+            if (phoneInput.value.length !== 11) {
+                phoneInput.classList.add('error');
+                phoneError.style.display = 'block';
+                hasError = true;
+            }
+
+            // Check Viber (Only if they filled it in)
+            if (viberInput.value.length > 0 && viberInput.value.length !== 11) {
+                viberInput.classList.add('error');
+                viberError.style.display = 'block';
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault(); // Stop form from submitting
+                // Scroll to the error
+                const firstError = document.querySelector('.error');
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         });
     </script>
 </body>

@@ -5,7 +5,7 @@
     <div class="container-fluid">
         <div class="page-title mb-5">
             <h1 class="font-weight-bold text-dark">Add New Sponsor</h1>
-            <p class="text-muted">Register a company profile. You can generate invitation codes in the next step.</p>
+            <p class="text-muted">Register a company profile and link it to a specific dinner.</p>
         </div>
 
         <div class="row">
@@ -16,6 +16,21 @@
                             @csrf
                             
                             <div class="row">
+                                {{-- Target Dinner (New) --}}
+                                <div class="col-md-12 mb-4">
+                                    <label class="form-label font-weight-bold text-dark">Select Dinner Event</label>
+                                    <select name="dinner_id" class="form-control @error('dinner_id') is-invalid @enderror" required>
+                                        <option value="" disabled selected>-- Choose a Dinner --</option>
+                                        @foreach($dinners as $dinner)
+                                            <option value="{{ $dinner->id }}" {{ old('dinner_id') == $dinner->id ? 'selected' : '' }}>
+                                                {{ $dinner->name }} ({{ \Carbon\Carbon::parse($dinner->date)->format('d M Y') }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('dinner_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    <small class="text-muted">This sponsor's quota will be applied to the selected dinner.</small>
+                                </div>
+
                                 {{-- Company Name --}}
                                 <div class="col-md-12 mb-4">
                                     <label class="form-label font-weight-bold text-dark">Company Name</label>
@@ -41,17 +56,17 @@
                                     <input type="text" name="phone" class="form-control" placeholder="09..." required value="{{ old('phone') }}">
                                 </div>
 
-                                {{-- Viber Number (New) --}}
+                                {{-- Viber Number --}}
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label font-weight-bold text-dark">Viber Number</label>
                                     <input type="text" name="viber" class="form-control" placeholder="09..." value="{{ old('viber') }}">
                                 </div>
 
-                                {{-- Quantity / Ticket Quota (New) --}}
-                                <div class="col-md-6 mb-4">
+                                {{-- Quantity / Ticket Quota --}}
+                                <div class="col-md-12 mb-4">
                                     <label class="form-label font-weight-bold text-dark">Ticket Quantity (Quota)</label>
                                     <input type="number" name="quantity" class="form-control" placeholder="e.g. 50" required value="{{ old('quantity', 0) }}">
-                                    <small class="text-muted">Total number of tickets allowed for this sponsor.</small>
+                                    <small class="text-muted">Total number of tickets allowed for this sponsor for the selected dinner.</small>
                                 </div>
                             </div>
 

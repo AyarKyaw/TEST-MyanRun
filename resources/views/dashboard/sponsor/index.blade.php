@@ -75,8 +75,14 @@
                             <hr>
 
                             {{-- Link to Batch Print/Details --}}
-                            <a href="{{ route('admin.sponsor.batchPrint', $sponsor->id) }}" class="btn btn-primary">
-                                <i class="fas fa-print mr-2"></i> Batch Print Tickets
+                            @php
+                                $seatsTaken = $sponsor->dinner->tickets()->whereNotNull('sponsor_id')->whereIn('status', ['confirmed', 'pending'])->sum('quantity');
+                                $isFull = $sponsor->dinner->sponsor_capacity > 0 && ($seatsTaken + $sponsor->quantity) > $sponsor->dinner->sponsor_capacity;
+                            @endphp
+
+                            <a href="{{ route('admin.sponsor.batchPrint', $sponsor->id) }}" 
+                                class="btn btn-primary {{ $isFull ? 'disabled' : '' }}">
+                                <i class="fa fa-print"></i> Print Tickets
                             </a>
                         </div>
                     </div>
