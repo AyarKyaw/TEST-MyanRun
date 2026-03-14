@@ -462,59 +462,52 @@ class DinnerController extends Controller
         $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
         return back()->with('success', "Scanning has been {$status} for this event.");
     }
-    
+
     public function publicVerify($code)
-    {
-        // 1. Find the unique code in sponsor_codes
-        // We eager load the 'ticket.dinner' and 'ticket.registration'
-        $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                        ->with(['ticket.registration', 'ticket.dinner'])
-                        ->first();
+{
+    // 1. Find the code
+    $codeRecord = \App\Models\SponsorCode::where('code', $code)
+                    ->with(['ticket.registration', 'ticket.dinner'])
+                    ->first();
 
-        // 2. Error: Code doesn't exist
-        if (!$codeRecord) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Invalid Ticket: Code {$code} not found.");
-        }
-
-        $ticket = $codeRecord->ticket;
-        $dinner = $ticket->dinner;
-
-        // 3. Error: Check if scanning is actually open for this specific dinner
-        if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Scanning is currently DISABLED for {$dinner->name}.");
-        }
-
-        // 4. Error: Check if the main payment is confirmed
-        if ($ticket->status !== 'confirmed') {
-            return redirect()->route('dinner.index')
-                ->with('error', "Verification Failed: Payment for this ticket is {$ticket->status}.");
-        }
-
-        // 5. Check for Double Scanning on the SPECIFIC CODE
-        // Using a 30-second grace period for accidental double-taps
-        if ($codeRecord->scanned_at && $codeRecord->scanned_at->diffInSeconds(now()) > 30) {
-            $scanTime = $codeRecord->scanned_at->timezone('Asia/Yangon')->format('h:i A');
-            return redirect()->route('dinner.index')
-                ->with('error', "ALREADY USED: This specific code ({$code}) was scanned at {$scanTime}.");
-        }
-
-        // 6. Success: Mark this specific code as scanned
-        $codeRecord->update([
-            'scanned_at' => now(),
-            'status' => 'used',
-            'used_count' => 1
-        ]);
-
-        // Optional: Also update the main ticket's scanned_at if it's the first person from that group
-        if (!$ticket->scanned_at) {
-            $ticket->update(['scanned_at' => now()]);
-        }
-
-        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
-        
+    if (!$codeRecord) {
         return redirect()->route('dinner.index')
-            ->with('success', "✅ Verified! Welcome, {$guestName}. (Seat Code: {$code})");
+            ->with('error', "Invalid Ticket: Code {$code} not found.");
     }
+
+    $ticket = $codeRecord->ticket;
+    $dinner = $ticket->dinner;
+
+    // 2. Check Event Scanning Status
+    if (!$dinner->is_scanning_open) {
+        return redirect()->route('dinner.index')
+            ->with('error', "Scanning is currently CLOSED for this event.");
+    }
+
+    // 3. Check Payment Status
+    if ($ticket->status !== 'confirmed') {
+        return redirect()->route('dinner.index')
+            ->with('error', "Payment is {$ticket->status}. Verification denied.");
+    }
+
+    // 4. Check if ALREADY USED (Using used_count and status)
+    // If status is 'used' and it was created more than a minute ago, 
+    // we treat it as a duplicate entry.
+    if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 30) {
+        $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
+        return redirect()->route('dinner.index')
+            ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
+    }
+
+    // 5. Success: Mark as used
+    $codeRecord->update([
+        'status' => 'used',
+        'used_count' => 1, // Set to 1 since these are unique physical tickets
+    ]);
+
+    $guestName = $codeRecord->used_by_name ?? $ticket->registration->first_name;
+    
+    return redirect()->route('dinner.index')
+        ->with('success', "✅ Verified! Welcome, {$guestName}.");
+}
 }
