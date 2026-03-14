@@ -466,21 +466,41 @@ class DinnerController extends Controller
     public function publicVerify($code)
 {
     // 1. Try SponsorCode table first
-    $codeRecord = \App\Models\SponsorCode::where('code', $code)->first();
+    $codeRecord = \App\Models\SponsorCode::where('code', $code)
+                    ->with('ticket.dinner') // Load dinner relation
+                    ->first();
 
     if ($codeRecord) {
+        $dinner = $codeRecord->ticket->dinner;
+        
+        // --- CHECK IF SCANNING IS DISABLED ---
+        if (!$dinner->is_scanning_open) {
+            return redirect()->route('dinner.index')->with('error', "Scanning is currently CLOSED for this event.");
+        }
+
         // Handle Individual/Public Ticket
         if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 3) {
              return redirect()->route('dinner.index')->with('error', "Already scanned.");
         }
+        
         $codeRecord->update(['status' => 'used', 'used_count' => 1]);
         $guestName = $codeRecord->used_by_name ?? "Guest";
+        
     } else {
         // 2. Handle Sponsor Batch Ticket (dinner_tickets table)
-        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)->first();
+        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)
+                    ->with('dinner') // Load dinner relation
+                    ->first();
 
         if (!$ticket) {
             return redirect()->route('dinner.index')->with('error', "Invalid Ticket.");
+        }
+
+        $dinner = $ticket->dinner;
+
+        // --- CHECK IF SCANNING IS DISABLED ---
+        if (!$dinner->is_scanning_open) {
+            return redirect()->route('dinner.index')->with('error', "Scanning is currently CLOSED for this event.");
         }
 
         // Check already scanned using the actual timestamp
@@ -489,10 +509,13 @@ class DinnerController extends Controller
             return redirect()->route('dinner.index')->with('error', "ALREADY USED: Scanned at {$scanTime}.");
         }
 
-        // FORCE UPDATE using DB directly (Bypasses all Model/Fillable issues)
+        // FORCE UPDATE with Yangon Timezone
         \DB::table('dinner_tickets')
             ->where('id', $ticket->id)
-            ->update(['scanned_at' => now()]);
+            ->update([
+                'scanned_at' => now()->timezone('Asia/Yangon'),
+                'updated_at' => now()->timezone('Asia/Yangon')
+            ]);
 
         $guestName = $ticket->sponsor->company ?? "Sponsor Guest";
     }
