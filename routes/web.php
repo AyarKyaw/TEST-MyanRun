@@ -121,6 +121,8 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
     Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
     Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
+    Route::post('/dinner/{id}/toggle-scan', [App\Http\Controllers\DinnerController::class, 'toggleScanning'])
+    ->name('admin.dinner.toggle-scan');
     
     // Dinner Tickets (Master/Detail)
     Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
@@ -136,7 +138,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
     Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
-});
+}); 
 
 Route::get('/ticket/verify/{ticket_no}', [DinnerController::class, 'publicVerify'])
     ->name('ticket.verify');

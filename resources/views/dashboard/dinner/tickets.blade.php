@@ -94,6 +94,22 @@
                 <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'rejected']) }}" 
                    class="btn btn-outline-danger btn-sm {{ request('status') == 'rejected' ? 'active' : '' }}">Rejected</a>
             </div>
+            <div class="d-flex gap-3 align-items-center">
+                {{-- Scanning Status Badge --}}
+                @if($dinner->is_scanning_open)
+                    <span class="badge badge-success pulse"><i class="fa fa-broadcast-tower me-1"></i> SCANNING LIVE</span>
+                @else
+                    <span class="badge badge-danger"><i class="fa fa-lock me-1"></i> SCANNING DISABLED</span>
+                @endif
+
+                {{-- Toggle Button --}}
+                <form action="{{ route('admin.dinner.toggle-scan', $dinner->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn {{ $dinner->is_scanning_open ? 'btn-outline-danger' : 'btn-primary' }} btn-sm fw-bold">
+                        {{ $dinner->is_scanning_open ? 'Disable Scanning' : 'Enable Scanning' }}
+                    </button>
+                </form>
+            </div>
         </div>
 
         {{-- Main Tickets Table --}}
@@ -118,10 +134,17 @@
                                 @forelse($tickets as $ticket)
                                 <tr>
                                     <td>
+                                    @if($ticket->type === 'Sponsored' && $ticket->ticket_no)
+                                        {{-- Show the unique ticket_no for Sponsors --}}
+                                        <div class="mb-1">
+                                            <span class="badge badge-xs light badge-dark" style="letter-spacing: 0.5px;">
+                                                <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $ticket->ticket_no }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        {{-- Fallback for Public users or older logic --}}
                                         @php
-                                            // Fetch all generated seat codes for this specific purchase/ticket record
-                                            $generatedCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)
-                                                                ->get();
+                                            $generatedCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)->get();
                                         @endphp
 
                                         @forelse($generatedCodes as $codeRecord)
@@ -131,10 +154,10 @@
                                                 </span>
                                             </div>
                                         @empty
-                                            {{-- Fallback if not yet approved/generated --}}
                                             <span class="text-muted fs-11">Pending Generation</span>
                                         @endforelse
-                                    </td>
+                                    @endif
+                                </td>
                                     <td>
                                         <div class="text-black fw-bold">
                                             {{ $ticket->registration?->first_name ?? 'SPONSOR' }} 

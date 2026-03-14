@@ -9,6 +9,7 @@ class Dinner extends Model
         'name',
         'company',
         'location',
+        'is_scanning_open',
         'date',
         'is_active',
         'public_capacity',   // Add this

@@ -259,7 +259,15 @@ class DinnerController extends Controller
     ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
     ->with('download_urls', $downloadUrls);
     }
+    public function toggleScanning($id)
+    {
+        $dinner = Dinner::findOrFail($id);
+        $dinner->is_scanning_open = !$dinner->is_scanning_open;
+        $dinner->save();
 
+        $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
+        return back()->with('success', "Scanning has been {$status} for this event.");
+    }
     public function publicVerify($code)
     {
         // 1. Find the unique DIN code in the sponsor_codes table
@@ -272,6 +280,13 @@ class DinnerController extends Controller
         if (!$codeRecord) {
             return redirect()->route('dinner.index')
                 ->with('error', "Invalid Ticket: Code {$code} not found in our system.");
+        }
+
+        $dinner = $codeRecord->ticket->dinner;
+        
+        if (!$dinner->is_scanning_open) {
+            return redirect()->route('dinner.index')
+                ->with('error', "Scanning is currently DISABLED for this event.");
         }
 
         $ticket = $codeRecord->ticket;
