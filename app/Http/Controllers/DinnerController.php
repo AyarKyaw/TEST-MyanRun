@@ -526,9 +526,10 @@ class DinnerController extends Controller
         ]);
     } else {
         // Update sponsor ticket record
-        $ticket->update([
-            'scanned_at' => now()
-        ]);
+        \Log::info("Scanning Ticket ID: " . $ticket->id . " with Code: " . $code);
+        $ticket->scanned_at = now();
+        $ticket->save();
+        \Log::info("New scanned_at value: " . $ticket->scanned_at);
     }
 
     return redirect()->route('dinner.index')
