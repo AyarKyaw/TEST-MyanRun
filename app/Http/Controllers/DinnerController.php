@@ -465,74 +465,38 @@ class DinnerController extends Controller
 
     public function publicVerify($code)
 {
-    // 1. Try to find the code in SponsorCodes first (Public/Guest Tickets)
-    $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                    ->with(['ticket.registration', 'ticket.dinner'])
-                    ->first();
+    // 1. Try SponsorCode table first
+    $codeRecord = \App\Models\SponsorCode::where('code', $code)->first();
 
     if ($codeRecord) {
-        // --- CASE: PUBLIC TICKET ---
-        $ticket = $codeRecord->ticket;
-        $dinner = $ticket->dinner;
-        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? 'Guest');
-        
-        // Use updated_at for the grace period check
-        $lastAction = $codeRecord->updated_at;
-        $isAlreadyUsed = ($codeRecord->status === 'used');
+        // Handle Individual/Public Ticket
+        if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 3) {
+             return redirect()->route('dinner.index')->with('error', "Already scanned.");
+        }
+        $codeRecord->update(['status' => 'used', 'used_count' => 1]);
+        $guestName = $codeRecord->used_by_name ?? "Guest";
     } else {
-        // 2. Fallback: Check DinnerTickets table (Sponsor Batch Tickets)
-        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)
-                    ->with(['dinner', 'sponsor'])
-                    ->first();
+        // 2. Handle Sponsor Batch Ticket (dinner_tickets table)
+        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)->first();
 
         if (!$ticket) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Invalid Ticket: Code {$code} not found.");
+            return redirect()->route('dinner.index')->with('error', "Invalid Ticket.");
         }
 
-        // --- CASE: SPONSOR BATCH TICKET ---
-        $dinner = $ticket->dinner;
-        $guestName = $ticket->sponsor->company ?? 'Sponsor Guest';
-        
-        // Use scanned_at for the grace period check
-        $lastAction = $ticket->scanned_at;
-        $isAlreadyUsed = ($ticket->scanned_at !== null);
+        // Check already scanned using the actual timestamp
+        if ($ticket->scanned_at && \Carbon\Carbon::parse($ticket->scanned_at)->diffInSeconds(now()) > 3) {
+            $scanTime = \Carbon\Carbon::parse($ticket->scanned_at)->timezone('Asia/Yangon')->format('h:i A');
+            return redirect()->route('dinner.index')->with('error', "ALREADY USED: Scanned at {$scanTime}.");
+        }
+
+        // FORCE UPDATE using DB directly (Bypasses all Model/Fillable issues)
+        \DB::table('dinner_tickets')
+            ->where('id', $ticket->id)
+            ->update(['scanned_at' => now()]);
+
+        $guestName = $ticket->sponsor->company ?? "Sponsor Guest";
     }
 
-    // 3. Common Checks
-    if (!$dinner->is_scanning_open) {
-        return redirect()->route('dinner.index')
-            ->with('error', "Scanning is CLOSED for this event.");
-    }
-
-    if ($ticket->status !== 'confirmed') {
-        return redirect()->route('dinner.index')
-            ->with('error', "Verification Failed: Payment status is {$ticket->status}.");
-    }
-
-    // 4. Double Scan Prevention (Your 3-second logic)
-    if ($isAlreadyUsed && $lastAction && $lastAction->diffInSeconds(now()) > 3) {
-        $scanTime = $lastAction->timezone('Asia/Yangon')->format('h:i A');
-        return redirect()->route('dinner.index')
-            ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
-    }
-
-    // 5. Success: Mark as Scanned
-    if ($codeRecord) {
-        // Update public code record
-        $codeRecord->update([
-            'status' => 'used',
-            'used_count' => 1
-        ]);
-    } else {
-        // Update sponsor ticket record
-        \Log::info("Scanning Ticket ID: " . $ticket->id . " with Code: " . $code);
-        $ticket->scanned_at = now();
-        $ticket->save();
-        \Log::info("New scanned_at value: " . $ticket->scanned_at);
-    }
-
-    return redirect()->route('dinner.index')
-        ->with('success', "✅ Verified! Welcome, {$guestName}.");
+    return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
 }
 }
