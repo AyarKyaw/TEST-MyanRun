@@ -94,7 +94,7 @@
     <div>
         <label class="label-text">Viber Number</label>
         <div class="relative">
-            <input type="tel" id="viber" name="viber" maxlength="11" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="eg. 091234567">
+            <input type="tel" id="viber" name="viber" maxlength="11" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="eg. 091234567" required>
             <div class="absolute right-5 top-1/2 -translate-y-1/2 text-[#7360F2] text-xl">
                 <i class="fab fa-viber"></i>
             </div>

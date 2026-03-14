@@ -25,6 +25,12 @@ class SponsorCode extends Model
         return $this->belongsTo(Sponsor::class);
     }
 
+    public function ticket(): BelongsTo
+    {
+        // This links the 'dinner_ticket_id' column to the DinnerTicket model
+        return $this->belongsTo(DinnerTicket::class, 'dinner_ticket_id');
+    }
+
     // Link to the user registration
     public function registration()
     {
