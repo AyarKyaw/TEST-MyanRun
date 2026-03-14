@@ -465,42 +465,67 @@ class DinnerController extends Controller
 
     public function publicVerify($code)
 {
-    // 1. Try SponsorCode table (Public/Guest Tickets)
-    $codeRecord = \App\Models\SponsorCode::where('code', $code)->with('ticket.dinner')->first();
+    // 1. Try SponsorCode table (This is where public/guest seats live)
+    $codeRecord = \App\Models\SponsorCode::where('code', $code)
+                    ->with(['ticket.dinner'])
+                    ->first();
 
     if ($codeRecord) {
-        $dinner = $codeRecord->ticket->dinner;
+        $ticket = $codeRecord->ticket;
+        $dinner = $ticket->dinner;
+
+        // Check if Scanning is Open
         if (!$dinner->is_scanning_open) {
             return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
         }
 
+        // Double Scan Check (3-second grace period)
         if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 3) {
-             return redirect()->route('dinner.index')->with('error', "Already scanned.");
+            $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
+            return redirect()->route('dinner.index')->with('error', "Already scanned at {$scanTime}.");
         }
-        
-        $codeRecord->update(['status' => 'used', 'used_count' => 1]);
-        $guestName = $codeRecord->used_by_name ?? "Guest";
+
+        // 2. MARK INDIVIDUAL CODE AS USED
+        $codeRecord->update([
+            'status' => 'used',
+            'used_count' => 1
+        ]);
+
+        // 3. CHECK IF THIS WAS THE LAST CODE FOR THIS TICKET
+        $remainingCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)
+                            ->where('status', '!=', 'used')
+                            ->count();
+
+        if ($remainingCodes === 0) {
+            // All seats for this ticket are now scanned!
+            // Update the main ticket's scanned_at timestamp
+            \DB::table('dinner_tickets')
+                ->where('id', $ticket->id)
+                ->update([
+                    'scanned_at' => now()->timezone('Asia/Yangon'),
+                    'updated_at' => now()->timezone('Asia/Yangon')
+                ]);
+        }
+
+        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? "Guest");
+        return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
     } 
     else {
-        // 2. Handle Sponsor Batch Ticket (dinner_tickets table)
+        // 4. Fallback for Sponsor Batch Tickets (Directly in dinner_tickets)
         $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)->with('dinner')->first();
 
         if (!$ticket) {
             return redirect()->route('dinner.index')->with('error', "Invalid Ticket.");
         }
 
-        $dinner = $ticket->dinner;
-        if (!$dinner->is_scanning_open) {
+        if (!$ticket->dinner->is_scanning_open) {
             return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
         }
 
-        // Duplicate Check
         if ($ticket->scanned_at && \Carbon\Carbon::parse($ticket->scanned_at)->diffInSeconds(now()) > 3) {
-            $scanTime = \Carbon\Carbon::parse($ticket->scanned_at)->timezone('Asia/Yangon')->format('h:i A');
-            return redirect()->route('dinner.index')->with('error', "ALREADY USED: Scanned at {$scanTime}.");
+            return redirect()->route('dinner.index')->with('error', "Already scanned.");
         }
 
-        // 3. UPDATE THE CURRENT TICKET
         \DB::table('dinner_tickets')
             ->where('id', $ticket->id)
             ->update([
@@ -508,25 +533,8 @@ class DinnerController extends Controller
                 'updated_at' => now()->timezone('Asia/Yangon')
             ]);
 
-        // 4. CHECK IF ALL TICKETS FOR THIS SPONSOR ARE NOW USED
-        if ($ticket->sponsor_id) {
-            $remainingTickets = \App\Models\DinnerTicket::where('sponsor_id', $ticket->sponsor_id)
-                ->where('dinner_id', $ticket->dinner_id)
-                ->whereNull('scanned_at')
-                ->count();
-
-            if ($remainingTickets === 0) {
-                // All tickets for this sponsor have been scanned!
-                // You can update the Sponsor's status here if you have a status column in sponsors table
-                \DB::table('sponsors')
-                    ->where('id', $ticket->sponsor_id)
-                    ->update(['status' => 'Fully Arrived']);
-            }
-        }
-
         $guestName = $ticket->sponsor->company ?? "Sponsor Guest";
+        return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
     }
-
-    return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
 }
 }
