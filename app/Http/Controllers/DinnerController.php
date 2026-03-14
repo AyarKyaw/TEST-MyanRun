@@ -493,7 +493,7 @@ class DinnerController extends Controller
     // 4. Check if ALREADY USED (Using used_count and status)
     // If status is 'used' and it was created more than a minute ago, 
     // we treat it as a duplicate entry.
-    if ($codeRecord->status === 'available' && $codeRecord->updated_at->diffInSeconds(now()) > 30) {
+    if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 30) {
         $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
         return redirect()->route('dinner.index')
             ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
