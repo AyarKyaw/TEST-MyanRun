@@ -10,6 +10,7 @@ class SponsorCode extends Model
     use HasFactory;
 
     protected $fillable = [
+        'sponsor_id',
         'dinner_id',
         'dinner_ticket_id',
         'dinner_register_id', // Link to the ID for data integrity
@@ -25,7 +26,7 @@ class SponsorCode extends Model
         return $this->belongsTo(Sponsor::class);
     }
 
-    public function ticket(): BelongsTo
+    public function ticket()
     {
         // This links the 'dinner_ticket_id' column to the DinnerTicket model
         return $this->belongsTo(DinnerTicket::class, 'dinner_ticket_id');
