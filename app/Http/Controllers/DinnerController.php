@@ -452,4 +452,14 @@ class DinnerController extends Controller
         DinnerTicket::findOrFail($id)->update(['status' => 'rejected']);
         return back()->with('success', 'Rejected.');
     }
+
+    public function toggleScanning($id)
+    {
+        $dinner = Dinner::findOrFail($id);
+        $dinner->is_scanning_open = !$dinner->is_scanning_open;
+        $dinner->save();
+
+        $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
+        return back()->with('success', "Scanning has been {$status} for this event.");
+    }
 }
