@@ -16,8 +16,13 @@ class DinnerTicket extends Model
         'status', 
         'price', 
         'quantity',
-        'payment_slip'
+        'payment_slip',
+        'scanned_at'
     ];
+
+    protected $casts = [
+    'scanned_at' => 'datetime', // <--- ADD THIS
+];
 
     /**
      * Define the relationship to the Dinner.
@@ -42,4 +47,6 @@ class DinnerTicket extends Model
     {
         return $this->belongsTo(Sponsor::class);
     }
+
+    
 }
