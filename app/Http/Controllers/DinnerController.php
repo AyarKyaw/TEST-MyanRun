@@ -227,7 +227,6 @@ class DinnerController extends Controller
                         
                         // Write the Unique DIN Code and Seat Number
                         imagettftext($image, 22, 0, 980, 45, $white, $fontPath, $uniqueCode);
-                        imagettftext($image, 12, 0, 980, 70, $white, $fontPath, "Seat {$i} of {$ticket->quantity}");
 
                         // Manual URL Construction for QR
                         $checkInUrl = "https://test-myanrun.itplus.net.mm/ticket/verify/" . $uniqueCode;
@@ -283,7 +282,7 @@ class DinnerController extends Controller
         }
 
         $dinner = $codeRecord->ticket->dinner;
-        
+
         if (!$dinner->is_scanning_open) {
             return redirect()->route('dinner.index')
                 ->with('error', "Scanning is currently DISABLED for this event.");
