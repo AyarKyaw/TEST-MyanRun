@@ -423,30 +423,31 @@ class DinnerController extends Controller
     return redirect()->route('admin.dinner.manage', 'now')->with('success', 'Dinner created successfully!');
 }
 
-    public function showDinnerTickets(Request $request, $id)
-    {
-        $dinner = Dinner::withSum(['tickets as public_seats_count' => function ($query) {
-            $query->whereIn('status', ['confirmed', 'pending'])->whereNull('sponsor_id');
-        }], 'quantity')
-        ->withSum(['tickets as sponsor_seats_count' => function ($query) {
-            $query->whereIn('status', ['confirmed', 'pending'])->whereNotNull('sponsor_id');
-        }], 'quantity')
-        ->findOrFail($id);
+    // In DinnerController.php
 
-        $query = DinnerTicket::where('dinner_id', $id)
-                    ->with(['registration', 'sponsor'])
-                    ->latest();
+public function showDinnerTickets(Request $request, $id)
+{
+    $dinner = Dinner::findOrFail($id);
+    $query = DinnerTicket::with(['registration', 'sponsor'])->where('dinner_id', $id);
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // We keep pagination, but the view will handle the "visual grouping"
-        $tickets = $query->paginate(15);
-
-        return view('dashboard.dinner.tickets', compact('dinner', 'tickets'));
+    // Filter by Status
+    if ($request->filled('status')) {
+        $query->where('status', $request->status);
     }
 
+    // Filter by Ticket Type using sponsor_id
+    if ($request->filled('type')) {
+        if ($request->type === 'Sponsored') {
+            $query->whereNotNull('sponsor_id');
+        } elseif ($request->type === 'Public') {
+            $query->whereNull('sponsor_id');
+        }
+    }
+
+    $tickets = $query->orderBy('created_at', 'desc')->paginate(20);
+
+    return view('dashboard.dinner.tickets', compact('dinner', 'tickets'));
+}
     public function adminReject($id) 
     {
         DinnerTicket::findOrFail($id)->update(['status' => 'rejected']);

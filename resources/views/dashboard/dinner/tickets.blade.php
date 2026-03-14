@@ -16,93 +16,103 @@
         </div>
 
         {{-- Refined Summary Card --}}
-    <div class="row mb-4">
-        <div class="col-xl-12">
-            {{-- Added h-100 to ensure the card fills the row height --}}
-            <div class="card m-0 shadow-sm border-0 h-100" style="border-radius: 12px;">
-                {{-- Increased py-4 for more vertical "breathing room" --}}
-                <div class="card-body py-4 px-4">
-                    <div class="row align-items-center h-100">
-                        
-                        {{-- Metric 1: Revenue --}}
-                        <div class="col-md-3 border-end">
-                            <div class="d-flex flex-column justify-content-center">
-                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmed Revenue</span>
-                                <h3 class="mb-0 fw-bold text-success" style="font-size: 24px;"> {{-- Bumped font size slightly --}}
-                                    {{ number_format($tickets->where('status', 'confirmed')->sum('price')) }} 
-                                    <span class="fs-12 fw-normal text-muted">MMK</span>
-                                </h3>
+        <div class="row mb-4">
+            <div class="col-xl-12">
+                <div class="card m-0 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                    <div class="card-body py-4 px-4">
+                        <div class="row align-items-center h-100">
+                            
+                            {{-- Metric 1: Revenue --}}
+                            <div class="col-md-3 border-end">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmed Revenue</span>
+                                    <h3 class="mb-0 fw-bold text-success" style="font-size: 24px;">
+                                        {{ number_format($tickets->where('status', 'confirmed')->sum('price')) }} 
+                                        <span class="fs-12 fw-normal text-muted">MMK</span>
+                                    </h3>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Metric 2: Public Seats --}}
-                        <div class="col-md-2 border-end text-center">
-                            <div class="d-flex flex-column justify-content-center">
-                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Public Seats</span>
-                                <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
-                                    {{ $dinner->public_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->public_capacity ?? '∞' }}</span>
-                                </h3>
+                            {{-- Metric 2: Public Seats --}}
+                            <div class="col-md-2 border-end text-center">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Public Seats</span>
+                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
+                                        {{ $dinner->public_seat_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->public_capacity ?? '∞' }}</span>
+                                    </h3>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Metric 3: Sponsor Seats --}}
-                        <div class="col-md-2 border-end text-center">
-                            <div class="d-flex flex-column justify-content-center">
-                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Sponsor Seats</span>
-                                <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
-                                    {{ $dinner->sponsor_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->sponsor_capacity ?? 0 }}</span>
-                                </h3>
+                            {{-- Metric 3: Sponsor Seats --}}
+                            <div class="col-md-2 border-end text-center">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Sponsor Seats</span>
+                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
+                                        {{ $dinner->sponsor_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->sponsor_capacity ?? 0 }}</span>
+                                    </h3>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Metric 4: Total Bookings --}}
-                        <div class="col-md-2 border-end text-center">
-                            <div class="d-flex flex-column justify-content-center">
-                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total Bookings</span>
-                                <h3 class="mb-0 fw-bold text-primary" style="font-size: 24px;">{{ $tickets->total() }}</h3>
+                            {{-- Metric 4: Total Bookings --}}
+                            <div class="col-md-2 border-end text-center">
+                                <div class="d-flex flex-column justify-content-center">
+                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total Bookings</span>
+                                    <h3 class="mb-0 fw-bold text-primary" style="font-size: 24px;">{{ $tickets->total() }}</h3>
+                                </div>
                             </div>
-                        </div>
 
-                        {{-- Actions --}}
-                        <div class="col-md-3">
-                            <div class="d-flex justify-content-end gap-2 align-items-center">
-                                <a href="{{ route('admin.dinner.manage', 'now') }}" class="btn btn-light btn-sm fw-bold px-3 py-2">
-                                    <i class="fa fa-chevron-left me-1 fs-12"></i> Back
-                                </a>
-                                <button class="btn btn-primary btn-sm fw-bold px-3 py-2 shadow-sm">
-                                    <i class="fa fa-download me-1 fs-12"></i> Export
-                                </button>
+                            {{-- Actions --}}
+                            <div class="col-md-3">
+                                <div class="d-flex justify-content-end gap-2 align-items-center">
+                                    <a href="{{ route('admin.dinner.manage', 'now') }}" class="btn btn-light btn-sm fw-bold px-3 py-2">
+                                        <i class="fa fa-chevron-left me-1 fs-12"></i> Back
+                                    </a>
+                                    <button class="btn btn-primary btn-sm fw-bold px-3 py-2 shadow-sm">
+                                        <i class="fa fa-download me-1 fs-12"></i> Export
+                                    </button>
+                                </div>
                             </div>
-                        </div>
 
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
         {{-- Filter Tabs --}}
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0 fw-bold">Guest List</h4>
-            <div class="btn-group shadow-sm bg-white rounded">
-                <a href="{{ route('admin.dinner.tickets.show', $dinner->id) }}" 
-                   class="btn btn-outline-secondary btn-sm {{ !request('status') ? 'active' : '' }}">All</a>
-                <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'pending']) }}" 
-                   class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
-                <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'confirmed']) }}" 
-                   class="btn btn-outline-success btn-sm {{ request('status') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
-                <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'rejected']) }}" 
-                   class="btn btn-outline-danger btn-sm {{ request('status') == 'rejected' ? 'active' : '' }}">Rejected</a>
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div class="d-flex gap-2">
+                {{-- Status Filter --}}
+<div class="btn-group shadow-sm bg-white rounded">
+    {{-- Preserve 'type' when switching status --}}
+    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'type' => request('type')]) }}" 
+       class="btn btn-outline-secondary btn-sm {{ !request('status') ? 'active' : '' }}">All Status</a>
+    
+    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'pending', 'type' => request('type')]) }}" 
+       class="btn btn-outline-warning btn-sm {{ request('status') == 'pending' ? 'active' : '' }}">Pending</a>
+    
+    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => 'confirmed', 'type' => request('type')]) }}" 
+       class="btn btn-outline-success btn-sm {{ request('status') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
+</div>
+
+                {{-- Type Filter --}}
+                <div class="btn-group shadow-sm bg-white rounded">
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => request('status')]) }}" 
+                       class="btn btn-outline-secondary btn-sm {{ !request('type') ? 'active' : '' }}">All Types</a>
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => request('status'), 'type' => 'Sponsored']) }}" 
+                       class="btn btn-outline-info btn-sm {{ request('type') == 'Sponsored' ? 'active' : '' }}">Sponsors</a>
+                    <a href="{{ route('admin.dinner.tickets.show', ['id' => $dinner->id, 'status' => request('status'), 'type' => 'Public']) }}" 
+                       class="btn btn-outline-primary btn-sm {{ request('type') == 'Public' ? 'active' : '' }}">Public</a>
+                </div>
             </div>
+
             <div class="d-flex gap-3 align-items-center">
-                {{-- Scanning Status Badge --}}
                 @if($dinner->is_scanning_open)
                     <span class="badge badge-success pulse"><i class="fa fa-broadcast-tower me-1"></i> SCANNING LIVE</span>
                 @else
                     <span class="badge badge-danger"><i class="fa fa-lock me-1"></i> SCANNING DISABLED</span>
                 @endif
 
-                {{-- Toggle Button --}}
                 <form action="{{ route('admin.dinner.toggle-scan', $dinner->id) }}" method="POST">
                     @csrf
                     <button type="submit" class="btn {{ $dinner->is_scanning_open ? 'btn-outline-danger' : 'btn-primary' }} btn-sm fw-bold">
@@ -134,34 +144,37 @@
                                 @forelse($tickets as $ticket)
                                 <tr>
                                     <td>
-                                    @if($ticket->type === 'Sponsored' && $ticket->ticket_no)
-                                        {{-- Show the unique ticket_no for Sponsors --}}
-                                        <div class="mb-1">
-                                            <span class="badge badge-xs light badge-dark" style="letter-spacing: 0.5px;">
-                                                <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $ticket->ticket_no }}
-                                            </span>
-                                        </div>
-                                    @else
-                                        {{-- Fallback for Public users or older logic --}}
-                                        @php
-                                            $generatedCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)->get();
-                                        @endphp
-
-                                        @forelse($generatedCodes as $codeRecord)
+                                        @if($ticket->type === 'Sponsored' && $ticket->ticket_no)
                                             <div class="mb-1">
                                                 <span class="badge badge-xs light badge-dark" style="letter-spacing: 0.5px;">
-                                                    <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $codeRecord->code }}
+                                                    <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $ticket->ticket_no }}
                                                 </span>
                                             </div>
-                                        @empty
-                                            <span class="text-muted fs-11">Pending Generation</span>
-                                        @endforelse
-                                    @endif
-                                </td>
+                                        @else
+                                            @php
+                                                $generatedCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)->get();
+                                            @endphp
+
+                                            @forelse($generatedCodes as $codeRecord)
+                                                <div class="mb-1">
+                                                    <span class="badge badge-xs light badge-dark" style="letter-spacing: 0.5px;">
+                                                        <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $codeRecord->code }}
+                                                    </span>
+                                                </div>
+                                            @empty
+                                                <span class="text-muted fs-11">Pending Generation</span>
+                                            @endforelse
+                                        @endif
+                                    </td>
                                     <td>
                                         <div class="text-black fw-bold">
-                                            {{ $ticket->registration?->first_name ?? 'SPONSOR' }} 
-                                            {{ $ticket->registration?->last_name ?? 'GUEST' }}
+                                            @if($ticket->type === 'Sponsored')
+                                                {{ $ticket->registration?->first_name ?? 'SPONSOR' }} 
+                                                {{ $ticket->registration?->last_name ?? 'GUEST' }}
+                                            @else
+                                                {{ $ticket->registration?->first_name ?? 'N/A' }} 
+                                                {{ $ticket->registration?->last_name ?? '' }}
+                                            @endif
                                         </div>
                                     </td>
                                     <td>
@@ -199,7 +212,7 @@
                                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title text-black fw-bold">Booking Details - #{{ $ticket->ticket_no }}</h5>
+                                                            <h5 class="modal-title text-black fw-bold">Booking Details - #{{ $ticket->ticket_no ?? 'N/A' }}</h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body text-start">
