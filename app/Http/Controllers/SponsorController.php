@@ -61,16 +61,6 @@ class SponsorController extends Controller
             'quantity'     => $request->quantity,
         ]);
 
-        // Generate invitation codes based on quantity
-        $prefix = $request->code_prefix ?? 'SPN';
-        for ($i = 0; $i < $request->quantity; $i++) {
-            $sponsor->codes()->create([
-                'code'       => strtoupper($prefix . '-' . Str::random(5)),
-                'max_uses'   => 1, 
-                'used_count' => 0,
-            ]);
-        }
-
         return redirect()->route('admin.sponsor.index', 'now')
                         ->with('success', 'Sponsor profile and ' . $request->quantity . ' codes generated successfully!');
     }
