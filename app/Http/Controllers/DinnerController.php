@@ -465,48 +465,70 @@ class DinnerController extends Controller
 
     public function publicVerify($code)
 {
-    // 1. Find the code
+    // 1. Try to find the code in SponsorCodes first (Public Tickets)
     $codeRecord = \App\Models\SponsorCode::where('code', $code)
                     ->with(['ticket.registration', 'ticket.dinner'])
                     ->first();
 
-    if (!$codeRecord) {
-        return redirect()->route('dinner.index')
-            ->with('error', "Invalid Ticket: Code {$code} not found.");
+    if ($codeRecord) {
+        $ticket = $codeRecord->ticket;
+        $dinner = $ticket->dinner;
+        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? 'Guest');
+        $targetRecord = $codeRecord; // We will update the codeRecord later
+    } else {
+        // 2. Fallback: Check DinnerTickets table directly (Sponsor Batch Tickets)
+        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)
+                    ->with(['dinner', 'sponsor'])
+                    ->first();
+
+        if (!$ticket) {
+            return redirect()->route('dinner.index')
+                ->with('error', "Invalid Ticket: Code {$code} not found.");
+        }
+
+        $dinner = $ticket->dinner;
+        // For sponsors, use the company name from the sponsor relation
+        $guestName = $ticket->sponsor->company ?? 'Sponsor Guest';
+        $targetRecord = $ticket; // We will update the ticket itself later
     }
 
-    $ticket = $codeRecord->ticket;
-    $dinner = $ticket->dinner;
-
-    // 2. Check Event Scanning Status
+    // 3. Common Checks (Scanning Status & Payment)
     if (!$dinner->is_scanning_open) {
         return redirect()->route('dinner.index')
-            ->with('error', "Scanning is currently CLOSED for this event.");
+            ->with('error', "Scanning is CLOSED for this event.");
     }
 
-    // 3. Check Payment Status
     if ($ticket->status !== 'confirmed') {
         return redirect()->route('dinner.index')
-            ->with('error', "Payment is {$ticket->status}. Verification denied.");
+            ->with('error', "Verification Failed: Payment is {$ticket->status}.");
     }
 
-    // 4. Check if ALREADY USED (Using used_count and status)
-    // If status is 'used' and it was created more than a minute ago, 
-    // we treat it as a duplicate entry.
-    if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 30) {
-        $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
+    // 4. Double Scan Prevention (3-second grace period as per your code)
+    // We check the 'scanned_at' or 'updated_at' of the target record
+    $lastUpdate = $targetRecord->scanned_at ?? $targetRecord->updated_at;
+    
+    // Check if it's already marked as used/scanned
+    $isAlreadyUsed = ($codeRecord) ? ($targetRecord->status === 'used') : ($targetRecord->scanned_at !== null);
+
+    if ($isAlreadyUsed && $lastUpdate->diffInSeconds(now()) > 3) {
+        $scanTime = $lastUpdate->timezone('Asia/Yangon')->format('h:i A');
         return redirect()->route('dinner.index')
             ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
     }
 
-    // 5. Success: Mark as used
-    $codeRecord->update([
-        'status' => 'used',
-        'used_count' => 1, // Set to 1 since these are unique physical tickets
-    ]);
+    // 5. Success: Mark as Scanned
+    if ($codeRecord) {
+        $targetRecord->update([
+            'status' => 'used',
+            'used_count' => 1
+        ]);
+    } else {
+        // For Sponsor tickets in dinner_tickets table, update scanned_at
+        $targetRecord->update([
+            'scanned_at' => now()
+        ]);
+    }
 
-    $guestName = $codeRecord->used_by_name ?? $ticket->registration->first_name;
-    
     return redirect()->route('dinner.index')
         ->with('success', "✅ Verified! Welcome, {$guestName}.");
 }
