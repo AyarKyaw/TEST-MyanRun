@@ -146,7 +146,7 @@ class SponsorController extends Controller
                 // Add Text
                 imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $uniqueSeatCode);
                 imagettftext($image, 22, 0, 1050, 90, $white, $fontPath, strtoupper($sponsor->company));
-                imagettftext($image, 16, 0, 950, 145, $white, $fontPath, "Sponsor Ticket");
+                imagettftext($image, 16, 0, 950, 145, $white, $fontPath, $sponsor->contact_name);
                 imagettftext($image, 16, 0, 950, 200, $white, $fontPath, $sponsor->phone);
 
                 // C. Link QR to the Verification URL
