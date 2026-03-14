@@ -462,58 +462,59 @@ class DinnerController extends Controller
         $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
         return back()->with('success', "Scanning has been {$status} for this event.");
     }
+    
     public function publicVerify($code)
     {
-        // 1. Find the unique DIN code in the sponsor_codes table
-        // We eager load the 'ticket' and the 'registration' to get the guest name
+        // 1. Find the unique code in sponsor_codes
+        // We eager load the 'ticket.dinner' and 'ticket.registration'
         $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                        ->with(['ticket.registration'])
+                        ->with(['ticket.registration', 'ticket.dinner'])
                         ->first();
 
         // 2. Error: Code doesn't exist
         if (!$codeRecord) {
             return redirect()->route('dinner.index')
-                ->with('error', "Invalid Ticket: Code {$code} not found in our system.");
-        }
-
-        $dinner = $codeRecord->ticket->dinner;
-        
-        if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Scanning is currently DISABLED for this event.");
+                ->with('error', "Invalid Ticket: Code {$code} not found.");
         }
 
         $ticket = $codeRecord->ticket;
+        $dinner = $ticket->dinner;
 
-        // 3. Error: The code exists but the admin hasn't officially "Confirmed" the payment yet
+        // 3. Error: Check if scanning is actually open for this specific dinner
+        if (!$dinner->is_scanning_open) {
+            return redirect()->route('dinner.index')
+                ->with('error', "Scanning is currently DISABLED for {$dinner->name}.");
+        }
+
+        // 4. Error: Check if the main payment is confirmed
         if ($ticket->status !== 'confirmed') {
             return redirect()->route('dinner.index')
-                ->with('error', "Verification Failed: This ticket payment is still {$ticket->status}.");
+                ->with('error', "Verification Failed: Payment for this ticket is {$ticket->status}.");
         }
 
-        // 4. Check for Double Scanning
-        // If the ticket was scanned more than 30 seconds ago, it's a duplicate entry attempt
-        if ($ticket->scanned_at && $ticket->scanned_at->diffInSeconds(now()) > 30) {
-            $scanTime = $ticket->scanned_at->timezone('Asia/Yangon')->format('h:i A');
+        // 5. Check for Double Scanning on the SPECIFIC CODE
+        // Using a 30-second grace period for accidental double-taps
+        if ($codeRecord->scanned_at && $codeRecord->scanned_at->diffInSeconds(now()) > 30) {
+            $scanTime = $codeRecord->scanned_at->timezone('Asia/Yangon')->format('h:i A');
             return redirect()->route('dinner.index')
-                ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
+                ->with('error', "ALREADY USED: This specific code ({$code}) was scanned at {$scanTime}.");
         }
 
-        // 5. Success: Mark as scanned
-        // We update the timestamp on the main ticket record
-        $ticket->update([
-            'scanned_at' => now()
-        ]);
-
-        // Optional: If you want to track which specific DIN code was scanned in the sponsor_codes table
+        // 6. Success: Mark this specific code as scanned
         $codeRecord->update([
+            'scanned_at' => now(),
             'status' => 'used',
             'used_count' => 1
         ]);
 
-        $guestName = $ticket->registration->first_name ?? 'Guest';
+        // Optional: Also update the main ticket's scanned_at if it's the first person from that group
+        if (!$ticket->scanned_at) {
+            $ticket->update(['scanned_at' => now()]);
+        }
+
+        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
         
         return redirect()->route('dinner.index')
-            ->with('success', "✅ Verified! Welcome, {$guestName}. (Code: {$code})");
+            ->with('success', "✅ Verified! Welcome, {$guestName}. (Seat Code: {$code})");
     }
 }
