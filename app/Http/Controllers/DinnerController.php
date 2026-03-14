@@ -465,18 +465,22 @@ class DinnerController extends Controller
 
     public function publicVerify($code)
 {
-    // 1. Try to find the code in SponsorCodes first (Public Tickets)
+    // 1. Try to find the code in SponsorCodes first (Public/Guest Tickets)
     $codeRecord = \App\Models\SponsorCode::where('code', $code)
                     ->with(['ticket.registration', 'ticket.dinner'])
                     ->first();
 
     if ($codeRecord) {
+        // --- CASE: PUBLIC TICKET ---
         $ticket = $codeRecord->ticket;
         $dinner = $ticket->dinner;
         $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? 'Guest');
-        $targetRecord = $codeRecord; // We will update the codeRecord later
+        
+        // Use updated_at for the grace period check
+        $lastAction = $codeRecord->updated_at;
+        $isAlreadyUsed = ($codeRecord->status === 'used');
     } else {
-        // 2. Fallback: Check DinnerTickets table directly (Sponsor Batch Tickets)
+        // 2. Fallback: Check DinnerTickets table (Sponsor Batch Tickets)
         $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)
                     ->with(['dinner', 'sponsor'])
                     ->first();
@@ -486,13 +490,16 @@ class DinnerController extends Controller
                 ->with('error', "Invalid Ticket: Code {$code} not found.");
         }
 
+        // --- CASE: SPONSOR BATCH TICKET ---
         $dinner = $ticket->dinner;
-        // For sponsors, use the company name from the sponsor relation
         $guestName = $ticket->sponsor->company ?? 'Sponsor Guest';
-        $targetRecord = $ticket; // We will update the ticket itself later
+        
+        // Use scanned_at for the grace period check
+        $lastAction = $ticket->scanned_at;
+        $isAlreadyUsed = ($ticket->scanned_at !== null);
     }
 
-    // 3. Common Checks (Scanning Status & Payment)
+    // 3. Common Checks
     if (!$dinner->is_scanning_open) {
         return redirect()->route('dinner.index')
             ->with('error', "Scanning is CLOSED for this event.");
@@ -500,31 +507,26 @@ class DinnerController extends Controller
 
     if ($ticket->status !== 'confirmed') {
         return redirect()->route('dinner.index')
-            ->with('error', "Verification Failed: Payment is {$ticket->status}.");
+            ->with('error', "Verification Failed: Payment status is {$ticket->status}.");
     }
 
-    // 4. Double Scan Prevention (3-second grace period as per your code)
-    // We check the 'scanned_at' or 'updated_at' of the target record
-    $lastUpdate = $targetRecord->scanned_at ?? $targetRecord->updated_at;
-    
-    // Check if it's already marked as used/scanned
-    $isAlreadyUsed = ($codeRecord) ? ($targetRecord->status === 'used') : ($targetRecord->scanned_at !== null);
-
-    if ($isAlreadyUsed && $lastUpdate->diffInSeconds(now()) > 3) {
-        $scanTime = $lastUpdate->timezone('Asia/Yangon')->format('h:i A');
+    // 4. Double Scan Prevention (Your 3-second logic)
+    if ($isAlreadyUsed && $lastAction && $lastAction->diffInSeconds(now()) > 3) {
+        $scanTime = $lastAction->timezone('Asia/Yangon')->format('h:i A');
         return redirect()->route('dinner.index')
             ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
     }
 
     // 5. Success: Mark as Scanned
     if ($codeRecord) {
-        $targetRecord->update([
+        // Update public code record
+        $codeRecord->update([
             'status' => 'used',
             'used_count' => 1
         ]);
     } else {
-        // For Sponsor tickets in dinner_tickets table, update scanned_at
-        $targetRecord->update([
+        // Update sponsor ticket record
+        $ticket->update([
             'scanned_at' => now()
         ]);
     }
