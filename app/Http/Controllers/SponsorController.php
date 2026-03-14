@@ -129,18 +129,18 @@ class SponsorController extends Controller
                 'quantity'           => 1,
             ]);
 
-            // B. Create the Scan Code Record (The individual entry)
-            // This is what the publicVerify function actually checks
-            \App\Models\SponsorCode::create([
-                'dinner_id'          => $dinner->id,
-                'dinner_ticket_id'   => $ticket->id,
-                'sponsor_id'         => $sponsor->id,
-                'used_by_name'       => $sponsor->company . " (Guest $i)",
-                'code'               => $uniqueSeatCode,
-                'max_uses'           => 1,
-                'used_count'         => 0,
-                'status'             => 'available' // Important: start as available
-            ]);
+            // // B. Create the Scan Code Record (The individual entry)
+            // // This is what the publicVerify function actually checks
+            // \App\Models\SponsorCode::create([
+            //     'dinner_id'          => $dinner->id,
+            //     'dinner_ticket_id'   => $ticket->id,
+            //     'sponsor_id'         => $sponsor->id,
+            //     'used_by_name'       => $sponsor->company . " (Guest $i)",
+            //     'code'               => $uniqueSeatCode,
+            //     'max_uses'           => 1,
+            //     'used_count'         => 0,
+            //     'status'             => 'available' // Important: start as available
+            // ]);
 
             if (File::exists($fontPath)) {
                 // Add Text
