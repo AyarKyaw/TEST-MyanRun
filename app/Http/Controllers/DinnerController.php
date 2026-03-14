@@ -237,7 +237,7 @@ class DinnerController extends Controller
         }
 
         // Mark the main ticket as confirmed
-        // $ticket->update(['status' => 'confirmed']);
+        $ticket->update(['status' => 'confirmed']);
 
         while (ob_get_level()) { ob_end_clean(); }
 
