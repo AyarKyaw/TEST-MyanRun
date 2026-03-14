@@ -169,7 +169,7 @@ class DinnerController extends Controller
         return view('dinner.confirmation', compact('registration'));
     }
 
-   public function adminApprove($id)
+    public function adminApprove($id)
     {
         $ticket = DinnerTicket::with(['registration', 'dinner'])->findOrFail($id);
 
@@ -237,7 +237,7 @@ class DinnerController extends Controller
         }
 
         // Mark the main ticket as confirmed
-        $ticket->update(['status' => 'confirmed']);
+        // $ticket->update(['status' => 'confirmed']);
 
         while (ob_get_level()) { ob_end_clean(); }
 

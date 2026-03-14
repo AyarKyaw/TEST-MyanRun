@@ -281,31 +281,33 @@
         </div>
     </div>
 </main>
+
 @if(session('download_urls'))
     <script>
         (function() {
-            const urls = {!! json_encode(session('download_urls')) !!};
-            if (!urls || urls.length === 0) return;
-
-            // Prevent repeat downloads on refresh/back
-            const downloadKey = 'dl_' + btoa(urls[0]).substring(0, 12);
+            // Unique key for this specific set of downloads
+            const downloadKey = "downloaded_{{ md5(json_encode(session('download_urls'))) }}";
+            
+            // If we've already done this in this browser tab, stop.
             if (sessionStorage.getItem(downloadKey)) return;
 
+            const urls = @json(session('download_urls'));
+            
             urls.forEach((url, index) => {
                 setTimeout(() => {
                     const link = document.createElement('a');
-                    link.href = encodeURI(url);
-                    link.setAttribute('download', url.split('/').pop());
+                    link.href = url;
+                    link.download = url.split('/').pop();
                     document.body.appendChild(link);
                     link.click();
-                    
-                    // Clean up DOM
-                    setTimeout(() => document.body.removeChild(link), 200);
-                }, index * 1000); // 1 second gap between downloads
+                    document.body.removeChild(link);
+                }, index * 500);
             });
 
+            // Mark as finished so "Back" button doesn't trigger it again
             sessionStorage.setItem(downloadKey, 'true');
         })();
     </script>
+    @php session()->forget('download_urls'); @endphp
 @endif
 @endsection
