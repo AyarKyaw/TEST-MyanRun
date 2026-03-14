@@ -171,10 +171,8 @@ class DinnerController extends Controller
 
    public function adminApprove($id)
     {
-        // 1. Get ONLY the specific ticket record clicked
-        $ticket = DinnerTicket::with('registration')->findOrFail($id);
+        $ticket = DinnerTicket::with(['registration', 'dinner'])->findOrFail($id);
 
-        // Prevent double-processing or approving rejected tickets
         if ($ticket->status !== 'pending') {
             return back()->with('error', 'This ticket is already ' . $ticket->status);
         }
@@ -183,20 +181,15 @@ class DinnerController extends Controller
         $fontPath     = public_path('assets/fonts/arial.ttf');
         $saveDir      = public_path('uploads/tickets');
 
-        // Ensure directory exists
         if (!File::exists($saveDir)) {
             File::makeDirectory($saveDir, 0777, true);
         }
 
         $downloadUrls = [];
 
-        // 2. Loop only for the quantity of this specific purchase record
         for ($i = 1; $i <= $ticket->quantity; $i++) {
-            
-            // Generate a unique DIN code for this specific seat
             $uniqueCode = 'DIN-' . strtoupper(Str::random(6));
 
-            // Create the tracking record in sponsor_codes
             \App\Models\SponsorCode::create([
                 'dinner_id'          => $ticket->dinner_id,
                 'dinner_ticket_id'   => $ticket->id,
@@ -208,11 +201,11 @@ class DinnerController extends Controller
                 'status'             => 'used'
             ]);
 
-            // Define file naming
-            $fileName =  strtoupper($ticket->registration->first_name . ' ' . $ticket->registration->last_name) . '_' . $ticket->registration->phone .'.png';
+            // SANITIZED FILENAME: Remove spaces and add loop index to prevent overwriting
+            $safeName = Str::slug($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
+            $fileName = $safeName . '_' . $ticket->registration->phone . '_' . time() . '_' . $i . '.png';
             $filePath = $saveDir . '/' . $fileName;
 
-            // 3. Image Logic
             if (file_exists($templatePath)) {
                 $image = @imagecreatefromjpeg($templatePath);
                 if ($image) {
@@ -221,14 +214,11 @@ class DinnerController extends Controller
                     $phone = $ticket->registration->phone ?? 'N/A';
                     
                     if (file_exists($fontPath)) {
-                        // Write Guest Name and Phone
                         imagettftext($image, 18, 0, 950, 86, $white, $fontPath, $fullName);
                         imagettftext($image, 18, 0, 950, 150, $white, $fontPath, $phone);
-                        
-                        // Write the Unique DIN Code and Seat Number
                         imagettftext($image, 22, 0, 980, 45, $white, $fontPath, $uniqueCode);
+                        imagettftext($image, 12, 0, 980, 70, $white, $fontPath, "Seat {$i} of {$ticket->quantity}");
 
-                        // Manual URL Construction for QR
                         $checkInUrl = "https://test-myanrun.itplus.net.mm/ticket/verify/" . $uniqueCode;
                         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($checkInUrl);
                         
@@ -239,87 +229,22 @@ class DinnerController extends Controller
                         }
                     }
                     
-                    // Save the image
                     imagepng($image, $filePath);
                     imagedestroy($image);
                     
-                    // Add to list of URLs to be downloaded by the browser
                     $downloadUrls[] = asset('uploads/tickets/' . $fileName);
                 }
             }
         }
 
-        // 4. Mark the specific record as confirmed
-        $ticket->update(['status' => 'confirmed']);
+        // Mark the main ticket as confirmed
+        // $ticket->update(['status' => 'confirmed']);
 
         while (ob_get_level()) { ob_end_clean(); }
 
         return back()
-    ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
-    ->with('download_urls', $downloadUrls);
-    }
-    public function toggleScanning($id)
-    {
-        $dinner = Dinner::findOrFail($id);
-        $dinner->is_scanning_open = !$dinner->is_scanning_open;
-        $dinner->save();
-
-        $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
-        return back()->with('success', "Scanning has been {$status} for this event.");
-    }
-    public function publicVerify($code)
-    {
-        // 1. Find the unique DIN code in the sponsor_codes table
-        // We eager load the 'ticket' and the 'registration' to get the guest name
-        $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                        ->with(['ticket.registration'])
-                        ->first();
-
-        // 2. Error: Code doesn't exist
-        if (!$codeRecord) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Invalid Ticket: Code {$code} not found in our system.");
-        }
-
-        $dinner = $codeRecord->ticket->dinner;
-
-        if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')
-                ->with('error', "Scanning is currently DISABLED for this event.");
-        }
-
-        $ticket = $codeRecord->ticket;
-
-        // 3. Error: The code exists but the admin hasn't officially "Confirmed" the payment yet
-        if ($ticket->status !== 'confirmed') {
-            return redirect()->route('dinner.index')
-                ->with('error', "Verification Failed: This ticket payment is still {$ticket->status}.");
-        }
-
-        // 4. Check for Double Scanning
-        // If the ticket was scanned more than 30 seconds ago, it's a duplicate entry attempt
-        if ($ticket->scanned_at && $ticket->scanned_at->diffInSeconds(now()) > 30) {
-            $scanTime = $ticket->scanned_at->timezone('Asia/Yangon')->format('h:i A');
-            return redirect()->route('dinner.index')
-                ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
-        }
-
-        // 5. Success: Mark as scanned
-        // We update the timestamp on the main ticket record
-        $ticket->update([
-            'scanned_at' => now()
-        ]);
-
-        // Optional: If you want to track which specific DIN code was scanned in the sponsor_codes table
-        $codeRecord->update([
-            'status' => 'used',
-            'used_count' => 1
-        ]);
-
-        $guestName = $ticket->registration->first_name ?? 'Guest';
-        
-        return redirect()->route('dinner.index')
-            ->with('success', "✅ Verified! Welcome, {$guestName}. (Code: {$code})");
+            ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
+            ->with('download_urls', $downloadUrls);
     }
 
     public function uploadPayment(Request $request, $id) 

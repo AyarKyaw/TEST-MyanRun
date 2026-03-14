@@ -281,36 +281,29 @@
         </div>
     </div>
 </main>
-
-{{-- Auto-Download Script --}}
 @if(session('download_urls'))
     <script>
         (function() {
-            // 1. Create a unique key based on the first URL to track this specific download batch
             const urls = {!! json_encode(session('download_urls')) !!};
-            if (urls.length === 0) return;
+            if (!urls || urls.length === 0) return;
 
-            const downloadKey = 'downloaded_' + btoa(urls[0]).substring(0, 16);
+            // Prevent repeat downloads on refresh/back
+            const downloadKey = 'dl_' + btoa(urls[0]).substring(0, 12);
+            if (sessionStorage.getItem(downloadKey)) return;
 
-            // 2. Check if the browser already processed this batch
-            if (sessionStorage.getItem(downloadKey)) {
-                console.log("Back button detected: Skipping duplicate download.");
-                return;
-            }
-
-            // 3. Trigger the downloads
             urls.forEach((url, index) => {
                 setTimeout(() => {
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = url.split('/').pop();
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                }, index * 400); // Small delay to prevent browser blocking
+                    const link = document.createElement('a');
+                    link.href = encodeURI(url);
+                    link.setAttribute('download', url.split('/').pop());
+                    document.body.appendChild(link);
+                    link.click();
+                    
+                    // Clean up DOM
+                    setTimeout(() => document.body.removeChild(link), 200);
+                }, index * 1000); // 1 second gap between downloads
             });
 
-            // 4. Mark as done in the browser's memory
             sessionStorage.setItem(downloadKey, 'true');
         })();
     </script>
