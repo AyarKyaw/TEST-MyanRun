@@ -465,57 +465,64 @@ class DinnerController extends Controller
 
     public function publicVerify($code)
 {
-    // 1. Try SponsorCode table first
-    $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                    ->with('ticket.dinner') // Load dinner relation
-                    ->first();
+    // 1. Try SponsorCode table (Public/Guest Tickets)
+    $codeRecord = \App\Models\SponsorCode::where('code', $code)->with('ticket.dinner')->first();
 
     if ($codeRecord) {
         $dinner = $codeRecord->ticket->dinner;
-        
-        // --- CHECK IF SCANNING IS DISABLED ---
         if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')->with('error', "Scanning is currently CLOSED for this event.");
+            return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
         }
 
-        // Handle Individual/Public Ticket
         if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 3) {
              return redirect()->route('dinner.index')->with('error', "Already scanned.");
         }
         
         $codeRecord->update(['status' => 'used', 'used_count' => 1]);
         $guestName = $codeRecord->used_by_name ?? "Guest";
-        
-    } else {
+    } 
+    else {
         // 2. Handle Sponsor Batch Ticket (dinner_tickets table)
-        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)
-                    ->with('dinner') // Load dinner relation
-                    ->first();
+        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)->with('dinner')->first();
 
         if (!$ticket) {
             return redirect()->route('dinner.index')->with('error', "Invalid Ticket.");
         }
 
         $dinner = $ticket->dinner;
-
-        // --- CHECK IF SCANNING IS DISABLED ---
         if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')->with('error', "Scanning is currently CLOSED for this event.");
+            return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
         }
 
-        // Check already scanned using the actual timestamp
+        // Duplicate Check
         if ($ticket->scanned_at && \Carbon\Carbon::parse($ticket->scanned_at)->diffInSeconds(now()) > 3) {
             $scanTime = \Carbon\Carbon::parse($ticket->scanned_at)->timezone('Asia/Yangon')->format('h:i A');
             return redirect()->route('dinner.index')->with('error', "ALREADY USED: Scanned at {$scanTime}.");
         }
 
-        // FORCE UPDATE with Yangon Timezone
+        // 3. UPDATE THE CURRENT TICKET
         \DB::table('dinner_tickets')
             ->where('id', $ticket->id)
             ->update([
                 'scanned_at' => now()->timezone('Asia/Yangon'),
                 'updated_at' => now()->timezone('Asia/Yangon')
             ]);
+
+        // 4. CHECK IF ALL TICKETS FOR THIS SPONSOR ARE NOW USED
+        if ($ticket->sponsor_id) {
+            $remainingTickets = \App\Models\DinnerTicket::where('sponsor_id', $ticket->sponsor_id)
+                ->where('dinner_id', $ticket->dinner_id)
+                ->whereNull('scanned_at')
+                ->count();
+
+            if ($remainingTickets === 0) {
+                // All tickets for this sponsor have been scanned!
+                // You can update the Sponsor's status here if you have a status column in sponsors table
+                \DB::table('sponsors')
+                    ->where('id', $ticket->sponsor_id)
+                    ->update(['status' => 'Fully Arrived']);
+            }
+        }
 
         $guestName = $ticket->sponsor->company ?? "Sponsor Guest";
     }
