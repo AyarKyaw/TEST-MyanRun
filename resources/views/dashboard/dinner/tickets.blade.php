@@ -262,19 +262,34 @@
 {{-- Auto-Download Script --}}
 @if(session('download_urls'))
     <script>
-        window.onload = function() {
-            const urls = @json(session('download_urls'));
+        (function() {
+            // 1. Create a unique key based on the first URL to track this specific download batch
+            const urls = {!! json_encode(session('download_urls')) !!};
+            if (urls.length === 0) return;
+
+            const downloadKey = 'downloaded_' + btoa(urls[0]).substring(0, 16);
+
+            // 2. Check if the browser already processed this batch
+            if (sessionStorage.getItem(downloadKey)) {
+                console.log("Back button detected: Skipping duplicate download.");
+                return;
+            }
+
+            // 3. Trigger the downloads
             urls.forEach((url, index) => {
                 setTimeout(() => {
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.setAttribute('download', ''); 
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }, index * 800); // 800ms delay between each download to prevent browser block
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = url.split('/').pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }, index * 400); // Small delay to prevent browser blocking
             });
-        };
+
+            // 4. Mark as done in the browser's memory
+            sessionStorage.setItem(downloadKey, 'true');
+        })();
     </script>
 @endif
 @endsection

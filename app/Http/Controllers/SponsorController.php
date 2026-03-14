@@ -68,7 +68,6 @@ class SponsorController extends Controller
                 'code'       => strtoupper($prefix . '-' . Str::random(5)),
                 'max_uses'   => 1, 
                 'used_count' => 0,
-                'dinner_id'  => $sponsor->dinner_id,
             ]);
         }
 

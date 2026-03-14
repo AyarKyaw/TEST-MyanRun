@@ -48,7 +48,7 @@
                             $sponsorLeft = $dinner->sponsor_capacity - ($dinner->sponsor_seats_count ?? 0);
                         @endphp
                         <span class="{{ $sponsorLeft <= 0 ? 'text-danger' : 'text-info' }}">
-                            {{ $dinner->sponsor_capacity }} Left
+                            {{ $dinner->sponsor_capacity - $dinner->sponsor_seats_count ?? 0}} Left
                         </span>
                         <small class="text-muted">/ {{ $dinner->sponsor_capacity}}</small>
                     </span>

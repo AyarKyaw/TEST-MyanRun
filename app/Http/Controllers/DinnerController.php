@@ -253,8 +253,11 @@ class DinnerController extends Controller
         // 4. Mark the specific record as confirmed
         $ticket->update(['status' => 'confirmed']);
 
-        return back()->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
-                    ->with('download_urls', $downloadUrls);
+        while (ob_get_level()) { ob_end_clean(); }
+
+        return back()
+    ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
+    ->with('download_urls', $downloadUrls);
     }
 
     public function publicVerify($code)
