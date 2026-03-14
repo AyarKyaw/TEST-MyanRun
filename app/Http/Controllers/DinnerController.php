@@ -217,7 +217,6 @@ class DinnerController extends Controller
                         imagettftext($image, 18, 0, 950, 86, $white, $fontPath, $fullName);
                         imagettftext($image, 18, 0, 950, 150, $white, $fontPath, $phone);
                         imagettftext($image, 22, 0, 980, 45, $white, $fontPath, $uniqueCode);
-                        imagettftext($image, 12, 0, 980, 70, $white, $fontPath, "Seat {$i} of {$ticket->quantity}");
 
                         $checkInUrl = "https://test-myanrun.itplus.net.mm/ticket/verify/" . $uniqueCode;
                         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($checkInUrl);
