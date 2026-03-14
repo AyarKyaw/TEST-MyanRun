@@ -462,4 +462,58 @@ class DinnerController extends Controller
         $status = $dinner->is_scanning_open ? 'Opened' : 'Closed';
         return back()->with('success', "Scanning has been {$status} for this event.");
     }
+    public function publicVerify($code)
+    {
+        // 1. Find the unique DIN code in the sponsor_codes table
+        // We eager load the 'ticket' and the 'registration' to get the guest name
+        $codeRecord = \App\Models\SponsorCode::where('code', $code)
+                        ->with(['ticket.registration'])
+                        ->first();
+
+        // 2. Error: Code doesn't exist
+        if (!$codeRecord) {
+            return redirect()->route('dinner.index')
+                ->with('error', "Invalid Ticket: Code {$code} not found in our system.");
+        }
+
+        $dinner = $codeRecord->ticket->dinner;
+        
+        if (!$dinner->is_scanning_open) {
+            return redirect()->route('dinner.index')
+                ->with('error', "Scanning is currently DISABLED for this event.");
+        }
+
+        $ticket = $codeRecord->ticket;
+
+        // 3. Error: The code exists but the admin hasn't officially "Confirmed" the payment yet
+        if ($ticket->status !== 'confirmed') {
+            return redirect()->route('dinner.index')
+                ->with('error', "Verification Failed: This ticket payment is still {$ticket->status}.");
+        }
+
+        // 4. Check for Double Scanning
+        // If the ticket was scanned more than 30 seconds ago, it's a duplicate entry attempt
+        if ($ticket->scanned_at && $ticket->scanned_at->diffInSeconds(now()) > 30) {
+            $scanTime = $ticket->scanned_at->timezone('Asia/Yangon')->format('h:i A');
+            return redirect()->route('dinner.index')
+                ->with('error', "ALREADY USED: This ticket was scanned at {$scanTime}.");
+        }
+
+        // 5. Success: Mark as scanned
+        // We update the timestamp on the main ticket record
+        $ticket->update([
+            'scanned_at' => now()
+        ]);
+
+        // Optional: If you want to track which specific DIN code was scanned in the sponsor_codes table
+        $codeRecord->update([
+            'status' => 'used',
+            'used_count' => 1
+        ]);
+
+        $guestName = $ticket->registration->first_name ?? 'Guest';
+        
+        return redirect()->route('dinner.index')
+            ->with('success', "✅ Verified! Welcome, {$guestName}. (Code: {$code})");
+    }
 }
