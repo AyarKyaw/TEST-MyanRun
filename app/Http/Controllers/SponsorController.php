@@ -122,7 +122,7 @@ class SponsorController extends Controller
             $ticket = DinnerTicket::create([
                 'sponsor_id'         => $sponsor->id,
                 'dinner_id'          => $dinner->id,
-                'ticket_no'          => 'GRP-' . strtoupper(Str::random(6)),
+                'ticket_no'          => $uniqueSeatCode,
                 'type'               => 'Sponsored',
                 'status'             => 'confirmed',
                 'price'              => 0,
