@@ -16,68 +16,70 @@
         </div>
 
         {{-- Refined Summary Card --}}
-        <div class="row mb-4">
-            <div class="col-xl-12">
-                <div class="card m-0 shadow-sm border-0" style="border-radius: 12px;">
-                    <div class="card-body py-3 px-4">
-                        <div class="row align-items-center">
-                            
-                            {{-- Metric 1: Revenue --}}
-                            <div class="col-md-3 border-end">
-                                <div class="d-flex flex-column">
-                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmed Revenue</span>
-                                    <h3 class="mb-0 fw-bold text-success" style="font-size: 20px;">
-                                        {{ number_format($tickets->where('status', 'confirmed')->sum('price')) }} 
-                                        <span class="fs-12 fw-normal text-muted">MMK</span>
-                                    </h3>
-                                </div>
+    <div class="row mb-4">
+        <div class="col-xl-12">
+            {{-- Added h-100 to ensure the card fills the row height --}}
+            <div class="card m-0 shadow-sm border-0 h-100" style="border-radius: 12px;">
+                {{-- Increased py-4 for more vertical "breathing room" --}}
+                <div class="card-body py-4 px-4">
+                    <div class="row align-items-center h-100">
+                        
+                        {{-- Metric 1: Revenue --}}
+                        <div class="col-md-3 border-end">
+                            <div class="d-flex flex-column justify-content-center">
+                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Confirmed Revenue</span>
+                                <h3 class="mb-0 fw-bold text-success" style="font-size: 24px;"> {{-- Bumped font size slightly --}}
+                                    {{ number_format($tickets->where('status', 'confirmed')->sum('price')) }} 
+                                    <span class="fs-12 fw-normal text-muted">MMK</span>
+                                </h3>
                             </div>
-
-                            {{-- Metric 2: Public Seats --}}
-                            <div class="col-md-2 border-end text-center">
-                                <div class="d-flex flex-column">
-                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Public Seats</span>
-                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 20px;">
-                                        {{ $dinner->public_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->public_capacity ?? '∞' }}</span>
-                                    </h3>
-                                </div>
-                            </div>
-
-                            {{-- Metric 3: Sponsor Seats --}}
-                            <div class="col-md-2 border-end text-center">
-                                <div class="d-flex flex-column">
-                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Sponsor Seats</span>
-                                    <h3 class="mb-0 fw-bold text-dark" style="font-size: 20px;">
-                                        {{ $dinner->sponsor_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->sponsor_capacity ?? 0 }}</span>
-                                    </h3>
-                                </div>
-                            </div>
-
-                            {{-- Metric 4: Total Bookings --}}
-                            <div class="col-md-2 border-end text-center">
-                                <div class="d-flex flex-column">
-                                    <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total Bookings</span>
-                                    <h3 class="mb-0 fw-bold text-primary" style="font-size: 20px;">{{ $tickets->total() }}</h3>
-                                </div>
-                            </div>
-
-                            {{-- Actions --}}
-                            <div class="col-md-3">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a href="{{ route('admin.dinner.manage', 'now') }}" class="btn btn-light btn-sm fw-bold px-3">
-                                        <i class="fa fa-chevron-left me-1 fs-12"></i> Back
-                                    </a>
-                                    <button class="btn btn-primary btn-sm fw-bold px-3 shadow-sm">
-                                        <i class="fa fa-download me-1 fs-12"></i> Export
-                                    </button>
-                                </div>
-                            </div>
-
                         </div>
+
+                        {{-- Metric 2: Public Seats --}}
+                        <div class="col-md-2 border-end text-center">
+                            <div class="d-flex flex-column justify-content-center">
+                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Public Seats</span>
+                                <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
+                                    {{ $dinner->public_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->public_capacity ?? '∞' }}</span>
+                                </h3>
+                            </div>
+                        </div>
+
+                        {{-- Metric 3: Sponsor Seats --}}
+                        <div class="col-md-2 border-end text-center">
+                            <div class="d-flex flex-column justify-content-center">
+                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Sponsor Seats</span>
+                                <h3 class="mb-0 fw-bold text-dark" style="font-size: 24px;">
+                                    {{ $dinner->sponsor_seats_count ?? 0 }}<span class="text-muted fw-light" style="font-size: 14px;">/{{ $dinner->sponsor_capacity ?? 0 }}</span>
+                                </h3>
+                            </div>
+                        </div>
+
+                        {{-- Metric 4: Total Bookings --}}
+                        <div class="col-md-2 border-end text-center">
+                            <div class="d-flex flex-column justify-content-center">
+                                <span class="text-muted fw-medium mb-1" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;">Total Bookings</span>
+                                <h3 class="mb-0 fw-bold text-primary" style="font-size: 24px;">{{ $tickets->total() }}</h3>
+                            </div>
+                        </div>
+
+                        {{-- Actions --}}
+                        <div class="col-md-3">
+                            <div class="d-flex justify-content-end gap-2 align-items-center">
+                                <a href="{{ route('admin.dinner.manage', 'now') }}" class="btn btn-light btn-sm fw-bold px-3 py-2">
+                                    <i class="fa fa-chevron-left me-1 fs-12"></i> Back
+                                </a>
+                                <button class="btn btn-primary btn-sm fw-bold px-3 py-2 shadow-sm">
+                                    <i class="fa fa-download me-1 fs-12"></i> Export
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
         {{-- Filter Tabs --}}
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -115,7 +117,24 @@
                             <tbody>
                                 @forelse($tickets as $ticket)
                                 <tr>
-                                    <td><span class="text-black font-w600">#{{ $ticket->ticket_no }}</span></td>
+                                    <td>
+                                        @php
+                                            // Fetch all generated seat codes for this specific purchase/ticket record
+                                            $generatedCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)
+                                                                ->get();
+                                        @endphp
+
+                                        @forelse($generatedCodes as $codeRecord)
+                                            <div class="mb-1">
+                                                <span class="badge badge-xs light badge-dark" style="letter-spacing: 0.5px;">
+                                                    <i class="fa fa-ticket-alt me-1 text-primary"></i> {{ $codeRecord->code }}
+                                                </span>
+                                            </div>
+                                        @empty
+                                            {{-- Fallback if not yet approved/generated --}}
+                                            <span class="text-muted fs-11">Pending Generation</span>
+                                        @endforelse
+                                    </td>
                                     <td>
                                         <div class="text-black fw-bold">
                                             {{ $ticket->registration?->first_name ?? 'SPONSOR' }} 
@@ -241,15 +260,20 @@
 </main>
 
 {{-- Auto-Download Script --}}
-@if(session('download_url'))
+@if(session('download_urls'))
     <script>
         window.onload = function() {
-            const link = document.createElement('a');
-            link.href = "{{ session('download_url') }}";
-            link.download = ''; 
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const urls = @json(session('download_urls'));
+            urls.forEach((url, index) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.setAttribute('download', ''); 
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }, index * 800); // 800ms delay between each download to prevent browser block
+            });
         };
     </script>
 @endif

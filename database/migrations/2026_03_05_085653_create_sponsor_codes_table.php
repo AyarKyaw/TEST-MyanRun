@@ -6,33 +6,35 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up() {
+    public function up()
+    {
         Schema::create('sponsor_codes', function (Blueprint $table) {
             $table->id();
-            // Link to the sponsor contact info
-            $table->foreignId('sponsor_id')->constrained()->onDelete('cascade');
             
-            // The shared code (e.g., 'KBZ-DINNER-2026')
+            // The unique code string (e.g., SPN-X82A)
             $table->string('code')->unique();
+
+            // Link to the Dinner Event
+            $table->foreignId('dinner_id')->constrained()->onDelete('cascade');
+
+            // Link to the specific seat/ticket
+            $table->foreignId('dinner_ticket_id')->nullable()->constrained()->onDelete('set null');
+
+            // Link to the Person who bought/used it
+            $table->foreignId('dinner_register_id')->nullable()->constrained('dinner_registers')->onDelete('set null');
+
+            // Usage tracking
+            $table->integer('max_uses')->default(1);
+            $table->integer('used_count')->default(0);
             
-            // The value: 10, 50, or 100 (%)
-            $table->integer('discount')->default(100);
-            
-            // The Quota Logic
-            $table->integer('max_uses')->default(1); // How many people can use it
-            $table->integer('used_count')->default(0); // How many have used it so far
-            
+            // Status: 'active', 'used', 'expired'
+            $table->string('status')->default('active');
+
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('sponsor_codes');
     }

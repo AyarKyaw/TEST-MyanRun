@@ -73,35 +73,35 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="label-text">First Name</label>
-                            <input type="text" name="first_name" value="{{ old('first_name') }}" class="input-field" placeholder="First Name" required>
+                            <input type="text" name="first_name" pattern="[A-Za-z\s]+" title="Please use only letters" value="{{ old('first_name') }}" class="input-field alpha-only" placeholder="First Name" required>
                         </div>
                         <div>
                             <label class="label-text">Middle Name</label>
-                            <input type="text" name="middle_name" value="{{ old('middle_name') }}" class="input-field" placeholder="Optional">
+                            <input type="text" name="middle_name" pattern="[A-Za-z\s]+" title="Please use only letters" value="{{ old('middle_name') }}" class="input-field alpha-only" placeholder="Optional">
                         </div>
                         <div>
                             <label class="label-text">Last Name</label>
-                            <input type="text" name="last_name" value="{{ old('last_name') }}" class="input-field" placeholder="Last Name" required>
+                            <input type="text" name="last_name" pattern="[A-Za-z\s]+" title="Please use only letters" value="{{ old('last_name') }}" class="input-field alpha-only" placeholder="Last Name" required>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="label-text">Phone Number</label>
-                            <input type="tel" id="guest_phone" name="guest_phone" maxlength="11" value="{{ old('guest_phone') }}" class="input-field numeric-only" placeholder="eg. 09123456789" required>
-                            <p id="phone_error" class="error-msg">Must be exactly 11 digits</p>
-                        </div>
-                        <div>
-                            <label class="label-text">Viber Number</label>
-                            <div class="relative">
-                                <input type="tel" id="viber" name="viber" maxlength="11" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="eg. 09123456789">
-                                <div class="absolute right-5 top-1/2 -translate-y-1/2 text-[#7360F2] text-xl">
-                                    <i class="fab fa-viber"></i>
-                                </div>
-                            </div>
-                            <p id="viber_error" class="error-msg">Must be exactly 11 digits</p>
-                        </div>
-                    </div>
+    <div>
+        <label class="label-text">Phone Number</label>
+        <input type="tel" id="guest_phone" name="guest_phone" maxlength="11" value="{{ old('guest_phone') }}" class="input-field numeric-only" placeholder="eg. 091234567" required>
+        <p id="phone_error" class="error-msg">Must be between 9 and 11 digits</p>
+    </div>
+    <div>
+        <label class="label-text">Viber Number</label>
+        <div class="relative">
+            <input type="tel" id="viber" name="viber" maxlength="11" value="{{ old('viber') }}" class="input-field pr-12 numeric-only" placeholder="eg. 091234567">
+            <div class="absolute right-5 top-1/2 -translate-y-1/2 text-[#7360F2] text-xl">
+                <i class="fab fa-viber"></i>
+            </div>
+        </div>
+        <p id="viber_error" class="error-msg">Must be between 9 and 11 digits</p>
+    </div>
+</div>
 
                     <div>
                         <label class="label-text">Email Address</label>
@@ -117,51 +117,61 @@
     </div>
 
     <script>
-        const form = document.getElementById('registrationForm');
-        const phoneInput = document.getElementById('guest_phone');
-        const viberInput = document.getElementById('viber');
-        const phoneError = document.getElementById('phone_error');
-        const viberError = document.getElementById('viber_error');
+    const form = document.getElementById('registrationForm');
+    const phoneInput = document.getElementById('guest_phone');
+    const viberInput = document.getElementById('viber');
+    const phoneError = document.getElementById('phone_error');
+    const viberError = document.getElementById('viber_error');
 
-        // 1. Live Numeric Restriction & Cleanup
-        document.querySelectorAll('.numeric-only').forEach(input => {
-            input.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                
-                // Remove error state as user types
-                if (this.value.length === 11) {
-                    this.classList.remove('error');
-                    const errorId = this.id === 'guest_phone' ? 'phone_error' : 'viber_error';
-                    document.getElementById(errorId).style.display = 'none';
-                }
-            });
+    // 1. Alpha-only Restriction (Names)
+    document.querySelectorAll('.alpha-only').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^A-Za-z\s]/g, '');
         });
+    });
 
-        // 2. Form Submission Validation
-        form.addEventListener('submit', function(e) {
-            let hasError = false;
-
-            // Check Phone
-            if (phoneInput.value.length !== 11) {
-                phoneInput.classList.add('error');
-                phoneError.style.display = 'block';
-                hasError = true;
+    // 2. Numeric Restriction
+    document.querySelectorAll('.numeric-only').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Live validation: Hide error if it falls within 9-11 range
+            if (this.value.length >= 9 && this.value.length <= 11) {
+                this.classList.remove('error');
+                const errorId = this.id === 'guest_phone' ? 'phone_error' : 'viber_error';
+                document.getElementById(errorId).style.display = 'none';
             }
+        });
+    });
 
-            // Check Viber (Only if they filled it in)
-            if (viberInput.value.length > 0 && viberInput.value.length !== 11) {
-                viberInput.classList.add('error');
-                viberError.style.display = 'block';
-                hasError = true;
-            }
+    // 3. Form Submission Validation
+    form.addEventListener('submit', function(e) {
+        let hasError = false;
 
-            if (hasError) {
-                e.preventDefault(); // Stop form from submitting
-                // Scroll to the error
-                const firstError = document.querySelector('.error');
+        // Validate Phone (Required, 9-11 digits)
+        const phoneLen = phoneInput.value.length;
+        if (phoneLen < 9 || phoneLen > 11) {
+            phoneInput.classList.add('error');
+            phoneError.style.display = 'block';
+            hasError = true;
+        }
+
+        // Validate Viber (Optional, but if filled must be 9-11 digits)
+        const viberLen = viberInput.value.length;
+        if (viberLen > 0 && (viberLen < 9 || viberLen > 11)) {
+            viberInput.classList.add('error');
+            viberError.style.display = 'block';
+            hasError = true;
+        }
+
+        if (hasError) {
+            e.preventDefault();
+            const firstError = document.querySelector('.error');
+            if (firstError) {
                 firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>

@@ -22,7 +22,7 @@
 
                     <div class="qr-wrap mb-4 text-center">
                         <p style="font-weight: 800; color: #1a1a1a; margin-bottom: 15px; letter-spacing: 1px;">
-                            SCAN TO PAY (KPAY / WAVE)
+                            SCAN TO PAY (MMQR)
                         </p>
                         <div style="padding: 15px; border: 2px solid #f59e0b; border-radius: 20px; background: #fff; display: inline-block;">
                             <img src="{{ asset('images/kbz_qr.jpg') }}" alt="Payment QR" style="width: 240px; height: auto; border-radius: 12px;">

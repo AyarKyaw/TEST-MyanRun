@@ -46,7 +46,7 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li><h1>{{ $title ?? 'Dinner Management' }}</h1></li>
-                        <li class="breadcrumb-item"><a href="{{ url('/admin') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url('/') }}">Dashboard</a></li>
                         <li class="breadcrumb-item active">Dinners</li>
                     </ol>
                 </nav>

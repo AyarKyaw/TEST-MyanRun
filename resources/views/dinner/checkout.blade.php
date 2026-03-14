@@ -66,17 +66,21 @@
                         <h4 class="mb-4">Review Order</h4>
                         
                         {{-- Product Details --}}
-                        <div class="checkout-product-wrap">
-                            <div class="checkout-product-item d-flex align-items-center mb-3" style="gap: 15px;">
-                                <div class="image" style="width: 70px; height: 70px; background: #1a1a1a; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden;">
-                                    <i class="fas fa-utensils" style="color: #f59e0b; font-size: 24px;"></i>
-                                </div>
-                                <div class="content flex-grow-1">
-                                    <span class="text-title d-block" style="font-weight: 700;">{{ $dinner->name }}</span>
-                                    <small class="text-muted">Type: {{ request('selected_type', 'Standard Guest') }} (x{{ request('quantity', 1) }})</small>
-                                </div>
+                    <div class="checkout-product-wrap">
+                        <div class="checkout-product-item d-flex align-items-center mb-3" style="gap: 15px;">
+                            {{-- Updated from black box to image --}}
+                            <div class="image" style="width: 80px; height: 80px; border-radius: 12px; flex-shrink: 0; position: relative; overflow: hidden; border: 1px solid #eee;">
+                                <img src="{{ asset('images/ticket1_1.jpg') }}" 
+                                    alt="Dinner Image" 
+                                    style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            
+                            <div class="content flex-grow-1">
+                                <span class="text-title d-block" style="font-weight: 700;">{{ $dinner->name }}</span>
+                                <small class="text-muted">Type: {{ request('selected_type', 'Standard Guest') }} (x{{ request('quantity', 1) }})</small>
                             </div>
                         </div>
+                    </div>
 
                         {{-- DISCOUNT CODE SECTION --}}
                         <div class="discount-section mt-4 mb-4">

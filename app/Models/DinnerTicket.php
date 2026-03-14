@@ -6,31 +6,40 @@ use Illuminate\Database\Eloquent\Model;
 
 class DinnerTicket extends Model
 {
+    // Ensure you have these in your $fillable array as well
     protected $fillable = [
-    'ticket_no',
-    'registration_id',
-    'dinner_id',
-    'dinner_register_id',
-    'sponsor_id',
-    'type',
-    'price',
-    'quantity', // Add this
-    'status',
-    'payment_slip',
-    'scanned_at'
-];
+        'sponsor_id', 
+        'dinner_id', 
+        'dinner_register_id', 
+        'ticket_no', 
+        'type', 
+        'status', 
+        'price', 
+        'quantity',
+        'payment_slip'
+    ];
 
-protected $casts = [
-    'scanned_at' => 'datetime',
-];
-
-    public function sponsor()
+    /**
+     * Define the relationship to the Dinner.
+     */
+    public function dinner()
     {
-        return $this->belongsTo(Sponsor::class, 'sponsor_id');
+        return $this->belongsTo(Dinner::class);
     }
 
+    /**
+     * Define the relationship to the Registration.
+     */
     public function registration()
     {
         return $this->belongsTo(DinnerRegister::class, 'dinner_register_id');
+    }
+
+    /**
+     * Define the relationship to the Sponsor (if applicable).
+     */
+    public function sponsor()
+    {
+        return $this->belongsTo(Sponsor::class);
     }
 }

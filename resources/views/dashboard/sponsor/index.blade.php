@@ -76,13 +76,28 @@
 
                             {{-- Link to Batch Print/Details --}}
                             @php
-                                $seatsTaken = $sponsor->dinner->tickets()->whereNotNull('sponsor_id')->whereIn('status', ['confirmed', 'pending'])->sum('quantity');
-                                $isFull = $sponsor->dinner->sponsor_capacity > 0 && ($seatsTaken + $sponsor->quantity) > $sponsor->dinner->sponsor_capacity;
+                                // 1. Check if the dinner relationship exists
+                                $dinner = $sponsor->dinner;
+                                
+                                if ($dinner) {
+                                    // 2. Use the relationship safely
+                                    $seatsTaken = $dinner->tickets()
+                                        ->whereNotNull('sponsor_id')
+                                        ->whereIn('status', ['confirmed', 'pending'])
+                                        ->sum('quantity') ?? 0;
+
+                                    $isFull = $dinner->sponsor_capacity > 0 && 
+                                            ($seatsTaken + $sponsor->quantity) > $dinner->sponsor_capacity;
+                                } else {
+                                    // 3. Fallback values if dinner is missing
+                                    $isFull = false; 
+                                    $seatsTaken = 0;
+                                }
                             @endphp
 
                             <a href="{{ route('admin.sponsor.batchPrint', $sponsor->id) }}" 
-                                class="btn btn-primary {{ $isFull ? 'disabled' : '' }}">
-                                <i class="fa fa-print"></i> Print Tickets
+                                class="btn btn-primary print-link {{ $isFull ? 'disabled' : '' }}">
+                                    <i class="fa fa-print"></i> <span>Print Tickets</span>
                             </a>
                         </div>
                     </div>
@@ -96,4 +111,26 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    document.querySelectorAll('.print-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.classList.contains('disabled')) return;
+            
+            const btnText = this.querySelector('span');
+            const originalText = btnText.innerText;
+            
+            this.classList.add('disabled', 'btn-secondary');
+            btnText.innerText = 'Generating ZIP...';
+
+            // Reset button after 8 seconds (roughly when download should start)
+            setTimeout(() => {
+                this.classList.remove('disabled', 'btn-secondary');
+                btnText.innerText = originalText;
+            }, 8000);
+        });
+    });
+</script>
+@endpush
 @endsection

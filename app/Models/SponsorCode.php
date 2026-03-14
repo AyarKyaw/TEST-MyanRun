@@ -9,19 +9,25 @@ class SponsorCode extends Model
 {
     use HasFactory;
 
-    // Add this array to allow these fields to be saved in bulk
     protected $fillable = [
-        'sponsor_id', 
+        'dinner_id',
+        'dinner_ticket_id',
+        'dinner_register_id', // Link to the ID for data integrity
         'code', 
-        'is_used', 
-        'used_by_name' // <--- Add this!
+        'max_uses',
+        'used_count',
+        'status',
+        'used_by_name' // Store the string name for quick display
     ];
 
-    /**
-     * Relationship back to the Sponsor
-     */
     public function sponsor()
     {
         return $this->belongsTo(Sponsor::class);
+    }
+
+    // Link to the user registration
+    public function registration()
+    {
+        return $this->belongsTo(DinnerRegister::class, 'dinner_register_id');
     }
 }

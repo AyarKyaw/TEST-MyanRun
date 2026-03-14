@@ -176,28 +176,24 @@
 
 @push('scripts')
 <script>
-    let currentPricePerTicket = 55000; // Base price updated
+    let currentPricePerTicket = 55000; 
     let currentQty = 1;
-
-    function selectTicket(card) {
-        // Even though there is only one, this keeps the logic robust
-        document.querySelectorAll('.ticket-card').forEach(c => c.classList.remove('active'));
-        card.classList.add('active');
-        
-        const name = card.getAttribute('data-name');
-        currentPricePerTicket = parseInt(card.getAttribute('data-raw-price'));
-        
-        document.getElementById('summary-name').innerText = name;
-        document.getElementById('input-type').value = name;
-        
-        calculateTotal();
-    }
+    
+    // Use the calculated variable from the controller
+    const remainingSeats = {{ $remainingSeats }};
 
     function updateQty(val) {
-        currentQty += val;
-        if (currentQty < 1) currentQty = 1; 
-        if (currentQty > 10) currentQty = 10; 
+        let nextQty = currentQty + val;
         
+        // Block if below 1
+        if (nextQty < 1) return; 
+
+        // Block if it exceeds the calculated remaining seats
+        if (nextQty > remainingSeats) {
+            return; 
+        }
+        
+        currentQty = nextQty;
         document.getElementById('display-qty').innerText = currentQty;
         document.getElementById('input-qty').value = currentQty;
         
@@ -206,9 +202,7 @@
 
     function calculateTotal() {
         const total = currentPricePerTicket * currentQty;
-        const formattedTotal = total.toLocaleString();
-        
-        document.getElementById('summary-price').innerText = formattedTotal + ' MMK';
+        document.getElementById('summary-price').innerText = total.toLocaleString() + ' MMK';
         document.getElementById('input-price').value = total;
     }
 </script>

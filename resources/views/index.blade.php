@@ -22,7 +22,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/event" class="flat-button">Join Myanrun</a>
+                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -30,9 +30,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">KBZ Community 10-mile Run 2026</a>
+                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -44,7 +44,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">21 March, 2026(Saturday)</a>
+                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -55,7 +55,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Start 04:00 AM - Until 8:00 AM</a>
+                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -66,7 +66,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Thuwanna National Indoor Stadium 1, Yangon</a>
+                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
                                     </li>
                                 </ul>
                             </div>
@@ -92,7 +92,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/event" class="flat-button">Join Myanrun</a>
+                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -100,9 +100,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">KBZ Community 10-mile Run 2026</a>
+                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -114,7 +114,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">21 March, 2026(Saturday)</a>
+                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -125,7 +125,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Start 04:00 AM - Until 8:00 AM</a>
+                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -136,7 +136,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Thuwanna National Indoor Stadium 1, Yangon</a>
+                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
                                     </li>
                                 </ul>
                             </div>
@@ -161,7 +161,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/event" class="flat-button">Join Myanrun</a>
+                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -169,9 +169,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">KBZ Community 10-mile Run 2026</a>
+                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -183,7 +183,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">21 March, 2026(Saturday)</a>
+                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -194,7 +194,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Start 04:00 AM - Until 8:00 AM</a>
+                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -205,7 +205,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Thuwanna National Indoor Stadium 1, Yangon</a>
+                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
                                     </li>
                                 </ul>
                             </div>
@@ -230,7 +230,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/event" class="flat-button">Join Myanrun</a>
+                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -238,9 +238,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">KBZ Community 10-mile Run 2026</a>
+                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -252,7 +252,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">21 March, 2026(Saturday)</a>
+                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -263,7 +263,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Start 04:00 AM - Until 8:00 AM</a>
+                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -274,7 +274,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Thuwanna National Indoor Stadium 1, Yangon</a>
+                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
                                     </li>
                                 </ul>
                             </div>
@@ -300,7 +300,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/event" class="flat-button">Join Myanrun</a>
+                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -308,9 +308,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                             <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">KBZ Community 10-mile Run 2026</a>
+                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -322,7 +322,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">21 March, 2026(Saturday)</a>
+                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -333,7 +333,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Start 04:00 AM - Until 8:00 AM</a>
+                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -344,7 +344,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event">Thuwanna National Indoor Stadium 1, Yangon</a>
+                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
                                     </li>
                                 </ul>
                             </div>
@@ -639,7 +639,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -650,7 +650,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Home Banner (2).JPG') }}" alt="denpasar marathon event 2023">
@@ -692,7 +692,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -703,7 +703,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run2.JPG') }}" alt="denpasar marathon event 2023">
@@ -745,7 +745,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -756,7 +756,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/local1.jpg') }}" alt="denpasar marathon event 2023">
@@ -798,7 +798,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -809,7 +809,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run(F)1.jpeg') }}" alt="denpasar marathon event 2023">
@@ -851,7 +851,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -862,7 +862,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run(F)2.JPG') }}" alt="denpasar marathon event 2023">
@@ -904,7 +904,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 04:00 AM - Until 8:00 AM
+                                Start 06:00 PM - Until 9:00 PM
                             </p>
                             <p>
                                 <span>
@@ -915,7 +915,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Thuwanna National Indoor Stadium 1, Yangon
+                                Golden Duck (Kan Taw Min), Yangon
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run(F)3.JPG') }}" alt="denpasar marathon event 2023">
@@ -1013,7 +1013,7 @@
                                         </select>
                                     </fieldset>
                                     <p class="form-submit">
-                                        <a name="submit" href="/event" id="comment-reply"
+                                        <a name="submit" href="dinner/tickets/1" id="comment-reply"
                                 class="flat-button btn-submit-comment"><span>Join our event</span></a>
                                     </p>
                                 </form>
@@ -1548,7 +1548,7 @@
                 </h2>
                 <!-- <span class="sale wow fadeInUp animated ">-30%</span> -->
                 <!-- <img src="images/retinal/runclub.png" alt="runclub" class="wow fadeInUp animated"> -->
-                <br><br><a href="/event" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
+                <br><br><a href="dinner/tickets/1" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
             </div>
         </div>
     </div><!-- banner-paralax -->
@@ -1740,7 +1740,7 @@
                                 </select>
                             </fieldset>
                             <p class="form-submit">
-                                <a name="submit" href="/event" id="comment-reply"
+                                <a name="submit" href="dinner/tickets/1" id="comment-reply"
                                 class="submit-register"span>Join our event</span></a>
                             </p>
                         </form>
@@ -1764,31 +1764,30 @@
                 <div class="marathon-body">
                     
                     <div class="marathon-image">
-                      <img src="{{ asset('images/home_banner/new_banner(1).jpg') }}" alt="KBZ Community 10-mile Run 2026">
+                      <img src="{{ asset('images/ticket1_1.jpg') }}" alt="KBZ Community 10-mile Run 2026 Dinner">
                     </div>
         <!-- LEFT TEXT -->
         <div class="marathon-text">
-          <h4 class="mb-2">KBZ Community 10-mile Run 2026</h4>
+          <h4 class="mb-2">KBZ Community 10-mile Run 2026 Dinner Dinner</h4>
 
           <p class="mb-3 primary-text">
-            Registration for the KBZ Community 10-mile Run 2026 is live!
+            Registration for the KBZ Community 10-mile Run 2026 Dinner Dinner is live!
           </p>
 
           <p class="mb-4">
             <strong>
-              ၂၀၂၆ ခုနှစ် KBZ Community ၁၀ မိုင် အပြေးပြိုင်ပွဲအတွက်
-              မှတ်ပုံတင်ခြင်းကို စတင်လိုက်ပါပြီ။
+              KBZ Community 10-mile Run 2026 Dinner ညစာအတွက် မှတ်ပုံတင်ခြင်း တိုက်ရိုက်ထုတ်လွှင့်နေပါသည်။
             </strong>
           </p>
 
         <div class="button">
-            <a href="/event" class="flat-button">Join our event</a>
+            <a href="dinner/tickets/1" class="flat-button">Join our dinner</a>
         </div>
 
           <hr>
 
           <p class="mb-1"><strong>Date:</strong> 21 March, 2026 (Saturday)</p>
-          <p class="mb-0"><strong>Venue:</strong> Thuwanna National Indoor Stadium 1, Yangon</p>
+          <p class="mb-0"><strong>Venue:</strong> Golden Duck (Kan Taw Min), Yangon</p>
         </div>
 
         <!-- RIGHT IMAGE -->

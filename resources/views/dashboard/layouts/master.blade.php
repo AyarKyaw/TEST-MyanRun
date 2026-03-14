@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <base href="/">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Cache-Control" content="max-age=31536000, public">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Myanrun - Dashboard</title>
 
