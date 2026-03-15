@@ -150,7 +150,7 @@ class SponsorController extends Controller
                 imagettftext($image, 16, 0, 950, 200, $white, $fontPath, $sponsor->phone);
 
                 // C. Link QR to the Verification URL
-                $verifyUrl = "https://test-myanrun.itplus.net.mm/ticket/verify/" . $uniqueSeatCode;
+                $verifyUrl = "https://myanrun.com/ticket/verify/" . $uniqueSeatCode;
                 $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($verifyUrl);
                 
                 $qrCodeImage = @imagecreatefrompng($qrUrl);
