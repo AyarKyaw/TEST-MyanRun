@@ -565,7 +565,7 @@
                             <div class="modal-content" style="background: transparent">
                             <button type="button" class="btn-close m-2" data-bs-dismiss="modal" aria-label="Close"></button>
                             <video id="popupVideo" width="100%" controls>
-                                <source src="video/show.mp4" type="video/mp4">
+                                <source src="{{ asset('video/show.mp4') }}" type="video/mp4">
                                 Your browser does not support the video tag.
                             </video>
                             </div>
