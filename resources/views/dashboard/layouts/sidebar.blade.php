@@ -87,10 +87,10 @@
         </ul>
     </div>
     
-    <div class="deznav-footer">
+    <!-- <div class="deznav-footer">
         <a href="https://coreui.w3itexperts.com/?theme=Tixia" target="_blank" class="btn btn-docs btn-success w-100">
             <span>Docs & Components</span>
             <i class="fa-solid fa-arrow-up"></i>
         </a>
-    </div>
+    </div> -->
 </div>

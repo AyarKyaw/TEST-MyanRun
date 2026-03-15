@@ -53,7 +53,14 @@
             display: none;
         }
     }
-    
+    [class^="DZ-bt-support-now DZ-theme-btn"] {
+    display: none !important;
+    visibility: hidden !important;
+}
+    [class^="DZ-bt-buy-now DZ-theme-btn"] {
+    display: none !important;
+    visibility: hidden !important;
+}
 </style>
     </head>
 <body>

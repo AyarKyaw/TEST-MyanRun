@@ -458,21 +458,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
-    <script>
-function showTab(tab){
-    
-    document.querySelectorAll('.tab-content').forEach(el=>{
-        el.classList.remove('active');
-    });
-
-    document.querySelectorAll('.tab-btn').forEach(el=>{
-        el.classList.remove('active');
-    });
-
-    document.getElementById(tab).classList.add('active');
-    event.target.classList.add('active');
-}
-</script>
+   
 $(document).ready(function() {
     // 2. TELL AXIOS WHERE TO FIND THE CSRF TOKEN
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
