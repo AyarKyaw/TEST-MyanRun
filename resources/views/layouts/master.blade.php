@@ -336,7 +336,70 @@
     font-weight: bold;
 }
 
+      /* ===============================
+   PRELOADER
+================================ */
+.preload-container {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+}
 
+.loader-gif {
+    width: 180px;
+    max-width: 60vw;
+    height: auto;
+}
+
+.contact-numbers {
+    display: flex;
+    gap: 20px; /* spacing between numbers */
+    align-items: center;
+}
+
+.contact-numbers span,
+.contact-numbers a span {
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.contact-numbers span:hover,
+.contact-numbers a span:hover {
+    color: #C3E92D; /* change to your desired color on hover */
+}
+
+.tab-btn{
+    background:#eee;
+    border:none;
+    padding:10px 25px;
+    margin:5px;
+    font-size:16px;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.tab-btn.active{
+    background:#ff5a00;
+    color:#fff;
+}
+
+.tab-content{
+    display:none;
+}
+
+.tab-content.active{
+    display:block;
+}
+
+.pdf-preview img{
+    width:100%;
+    margin-bottom:20px;
+    border-radius:10px;
+}
 </style>
     <link rel="stylesheet" type="text/css" href="{{ asset('stylesheets/bootstrap.min.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('stylesheets/style.css') }}">
@@ -395,6 +458,21 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+    <script>
+function showTab(tab){
+    
+    document.querySelectorAll('.tab-content').forEach(el=>{
+        el.classList.remove('active');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(el=>{
+        el.classList.remove('active');
+    });
+
+    document.getElementById(tab).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
 $(document).ready(function() {
     // 2. TELL AXIOS WHERE TO FIND THE CSRF TOKEN
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

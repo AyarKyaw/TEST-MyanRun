@@ -203,7 +203,7 @@ class DinnerController extends Controller
 
             // SANITIZED FILENAME: Remove spaces and add loop index to prevent overwriting
             $safeName = Str::slug($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
-            $fileName = $safeName . '_' . $ticket->registration->phone . '_' . time() . '_' . $i . '.png';
+            $fileName = $safeName . '_' . $ticket->registration->viber . '_' . $i . '.png';
             $filePath = $saveDir . '/' . $fileName;
 
             if (file_exists($templatePath)) {

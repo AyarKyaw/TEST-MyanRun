@@ -24,6 +24,7 @@ Route::get('/contact', function () { return view('contact'); });
 Route::get('/race', function () { return view('race'); });
 Route::get('/term', function () { return view('term'); });
 Route::get('/pp', function () { return view('pp'); });
+Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');

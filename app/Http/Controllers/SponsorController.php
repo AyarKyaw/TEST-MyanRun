@@ -100,7 +100,7 @@ class SponsorController extends Controller
         if (!File::exists($templatePath)) return "ERROR: Template image not found.";
         if (!File::isDirectory($tempDir)) File::makeDirectory($tempDir, 0777, true, true);
 
-        $zipFileName = Str::slug($sponsor->company) . '_tickets_' . time() . '.zip';
+        $zipFileName = Str::slug($sponsor->company) . $sponsor->viber . '.zip';
         $zipPath = $tempDir . DIRECTORY_SEPARATOR . $zipFileName;
 
         $zip = new \ZipArchive();

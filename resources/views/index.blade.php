@@ -1771,7 +1771,7 @@
           <h4 class="mb-2">KBZ Community 10-mile Run 2026 Dinner</h4>
 
           <p class="mb-3 primary-text">
-            Registration for the KBZ Community 10-mile Run 2026 Dinner is live!
+            Registration for the KBZ Community 10-mile Run 2026 Dinner
           </p>
 
           <p class="mb-4">
