@@ -561,7 +561,7 @@
 
 <!-- Start - Nav header -->
 <div class="nav-header" style="padding-top: 20px; padding-bottom: 10px; display: flex; justify-content: center; align-items: center; height: 100px;">
-    <a href="/dashboard" class="brand-logo mb-6 block text-center"> 
+    <a href="/" class="brand-logo mb-6 block text-center"> 
         <img src="{{ asset('images/MyanRun_Orange_RM2.png') }}" alt="Myan Run Logo" class="h-24 w-auto mx-auto">
     </a>
 
