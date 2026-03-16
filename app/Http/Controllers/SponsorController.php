@@ -115,43 +115,45 @@ class SponsorController extends Controller
 
             $white = imagecolorallocate($image, 255, 255, 255);
             
-            // Generate a unique code for THIS specific ticket/seat
-            $uniqueSeatCode = 'SPN-' . strtoupper(Str::random(8));
+            // MATCHING adminApprove: Unique code
+            $uniqueCode = 'SPN-' . strtoupper(Str::random(8));
 
-            // A. Create the Main Ticket Record (The group/purchase)
+            // MATCHING adminApprove: Signature (Dash separator and 10 chars)
+            $signature = hash_hmac('sha256', $uniqueCode, config('app.key'));
+            $securePayload = $uniqueCode . '-' . substr($signature, 0, 10);
+
+            // A. Create the Main Ticket Record
             $ticket = DinnerTicket::create([
                 'sponsor_id'         => $sponsor->id,
                 'dinner_id'          => $dinner->id,
-                'ticket_no'          => $uniqueSeatCode,
+                'ticket_no'          => $uniqueCode,
                 'type'               => 'Sponsored',
                 'status'             => 'confirmed',
                 'price'              => 0,
                 'quantity'           => 1,
             ]);
 
-            // // B. Create the Scan Code Record (The individual entry)
-            // // This is what the publicVerify function actually checks
-            // \App\Models\SponsorCode::create([
-            //     'dinner_id'          => $dinner->id,
-            //     'dinner_ticket_id'   => $ticket->id,
-            //     'sponsor_id'         => $sponsor->id,
-            //     'used_by_name'       => $sponsor->company . " (Guest $i)",
-            //     'code'               => $uniqueSeatCode,
-            //     'max_uses'           => 1,
-            //     'used_count'         => 0,
-            //     'status'             => 'available' // Important: start as available
-            // ]);
+            // B. Create the SponsorCode record (Crucial for publicVerify to find it)
+            \App\Models\SponsorCode::create([
+                'dinner_id'          => $dinner->id,
+                'dinner_ticket_id'   => $ticket->id,
+                'sponsor_id'         => $sponsor->id,
+                'used_by_name'       => $sponsor->company . " (Guest $i)",
+                'code'               => $uniqueCode,
+                'max_uses'           => 1,
+                'used_count'         => 0,
+                'status'             => 'available'
+            ]);
 
             if (File::exists($fontPath)) {
-                // Add Text
-                imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $uniqueSeatCode);
+                // Add Text (Kept original label positions)
+                imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $uniqueCode);
                 imagettftext($image, 22, 0, 1050, 90, $white, $fontPath, strtoupper($sponsor->company));
                 imagettftext($image, 16, 0, 950, 145, $white, $fontPath, $sponsor->contact_name);
                 imagettftext($image, 16, 0, 950, 200, $white, $fontPath, $sponsor->phone);
 
-                // C. Link QR to the Verification URL
-                $verifyUrl = "https://myanrun.com/ticket/verify/" . $uniqueSeatCode;
-                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($verifyUrl);
+                // C. QR Code (150x150, using securePayload with dashes)
+                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($securePayload);
                 
                 $qrCodeImage = @imagecreatefrompng($qrUrl);
                 if ($qrCodeImage) {
@@ -166,7 +168,7 @@ class SponsorController extends Controller
             $imageData = ob_get_clean();
             imagedestroy($image);
 
-            $zip->addFromString("Ticket_" . $uniqueSeatCode . ".png", $imageData);
+            $zip->addFromString("Ticket_" . $uniqueCode . ".png", $imageData);
         }
 
         $zip->close();
