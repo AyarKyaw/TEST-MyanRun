@@ -60,7 +60,7 @@
                     {{-- We pass 'now' for active (1) and 'past' for inactive (0) --}}
                     <li><a href="{{ route('admin.dinner.manage', 'now') }}">Now Dinner</a></li>
                     <li><a href="{{ route('admin.dinner.manage', 'past') }}">Past Dinner</a></li>
-                    <li><a href="{{ route('dinner.verify') }}">Scanner</a></li>
+                    <li><a href="{{ route('staff.scanner') }}">Scanner</a></li>
                 </ul>
             </li>
             <li>
