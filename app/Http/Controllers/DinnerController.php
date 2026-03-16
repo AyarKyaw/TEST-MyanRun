@@ -170,81 +170,84 @@ class DinnerController extends Controller
     }
 
     public function adminApprove($id)
-    {
-        $ticket = DinnerTicket::with(['registration', 'dinner'])->findOrFail($id);
+{
+    $ticket = DinnerTicket::with(['registration', 'dinner'])->findOrFail($id);
 
-        if ($ticket->status !== 'pending') {
-            return back()->with('error', 'This ticket is already ' . $ticket->status);
-        }
+    if ($ticket->status !== 'pending') {
+        return back()->with('error', 'This ticket is already ' . $ticket->status);
+    }
 
-        $templatePath = public_path('images/ticket1.jpg');
-        $fontPath     = public_path('assets/fonts/arial.ttf');
-        $saveDir      = public_path('uploads/tickets');
+    $templatePath = public_path('images/ticket1.jpg');
+    $fontPath     = public_path('assets/fonts/arial.ttf');
+    $saveDir      = public_path('uploads/tickets');
 
-        if (!File::exists($saveDir)) {
-            File::makeDirectory($saveDir, 0777, true);
-        }
+    if (!File::exists($saveDir)) {
+        File::makeDirectory($saveDir, 0777, true);
+    }
 
-        $downloadUrls = [];
+    $downloadUrls = [];
 
-        for ($i = 1; $i <= $ticket->quantity; $i++) {
-            $uniqueCode = 'DIN-' . strtoupper(Str::random(6));
+    for ($i = 1; $i <= $ticket->quantity; $i++) {
+        $uniqueCode = 'DIN-' . strtoupper(Str::random(6));
+        $signature = hash_hmac('sha256', $uniqueCode, config('app.key'));
+        $securePayload = $uniqueCode . '-' . substr($signature, 0, 10);
 
-            \App\Models\SponsorCode::create([
-                'dinner_id'          => $ticket->dinner_id,
-                'dinner_ticket_id'   => $ticket->id,
-                'dinner_register_id' => $ticket->dinner_register_id,
-                'used_by_name'       => $ticket->registration->first_name . ' ' . $ticket->registration->last_name,
-                'code'               => $uniqueCode,
-                'max_uses'           => 1,
-                'used_count'         => 0,
-                'status'             => 'available'
-            ]);
+        // Save to database
+        \App\Models\SponsorCode::create([
+            'dinner_id'          => $ticket->dinner_id,
+            'dinner_ticket_id'   => $ticket->id,
+            'dinner_register_id' => $ticket->dinner_register_id,
+            'used_by_name'       => $ticket->registration->first_name . ' ' . $ticket->registration->last_name,
+            'code'               => $uniqueCode,
+            'max_uses'           => 1,
+            'used_count'         => 0,
+            'status'             => 'available'
+        ]);
 
-            // SANITIZED FILENAME: Remove spaces and add loop index to prevent overwriting
-            $safeName = Str::slug($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
-            $fileName = $safeName . '_' . $ticket->registration->viber . '_' . $i . '.png';
-            $filePath = $saveDir . '/' . $fileName;
+        $safeName = Str::slug($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
+        $fileName = $safeName . '_' . time() . '_' . $i . '.png';
+        $filePath = $saveDir . '/' . $fileName;
 
-            if (file_exists($templatePath)) {
-                $image = @imagecreatefromjpeg($templatePath);
-                if ($image) {
-                    $white = imagecolorallocate($image, 255, 255, 255);
-                    $fullName = strtoupper($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
-                    $phone = $ticket->registration->phone ?? 'N/A';
-                    
-                    if (file_exists($fontPath)) {
-                        imagettftext($image, 18, 0, 950, 86, $white, $fontPath, $fullName);
-                        imagettftext($image, 18, 0, 950, 150, $white, $fontPath, $phone);
-                        imagettftext($image, 22, 0, 980, 45, $white, $fontPath, $uniqueCode);
+        if (file_exists($templatePath)) {
+            $image = @imagecreatefromjpeg($templatePath);
+            if ($image) {
+                $white = imagecolorallocate($image, 255, 255, 255);
+                $fullName = strtoupper($ticket->registration->first_name . ' ' . $ticket->registration->last_name);
+                $phone = $ticket->registration->phone ?? 'N/A';
+                
+                if (file_exists($fontPath)) {
+                    imagettftext($image, 18, 0, 950, 86, $white, $fontPath, $fullName);
+                    imagettftext($image, 18, 0, 950, 150, $white, $fontPath, $phone);
+                    imagettftext($image, 22, 0, 980, 45, $white, $fontPath, $uniqueCode);
 
-                        $checkInUrl = "https://myanrun.com/ticket/verify/" . $uniqueCode;
-                        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($checkInUrl);
-                        
-                        $qrCodeImage = @imagecreatefrompng($qrUrl);
+                    // --- WINDOWS-FRIENDLY QR GENERATION ---
+                    // Fetch PNG from API to bypass missing local Imagick extension
+                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($securePayload);
+                    $qrCodeRaw = @file_get_contents($qrUrl);
+
+                    if ($qrCodeRaw) {
+                        $qrCodeImage = imagecreatefromstring($qrCodeRaw);
                         if ($qrCodeImage) {
                             imagecopy($image, $qrCodeImage, 960, 200, 0, 0, 150, 150);
                             imagedestroy($qrCodeImage);
                         }
                     }
-                    
-                    imagepng($image, $filePath);
-                    imagedestroy($image);
-                    
-                    $downloadUrls[] = asset('uploads/tickets/' . $fileName);
                 }
+                
+                imagepng($image, $filePath);
+                imagedestroy($image);
+                $downloadUrls[] = asset('uploads/tickets/' . $fileName);
             }
         }
-
-        // Mark the main ticket as confirmed
-        $ticket->update(['status' => 'confirmed']);
-
-        while (ob_get_level()) { ob_end_clean(); }
-
-        return back()
-            ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
-            ->with('download_urls', $downloadUrls);
     }
+
+    // Update ticket status so they aren't approved twice
+    $ticket->update(['status' => 'confirmed']);
+
+    return back()
+        ->with('success', count($downloadUrls) . ' ticket(s) generated successfully.')
+        ->with('download_urls', $downloadUrls);
+}
 
     public function uploadPayment(Request $request, $id) 
     {
@@ -464,78 +467,65 @@ public function showDinnerTickets(Request $request, $id)
         return back()->with('success', "Scanning has been {$status} for this event.");
     }
 
-    public function publicVerify($code)
+    public function publicVerify(Request $request)
 {
-    // 1. Try SponsorCode table (This is where public/guest seats live)
+    $rawPayload = $request->input('scanned_raw_data'); 
+    
+    $parts = explode('-', $rawPayload);
+    if (count($parts) < 3) {
+        return response()->json(['status' => 'error', 'message' => 'Invalid Scan Format'], 400);
+    }
+
+    $signature = array_pop($parts); 
+    $code = implode('-', $parts);   
+
+    $expectedSignature = substr(hash_hmac('sha256', $code, config('app.key')), 0, 10);
+    if (!hash_equals($expectedSignature, $signature)) {
+        return response()->json(['status' => 'error', 'message' => 'SECURITY ALERT: Invalid Signature'], 403);
+    }
+
+    // 1. Find the code record
     $codeRecord = \App\Models\SponsorCode::where('code', $code)
-                    ->with(['ticket.dinner'])
+                    ->with(['ticket.dinner', 'ticket.registration'])
                     ->first();
 
-    if ($codeRecord) {
-        $ticket = $codeRecord->ticket;
-        $dinner = $ticket->dinner;
-
-        // Check if Scanning is Open
-        if (!$dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
-        }
-
-        // Double Scan Check (3-second grace period)
-        if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 3) {
-            $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
-            return redirect()->route('dinner.index')->with('error', "Already scanned at {$scanTime}.");
-        }
-
-        // 2. MARK INDIVIDUAL CODE AS USED
-        $codeRecord->update([
-            'status' => 'used',
-            'used_count' => 1
-        ]);
-
-        // 3. CHECK IF THIS WAS THE LAST CODE FOR THIS TICKET
-        $remainingCodes = \App\Models\SponsorCode::where('dinner_ticket_id', $ticket->id)
-                            ->where('status', '!=', 'used')
-                            ->count();
-
-        if ($remainingCodes === 0) {
-            // All seats for this ticket are now scanned!
-            // Update the main ticket's scanned_at timestamp
-            \DB::table('dinner_tickets')
-                ->where('id', $ticket->id)
-                ->update([
-                    'scanned_at' => now()->timezone('Asia/Yangon'),
-                    'updated_at' => now()->timezone('Asia/Yangon')
-                ]);
-        }
-
-        $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? "Guest");
-        return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
-    } 
-    else {
-        // 4. Fallback for Sponsor Batch Tickets (Directly in dinner_tickets)
-        $ticket = \App\Models\DinnerTicket::where('ticket_no', $code)->with('dinner')->first();
-
-        if (!$ticket) {
-            return redirect()->route('dinner.index')->with('error', "Invalid Ticket.");
-        }
-
-        if (!$ticket->dinner->is_scanning_open) {
-            return redirect()->route('dinner.index')->with('error', "Scanning is CLOSED.");
-        }
-
-        if ($ticket->scanned_at && \Carbon\Carbon::parse($ticket->scanned_at)->diffInSeconds(now()) > 3) {
-            return redirect()->route('dinner.index')->with('error', "Already scanned.");
-        }
-
-        \DB::table('dinner_tickets')
-            ->where('id', $ticket->id)
-            ->update([
-                'scanned_at' => now()->timezone('Asia/Yangon'),
-                'updated_at' => now()->timezone('Asia/Yangon')
-            ]);
-
-        $guestName = $ticket->sponsor->company ?? "Sponsor Guest";
-        return redirect()->route('dinner.index')->with('success', "✅ Verified! Welcome, {$guestName}.");
+    if (!$codeRecord) {
+        return response()->json(['status' => 'error', 'message' => 'Code not found in system'], 404);
     }
+
+    // 2. SAFETY CHECK: Ensure the ticket relationship exists
+    $ticket = $codeRecord->ticket;
+    if (!$ticket) {
+        return response()->json(['status' => 'error', 'message' => 'Code exists but has no linked ticket'], 404);
+    }
+
+    // 3. SAFETY CHECK: Ensure the dinner relationship exists
+    $dinner = $ticket->dinner;
+    if (!$dinner) {
+        return response()->json(['status' => 'error', 'message' => 'Ticket exists but event info is missing'], 404);
+    }
+
+    // Now it is safe to check scanning status
+    if (!$dinner->is_scanning_open) {
+        return response()->json(['status' => 'error', 'message' => 'Scanning is CLOSED'], 403);
+    }
+
+    if ($codeRecord->status === 'used' && $codeRecord->updated_at->diffInSeconds(now()) > 5) {
+        $scanTime = $codeRecord->updated_at->timezone('Asia/Yangon')->format('h:i A');
+        return response()->json(['status' => 'error', 'message' => "Already scanned at $scanTime"], 422);
+    }
+
+    $codeRecord->update([
+        'status' => 'used',
+        'used_count' => 1
+    ]);
+
+    $guestName = $codeRecord->used_by_name ?? ($ticket->registration->first_name ?? "Guest");
+    
+    return response()->json([
+        'status' => 'success',
+        'guest_name' => $guestName,
+        'message' => 'Access Granted'
+    ]);
 }
 }

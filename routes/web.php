@@ -29,6 +29,10 @@ Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
 
+
+Route::get('/staff/scanner', function () {
+    return view('staff.scanner');
+})->name('staff.scanner');
 /*
 |--------------------------------------------------------------------------
 | Dinner Registration Flow (Public)
@@ -141,8 +145,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
 }); 
 
-Route::get('/ticket/verify/{ticket_no}', [DinnerController::class, 'publicVerify'])
-    ->name('ticket.verify');
+Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
 
 Route::get('/api/validate-discount', function (Illuminate\Http\Request $request) {
     // 1. Find the code in the new table
