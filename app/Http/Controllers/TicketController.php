@@ -119,7 +119,12 @@ class TicketController extends Controller
 
             if (isset($result['Response']['return_code']) && $result['Response']['return_code'] === 'SUCCESS') {
                 // 5. Payment initialized, save QR code string
-                $qrString = $result['Response']['qr_code'];
+                $qrString = $result['Response']['qr_code'] ?? null;
+
+                if (!$qrString) {
+                    return back()->with('error', 'QR code not returned from KBZ');
+                }
+                
                 $ticket->update(['qr_code_str' => $qrString]);
 
                 // 6. Clear session and show QR page
