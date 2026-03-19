@@ -107,11 +107,19 @@ class TicketController extends Controller
                 'Request' => $kbzData
             ]);
 
+            if (!$response->successful()) {
+                Log::error('KBZ HTTP Error', ['body' => $response->body()]);
+                return back()->with('error', 'KBZ API connection failed');
+            }
+
             $result = $response->json();
+
+            Log::info('KBZ Request:', $kbzData);
+            Log::info('KBZ Response:', $result);
 
             if (isset($result['Response']['return_code']) && $result['Response']['return_code'] === 'SUCCESS') {
                 // 5. Payment initialized, save QR code string
-                $qrString = $result['Response']['qr_code'] ?? 'TEST_PAYMENT_DATA_FOR_' . $ticket->id;
+                $qrString = $result['Response']['qr_code'];
                 $ticket->update(['qr_code_str' => $qrString]);
 
                 // 6. Clear session and show QR page
@@ -141,7 +149,7 @@ class TicketController extends Controller
                 $stringA .= $key . "=" . $value . "&";
             }
         }
-        $stringSignTemp = $stringA . "key=" . env('KBZ_APP_KEY');
+        $stringSignTemp = $stringA . "key=" . env('KBZ_PAY_APP_KEY');
         return strtoupper(hash('sha256', $stringSignTemp));
     }
 
@@ -157,7 +165,7 @@ class TicketController extends Controller
             // Use 'merch_order_id' which you pass when creating the QR
             $orderId = $data['merch_order_id'] ?? null;
 
-            if ($data['result'] === 'SUCCESS' && $orderId) {
+            if (($data['result'] ?? null) === 'SUCCESS' && $orderId) {
                 
                 // 2. Find the ticket. Note: Make sure 'id' matches what you sent to KBZ
                 $ticket = Ticket::find($orderId);
@@ -171,7 +179,10 @@ class TicketController extends Controller
                     Log::info("Ticket #{$orderId} successfully paid and confirmed.");
                 }
             } else {
-                Log::warning("KBZ payment failed for order {$orderId}");
+                Log::warning("KBZ payment failed", [
+                    'orderId' => $orderId,
+                    'payload' => $data
+                ]);
             }
         }
 

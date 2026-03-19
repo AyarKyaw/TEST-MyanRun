@@ -200,6 +200,7 @@ class DinnerController extends Controller
             'used_by_name'       => $ticket->registration->first_name . ' ' . $ticket->registration->last_name,
             'code'               => $uniqueCode,
             'max_uses'           => 1,
+            'signature'          => substr($signature, 0, 10),
             'used_count'         => 0,
             'status'             => 'available'
         ]);

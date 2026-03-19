@@ -79,20 +79,7 @@ class SponsorController extends Controller
         $dinner = Dinner::findOrFail($sponsor->dinner_id);
         $maxTickets = (int)($sponsor->quantity ?? 1);
 
-        // 1. Capacity Check
-        $sponsorSeatsTaken = DinnerTicket::where('dinner_id', $dinner->id)
-            ->whereIn('status', ['confirmed', 'pending'])
-            ->whereNotNull('sponsor_id')
-            ->sum('quantity');
-
-        if ($dinner->sponsor_capacity > 0) {
-            $availableSponsorSeats = $dinner->sponsor_capacity - $sponsorSeatsTaken;
-            if ($maxTickets > $availableSponsorSeats) {
-                return back()->with('error', "Cannot print. Only {$availableSponsorSeats} sponsor seats remaining.");
-            }
-        }
-
-        // 2. Setup Paths
+        // Paths
         $tempDir = public_path('uploads/temp');
         $templatePath = public_path('images/ticket.jpg'); 
         $fontPath = public_path('assets/fonts/arial.ttf');
@@ -108,77 +95,69 @@ class SponsorController extends Controller
             return "ERROR: Could not create ZIP file.";
         }
 
-        // 3. Generation Loop
         for ($i = 1; $i <= $maxTickets; $i++) {
             $image = @imagecreatefromjpeg($templatePath);
             if (!$image) continue;
 
             $white = imagecolorallocate($image, 255, 255, 255);
             
-            // MATCHING adminApprove: Unique code
+            // 1. Generate Security Data
             $uniqueCode = 'SPN-' . strtoupper(Str::random(8));
+            $signatureHash = hash_hmac('sha256', $uniqueCode, config('app.key'));
+            $shortSig = substr($signatureHash, 0, 10); // 10 chars to match publicVerify
+            
+            $securePayload = $uniqueCode . '-' . $shortSig;
 
-            // MATCHING adminApprove: Signature (Dash separator and 10 chars)
-            $signature = hash_hmac('sha256', $uniqueCode, config('app.key'));
-            $securePayload = $uniqueCode . '-' . substr($signature, 0, 10);
-
-            // A. Create the Main Ticket Record
+            // 2. Create DinnerTicket (The Purchase)
             $ticket = DinnerTicket::create([
-                'sponsor_id'         => $sponsor->id,
-                'dinner_id'          => $dinner->id,
-                'ticket_no'          => $uniqueCode,
-                'type'               => 'Sponsored',
-                'status'             => 'confirmed',
-                'price'              => 0,
-                'quantity'           => 1,
+                'sponsor_id' => $sponsor->id,
+                'dinner_id'  => $dinner->id,
+                'ticket_no'  => $uniqueCode,
+                'type'       => 'Sponsored',
+                'status'     => 'confirmed',
+                'price'      => 0,
+                'quantity'   => 1,
             ]);
 
-            // B. Create the SponsorCode record (Crucial for publicVerify to find it)
+            // 3. Create SponsorCode (The Individual Seat for AppSheet)
             \App\Models\SponsorCode::create([
-                'dinner_id'          => $dinner->id,
-                'dinner_ticket_id'   => $ticket->id,
-                'sponsor_id'         => $sponsor->id,
-                'used_by_name'       => $sponsor->company . " (Guest $i)",
-                'code'               => $uniqueCode,
-                'max_uses'           => 1,
-                'used_count'         => 0,
-                'status'             => 'available'
+                'dinner_id'        => $dinner->id,
+                'dinner_ticket_id' => $ticket->id,
+                'sponsor_id'       => $sponsor->id,
+                'code'             => $uniqueCode,
+                'signature'        => $shortSig, // NOW SAVED FOR OFFLINE SCAN
+                'used_by_name'     => $sponsor->company . " (Guest $i)",
+                'max_uses'         => 1,
+                'used_count'       => 0,
+                'status'           => 'available'
             ]);
 
             if (File::exists($fontPath)) {
-                // Add Text (Kept original label positions)
+                // Add Text (Original Positions)
                 imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $uniqueCode);
                 imagettftext($image, 22, 0, 1050, 90, $white, $fontPath, strtoupper($sponsor->company));
                 imagettftext($image, 16, 0, 950, 145, $white, $fontPath, $sponsor->contact_name);
                 imagettftext($image, 16, 0, 950, 200, $white, $fontPath, $sponsor->phone);
 
-                // C. QR Code (150x150, using securePayload with dashes)
+                // Add QR (150x150)
                 $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($securePayload);
-                
-                $qrCodeImage = @imagecreatefrompng($qrUrl);
-                if ($qrCodeImage) {
+                $qrCodeRaw = @file_get_contents($qrUrl);
+                if ($qrCodeRaw) {
+                    $qrCodeImage = imagecreatefromstring($qrCodeRaw);
                     imagecopy($image, $qrCodeImage, 950, 230, 0, 0, 150, 150);
                     imagedestroy($qrCodeImage);
                 }
             }
 
-            // D. Add to ZIP
             ob_start();
             imagepng($image);
             $imageData = ob_get_clean();
             imagedestroy($image);
-
             $zip->addFromString("Ticket_" . $uniqueCode . ".png", $imageData);
         }
 
         $zip->close();
-
-        if (File::exists($zipPath)) {
-            while (ob_get_level()) { ob_end_clean(); }
-            return response()->download($zipPath)->deleteFileAfterSend(true);
-        }
-
-        return "ERROR: Zip file was not generated.";
+        return response()->download($zipPath)->deleteFileAfterSend(true);
 
     } catch (\Exception $e) {
         return "CRASH ERROR: " . $e->getMessage();

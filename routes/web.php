@@ -28,6 +28,44 @@ Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
+Route::get('/score', function () {
+    $pc = "000001";
+    $rid = "104742";
+    $token = "fe95a4e0d6c442129469f65e9c7a3ff9";
+    $base = "https://rqs.racetigertiming.com/Dif";
+    $headers = ['User-Agent' => 'Mozilla/5.0'];
+
+    try {
+        // 1. Get Event Config (Static, only one call needed)
+        $configReq = Http::withoutVerifying()->withHeaders($headers)->post("$base/info?pc=$pc&rid=$rid&token=$token");
+        $raceData = $configReq->json()['data'] ?? [];
+
+        // 2. Get ALL Athletes (Loop through pages)
+        $athletes = [];
+        $page = 1;
+        do {
+            $res = Http::withoutVerifying()->withHeaders($headers)->post("$base/bio?pc=$pc&rid=$rid&token=$token&page=$page");
+            $data = $res->json()['data'] ?? [];
+            $athletes = array_merge($athletes, $data);
+            $page++;
+        } while (count($data) >= 50); // If we got 50, there's likely another page
+
+        // 3. Get ALL Scores (Loop through pages)
+        $scores = [];
+        $page = 1;
+        do {
+            $res = Http::withoutVerifying()->withHeaders($headers)->post("$base/score?pc=$pc&rid=$rid&token=$token&page=$page");
+            $data = $res->json()['data'] ?? [];
+            $scores = array_merge($scores, $data);
+            $page++;
+        } while (count($data) >= 50);
+
+        return view('score', compact('raceData', 'athletes', 'scores'));
+
+    } catch (\Exception $e) {
+        return "Connection Error: " . $e->getMessage();
+    }
+});
 
 
 Route::get('/staff/scanner', function () {

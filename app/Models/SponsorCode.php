@@ -15,6 +15,7 @@ class SponsorCode extends Model
         'dinner_ticket_id',
         'dinner_register_id', // Link to the ID for data integrity
         'code', 
+        'signature', 
         'max_uses',
         'used_count',
         'status',
