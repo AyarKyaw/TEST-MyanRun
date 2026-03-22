@@ -63,7 +63,7 @@
             </div>
             <div class="col-md-6">
                 <label style="font-size: 12px; text-transform: uppercase; color: #999; font-weight: 700;">Phone Number</label>
-                <p style="font-size: 16px; font-weight: 600; color: #000;">{{ Auth::user()->athlete->phone_2 ?? 'No secondary phone' }}</p>
+                <p style="font-size: 16px; font-weight: 600; color: #000;">{{ Auth::user()->phone ?? 'No secondary phone' }}</p>
             </div>
 
             <div class="col-12">

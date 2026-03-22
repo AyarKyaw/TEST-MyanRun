@@ -400,7 +400,7 @@
                     </div>
                     <div>
                         <label class="label-text">Viber</label>
-                        <input type="text" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" class="input-field" minlength="11" 
+                        <input type="text" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="11" 
                         maxlength="13">
                     </div>
                     <div>

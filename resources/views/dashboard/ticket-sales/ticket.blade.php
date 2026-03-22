@@ -81,7 +81,7 @@
                                 <thead>
                                     <tr>
                                         <th><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                                        <th>Runner ID</th>
+                                        <th>BIB Number</th>
                                         <th>Event & Category</th>
                                         <th>Price</th>
                                         <th>Status</th>
@@ -95,7 +95,7 @@
                                         <td><input type="checkbox" class="form-check-input"></td>
                                         
                                         {{-- Runner ID --}}
-                                        <td><strong>#{{ $customer->runner_id }}</strong></td>
+                                        <td><strong>#{{ $customer->bib_number }}</strong></td>
                                         
                                         {{-- Event and Category combined --}}
                                         <td>
@@ -123,8 +123,19 @@
                                         <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
                                         
                                         {{-- Action Buttons --}}
+{{-- Action Buttons --}}
 <td>
     <div class="d-flex">
+        {{-- Details Button --}}
+        <button type="button" 
+        class="btn btn-primary shadow btn-xs btn-square me-1 view-details" 
+        data-bs-toggle="modal" 
+        data-bs-target="#ticketDetailsModal"
+        data-info="{{ json_encode($customer) }}"
+        data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
+    <i class="fa fa-eye"></i>
+</button>
+
         @if($customer->status == 'pending')
             {{-- Approve Button --}}
             <form action="{{ route('tickets.approve', $customer->id) }}" method="POST" class="me-1">
@@ -158,4 +169,92 @@
             </div>
         </div>
     </main>
+<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ticketDetailsModalLabel">Runner Registration Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Personal Information</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>BIB Name:</strong></td> <td id="modal-bib-name"></td></tr>
+                            <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
+                            <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
+                            <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Event Details</h6>
+                        <table class="table table-sm">
+                            <tr><td><strong>Event:</strong></td> <td id="modal-event"></td></tr>
+                            <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
+                            <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
+                            <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="row align-items-center">
+        <div class="col-md-5">
+            <h6 class="fw-bold text-success">Transaction Image Proof</h6>
+            <p class="small text-muted">This image is retrieved from the transaction_id record.</p>
+            <div class="alert alert-info py-2">
+                <strong>Medical Info:</strong><br>
+                <span id="modal-medical" class="small"></span>
+            </div>
+        </div>
+        <div class="col-md-7 text-center">
+            <div class="border rounded p-1 bg-light shadow-sm">
+                {{-- This is where the transaction image displays --}}
+                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
+            </div>
+            <p class="small text-muted mt-2">Click image to open full size</p>
+        </div>
+    </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const detailButtons = document.querySelectorAll('.view-details');
+    
+    detailButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const data = JSON.parse(this.getAttribute('data-info'));
+            const transactionImageUrl = this.getAttribute('data-image');
+
+            // Force "16 mile" to display as "16km" in the modal
+            let categoryLabel = data.category || 'N/A';
+            if (categoryLabel.toLowerCase().includes('16 mile')) {
+                categoryLabel = '16km';
+            }
+
+            // Fill text fields
+            document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
+            document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
+            document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
+            document.getElementById('modal-blood').innerText = data.blood_type || 'N/A';
+            document.getElementById('modal-category').innerText = categoryLabel;
+            document.getElementById('modal-price').innerText = data.price + ' MMK';
+            document.getElementById('modal-exp').innerText = data.experience_level || 'N/A';
+            document.getElementById('modal-medical').innerText = data.medical_details || 'None';
+
+            // Set the Image Source to the Transaction ID image
+            const imgContainer = document.getElementById('modal-transaction-img');
+            imgContainer.src = transactionImageUrl;
+        });
+    });
+});
+</script>
 @endsection

@@ -74,25 +74,43 @@
             </div>
             <div class="row">
                 @forelse($nowEvents as $event)
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="/ticket?event={{ urlencode($event->name) }}" class="event-link">
-                        <div class="card border-0 rounded-lg overflow-hidden thairun-shadow position-relative h-100 event-card">
-                            <div class="ribbon-red status-ribbon">LIVE EVENT</div>
-                            <img src="{{ asset('storage/' . $event->image_path) }}" class="card-img-top event-card-img">
-                            <div class="card-body p-4">
-                                <span class="badge badge-light text-muted mb-2 uppercase" style="font-size: 10px;">{{ $event->company }}</span>
-                                <h4 class="h5 font-weight-bold text-dark mb-4">{{ $event->name }}</h4>
-                                <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                                    <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
-                                    <span class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">ENTER NOW</span>
-                                </div>
-                            </div>
-                        </div>
+<div class="col-lg-4 col-md-6 mb-4">
+    @php
+        // Check if this specific event ID is in the user's active tickets list
+        $alreadyRegistered = in_array($event->id, $userTickets ?? []);
+    @endphp
+
+    <div class="card border-0 rounded-lg overflow-hidden thairun-shadow position-relative h-100 event-card">
+        @if($alreadyRegistered)
+            <div class="ribbon-grey status-ribbon" style="background: #6366f1;">REGISTERED</div>
+        @else
+            <div class="ribbon-red status-ribbon">LIVE EVENT</div>
+        @endif
+
+        <img src="{{ asset('storage/' . $event->image_path) }}" class="card-img-top event-card-img">
+        
+        <div class="card-body p-4">
+            <h4 class="h5 font-weight-bold text-dark mb-4">{{ $event->name }}</h4>
+            
+            <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
+                
+                @if($alreadyRegistered)
+                    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled>
+                        <i class="fas fa-check-circle"></i> SECURED
+                    </button>
+                @else
+                    <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
+                        ENTER NOW
                     </a>
-                </div>
-                @empty
-                <div class="col-12"><p class="text-muted">No live events at the moment.</p></div>
-                @endforelse
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@empty
+    <p>No live events.</p>
+@endforelse
             </div>
         </div>
 

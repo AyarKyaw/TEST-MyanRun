@@ -98,8 +98,8 @@
 <div id="ticket-page-scope" class="content-wrapper py-20 px-4">
     <form action="{{ url('/select-race') }}" method="POST">
         @csrf
-        {{-- Default values updated to 16 Mile --}}
-        <input type="hidden" name="selected_category" id="input-category" value="16 Mile Run">
+        {{-- Default values updated to 16 Kilometer --}}
+        <input type="hidden" name="selected_category" id="input-category" value="16 Kilometer Run">
         <input type="hidden" name="selected_price" id="input-price" value="120,000">
         <input type="hidden" name="nationality" id="input-nat" value="national">
         <input type="hidden" name="event_name" value="{{ request('event', 'KBZ Community Run') }}">
@@ -131,23 +131,23 @@
 
             {{-- Grid changed to 2 columns on medium screens --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="ticket-card active" id="card-16mile"
+                <div class="ticket-card active" id="card-16Kilometer"
                     style="background-image: url('{{ asset('images/home_banner/Run2.JPG') }}');" 
-                    data-name="16 Mile Run" data-local="120,000" data-foreign="150,000"
+                    data-name="16 Kilometer Run" data-local="120,000" data-foreign="150,000"
                     data-img-local="{{ asset('images/home_banner/Run2.JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)2.JPG') }}"
                     onclick="selectTicket(this)">
-                    <span class="category-badge">16 MILE</span>
+                    <span class="category-badge">16 Kilometer</span>
                     <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
 
-                <div class="ticket-card" id="card-36mile"
+                <div class="ticket-card" id="card-36Kilometer"
                     style="background-image: url('{{ asset('images/home_banner/Home Banner (2).JPG') }}');" 
-                    data-name="36 Mile Run" data-local="150,000" data-foreign="200,000"
+                    data-name="36 Kilometer Run" data-local="150,000" data-foreign="200,000"
                     data-img-local="{{ asset('images/home_banner/Home Banner (2).JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)1.jpeg') }}"
                     onclick="selectTicket(this)">
-                    <span class="category-badge">36 MILE</span>
+                    <span class="category-badge">36 Kilometer</span>
                     <div class="price-display price-tag">150,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
             </div>
@@ -158,7 +158,7 @@
                         <i class="fas fa-bolt text-[#C3E92D]"></i>
                     </div>
                     <div>
-                        <h4 class="text-2xl font-black uppercase italic tracking-tighter"><span id="summary-name" class="text-[#C3E92D]">Ready for 16 Mile Run</span>?</h4>
+                        <h4 class="text-2xl font-black uppercase italic tracking-tighter"><span id="summary-name" class="text-[#C3E92D]">Ready for 16 Kilometer Run</span>?</h4>
                         <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Selected category</p>
                     </div>
                 </div>

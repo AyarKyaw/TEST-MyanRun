@@ -31,11 +31,31 @@ class EventController extends Controller
 
         $events = $query->orderBy('date', 'desc')->get();
         
-        // Sidebar: Always show the 'Coming' (is_active = 2) events
+        // Consistency check: Use is_active = 1 for 'now' events
+        $nowEvents = \App\Models\Event::where('is_active', 1)->get();
+
+        $userTickets = [];
+        if (auth()->check()) {
+            // This plucks the IDs of events the user has already paid for/applied for
+            $userTickets = auth()->user()->tickets()
+                ->whereIn('status', ['pending', 'approved'])
+                ->pluck('event_id')
+                ->toArray();
+        }
+        
         $sidebarEvents = \App\Models\Event::where('is_active', 2)->take(5)->get();
         $customers = \App\Models\User::all(); 
 
-        return view('dashboard.events.event', compact('events', 'sidebarEvents', 'title', 'status', 'customers'));
+        // IMPORTANT: Added 'userTickets' and 'nowEvents' to the return
+        return view('dashboard.events.event', compact(
+            'events', 
+            'sidebarEvents', 
+            'title', 
+            'status', 
+            'customers', 
+            'userTickets', 
+            'nowEvents'
+        ));
     }
     // Show form to create event
     public function create()
