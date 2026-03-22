@@ -246,6 +246,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
             document.getElementById('modal-blood').innerText = data.blood_type || 'N/A';
             document.getElementById('modal-category').innerText = categoryLabel;
+            document.getElementById('modal-event').innerText = data.event;
+            document.getElementById('modal-blood').innerText = data.athlete ? data.athlete.blood_type : 'N/A';
             document.getElementById('modal-price').innerText = data.price + ' MMK';
             document.getElementById('modal-exp').innerText = data.experience_level || 'N/A';
             document.getElementById('modal-medical').innerText = data.medical_details || 'None';

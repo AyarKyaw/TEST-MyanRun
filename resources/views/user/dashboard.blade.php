@@ -38,8 +38,12 @@
     <div class="flex h-screen overflow-hidden">
         <aside class="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col z-20">
             <div class="p-8">
-                <img src="{{ asset('images/MyanRun_Orange_RM2.png') }}" alt="Myan Run Logo" class="h-10 w-auto object-contain hover:scale-105 transition-transform duration-300">
-            </div>
+    <a href="{{ url('/') }}" class="inline-block group">
+        <img src="{{ asset('images/MyanRun_Orange_RM2.png') }}" 
+             alt="Myan Run Logo" 
+             class="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300">
+    </a>
+</div>
             
             <nav class="flex-1 px-6 space-y-1.5 mt-4">
                 <p class="text-[10px] font-extrabold text-slate-400 uppercase tracking-[2px] mb-4 px-2">Main Menu</p>

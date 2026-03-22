@@ -20,7 +20,7 @@ class TicketController extends Controller
     public function dashboard()
     {
         // Fetch all records from the Tickets table
-        $customers = \App\Models\Ticket::all(); 
+        $customers = \App\Models\Ticket::with('athlete')->orderBy('created_at', 'desc')->get();
         $totalCount = \App\Models\Ticket::count();
 
         return view('dashboard.ticket-sales.ticket', compact('customers', 'totalCount'));

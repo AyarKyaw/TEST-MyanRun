@@ -18,13 +18,16 @@ class UserController extends Controller
     // 2. Get the status from the URL for filtering
     $status = $request->get('status');
 
-    // 3. Fetch tickets using the ATHLETE'S ID, not the user's ID
+    // 3. Fetch tickets using the ATHLETE'S ID
     $tickets = \App\Models\Ticket::query()
+        // --- ADDED FILTER HERE ---
+        ->where('status', '!=', 'rejected') 
+        // -------------------------
         ->when($athlete, function ($query) use ($athlete) {
             return $query->where('athlete_id', $athlete->id);
         })
         ->unless($athlete, function ($query) {
-            return $query->whereRaw('1 = 0'); // Return nothing if no athlete record exists
+            return $query->whereRaw('1 = 0');
         })
         ->when($status, function ($query, $status) {
             return $query->where('status', $status);
