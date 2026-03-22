@@ -21,7 +21,7 @@
 
                     <div class="qr-wrap mb-4 text-center">
                         <p style="font-weight: 800; color: #1a1a1a; margin-bottom: 15px; letter-spacing: 1px; text-transform: uppercase;">
-                            Scan to Pay (KBZ Pay MMQR)
+                            Scan to Pay (MMQR)
                         </p>
                         <div style="padding: 15px; border: 2px solid #CEF531; border-radius: 20px; background: #fff; display: inline-block;">
                             {{-- Ensure this path is correct in your public folder --}}
