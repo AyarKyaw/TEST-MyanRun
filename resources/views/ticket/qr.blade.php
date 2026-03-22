@@ -35,7 +35,7 @@
                     
                     <div class="alert alert-warning py-3 mb-4" style="border-radius: 12px; background: #fefce8; border: 1px solid #fef08a;">
                         <span style="display: block; font-size: 12px; color: #854d0e; font-weight: 700; text-transform: uppercase;">Total Amount</span>
-                        <strong style="font-size: 24px; color: #000;">{{ number_format((float)$price) }} MMK</strong>
+                        <strong style="font-size: 24px; color: #000;">{{ $price }} MMK</strong>
                     </div>
 
                     <div class="upload-box" style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
