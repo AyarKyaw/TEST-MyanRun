@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -32,7 +33,11 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-
+public function tickets(): HasMany
+{
+    // The second parameter tells Laravel to look for 'athlete_id' instead of 'user_id'
+    return $this->hasMany(Ticket::class, 'athlete_id');
+}
     /**
      * Auto-generate Runner ID on creation
      */

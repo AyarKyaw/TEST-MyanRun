@@ -31,31 +31,11 @@ class EventController extends Controller
 
         $events = $query->orderBy('date', 'desc')->get();
         
-        // Consistency check: Use is_active = 1 for 'now' events
-        $nowEvents = \App\Models\Event::where('is_active', 1)->get();
-
-        $userTickets = [];
-        if (auth()->check()) {
-            // This plucks the IDs of events the user has already paid for/applied for
-            $userTickets = auth()->user()->tickets()
-                ->whereIn('status', ['pending', 'approved'])
-                ->pluck('event_id')
-                ->toArray();
-        }
-        
+        // Sidebar: Always show the 'Coming' (is_active = 2) events
         $sidebarEvents = \App\Models\Event::where('is_active', 2)->take(5)->get();
         $customers = \App\Models\User::all(); 
 
-        // IMPORTANT: Added 'userTickets' and 'nowEvents' to the return
-        return view('dashboard.events.event', compact(
-            'events', 
-            'sidebarEvents', 
-            'title', 
-            'status', 
-            'customers', 
-            'userTickets', 
-            'nowEvents'
-        ));
+        return view('dashboard.events.event', compact('events', 'sidebarEvents', 'title', 'status', 'customers'));
     }
     // Show form to create event
     public function create()
@@ -63,16 +43,24 @@ class EventController extends Controller
         return view('dashboard.events.event-create');
     }
     public function showPublicEvents()
-    {
-        $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
+{
+    $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
 
-        // Grouping manually based on your is_active integer
-        $nowEvents = $allEvents->where('is_active', 1);
-        $comingEvents = $allEvents->where('is_active', 2);
-        $pastEvents = $allEvents->where('is_active', 0);
+    $nowEvents = $allEvents->where('is_active', 1);
+    $comingEvents = $allEvents->where('is_active', 2);
+    $pastEvents = $allEvents->where('is_active', 0);
 
-        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents'));
+    $userTickets = [];
+    if (auth()->check()) {
+        // We pluck the 'event' column which contains the name (e.g., "Cherry Trail Run")
+        $userTickets = auth()->user()->tickets()
+            ->whereIn('status', ['pending', 'approved'])
+            ->pluck('event') 
+            ->toArray();
     }
+
+    return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
+}
     // Save the event
     public function store(Request $request)
     {
