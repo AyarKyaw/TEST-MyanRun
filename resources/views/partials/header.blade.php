@@ -33,7 +33,8 @@
                         <li><a href="/event">Our Events</a></li>
                         <li><a href="/dinner">Our Dinner</a></li>
                         <li><a href="/race">Our Race</a></li>
-                        <li><a href="/score">Our Score</a></li>
+                        <!-- <li><a href="/score">Our Score</a></li> -->
+                        <li><a href="/result">Our Results</a></li>
                         <li><a href="/race_guide">Race Guide</a></li>
                         <li><a href="/blog">Our Stories</a></li>
                         <li><a href="/contact">Contact us</a></li>

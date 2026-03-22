@@ -261,17 +261,17 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <a href="{{ route('ticket.download', $ticket->id) }}" 
+                            <!-- <a href="{{ route('ticket.download', $ticket->id) }}" 
                             class="flex-1 bg-slate-900 text-white text-[11px] text-center font-bold py-3 rounded-xl hover:bg-black transition-all">
                                 <i class="fas fa-file-pdf mr-2 text-brand"></i> Download Ticket
-                            </a>
+                            </a> -->
                             <button class="px-4 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 transition-all">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
-                            <button onclick="openPdfPreview('{{ route('ticket.preview', $ticket->id) }}')" 
+                            <!-- <button onclick="openPdfPreview('{{ route('ticket.preview', $ticket->id) }}')" 
                                     class="bg-slate-100 hover:bg-[#C3E92D] p-3 rounded-xl transition-all group">
                                 <i class="fas fa-eye text-slate-500 group-hover:text-slate-900"></i>
-                            </button>
+                            </button> -->
                         </div>
                     </div>
                 </div>
@@ -377,7 +377,7 @@
     .animate-bounce-short { animation: bounce-short 0.5s ease-in-out; }
 </style>
 @endif
-<div id="pdfModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+<!-- <div id="pdfModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
     <div class="bg-white rounded-[2rem] w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden">
         <div class="p-6 border-b flex justify-between items-center">
             <h3 class="font-black uppercase italic text-slate-800">Ticket Preview</h3>
@@ -396,7 +396,7 @@
              </a>
         </div>
     </div>
-</div>
+</div> -->
 
 <script>
 function openPdfPreview(url) {

@@ -98,12 +98,13 @@
 <div id="ticket-page-scope" class="content-wrapper py-20 px-4">
     <form action="{{ url('/select-race') }}" method="POST">
         @csrf
-        <input type="hidden" name="selected_category" id="input-category" value="5 Mile Run">
-        <input type="hidden" name="selected_price" id="input-price" value="90,000">
+        {{-- Default values updated to 16 Mile --}}
+        <input type="hidden" name="selected_category" id="input-category" value="16 Mile Run">
+        <input type="hidden" name="selected_price" id="input-price" value="120,000">
         <input type="hidden" name="nationality" id="input-nat" value="national">
-        <input type="hidden" name="event_name" value="{{ request('event', 'General Marathon') }}">
+        <input type="hidden" name="event_name" value="{{ request('event', 'KBZ Community Run') }}">
 
-        <div class="max-w-6xl mx-auto">
+        <div class="max-w-5xl mx-auto"> {{-- Reduced max-width for better 2-card centering --}}
             <header class="flex flex-col items-center justify-center mb-16 text-center">
                 <div class="mb-8">
                     <h2 class="text-[#C3E92D] font-black uppercase tracking-widest text-lg mb-2">
@@ -128,35 +129,26 @@
                 </div>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="ticket-card" id="card-3mile"
-                    style="background-image: url('{{ asset('images/local1.jpg') }}');" 
-                    data-name="3 Mile Run" data-local="70,000" data-foreign="90,000"
-                    data-img-local="{{ asset('images/local1.jpg') }}"
-                    data-img-foreign="{{ asset('images/home_banner/Run(F)3.JPG') }}"
-                    onclick="selectTicket(this)">
-                    <span class="category-badge">3 MILE</span>
-                    <div class="price-display price-tag">70,000 <span class="text-lg opacity-60">MMK</span></div>
-                </div>
-
-                <div class="ticket-card active" id="card-5mile"
+            {{-- Grid changed to 2 columns on medium screens --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="ticket-card active" id="card-16mile"
                     style="background-image: url('{{ asset('images/home_banner/Run2.JPG') }}');" 
-                    data-name="5 Mile Run" data-local="90,000" data-foreign="140,000"
+                    data-name="16 Mile Run" data-local="120,000" data-foreign="150,000"
                     data-img-local="{{ asset('images/home_banner/Run2.JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)2.JPG') }}"
                     onclick="selectTicket(this)">
-                    <span class="category-badge">5 MILE</span>
-                    <div class="price-display price-tag">90,000 <span class="text-lg opacity-60">MMK</span></div>
+                    <span class="category-badge">16 MILE</span>
+                    <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
 
-                <div class="ticket-card" id="card-10mile"
+                <div class="ticket-card" id="card-36mile"
                     style="background-image: url('{{ asset('images/home_banner/Home Banner (2).JPG') }}');" 
-                    data-name="10 Mile Run" data-local="100,000" data-foreign="190,000"
+                    data-name="36 Mile Run" data-local="150,000" data-foreign="200,000"
                     data-img-local="{{ asset('images/home_banner/Home Banner (2).JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)1.jpeg') }}"
                     onclick="selectTicket(this)">
-                    <span class="category-badge">10 MILE</span>
-                    <div class="price-display price-tag">100,000 <span class="text-lg opacity-60">MMK</span></div>
+                    <span class="category-badge">36 MILE</span>
+                    <div class="price-display price-tag">150,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
             </div>
 
@@ -166,14 +158,14 @@
                         <i class="fas fa-bolt text-[#C3E92D]"></i>
                     </div>
                     <div>
-                        <h4 class="text-2xl font-black uppercase italic tracking-tighter"><span id="summary-name" class="text-[#C3E92D]">Ready for 5 Mile Run</span>?</h4>
-                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Select your category above</p>
+                        <h4 class="text-2xl font-black uppercase italic tracking-tighter"><span id="summary-name" class="text-[#C3E92D]">Ready for 16 Mile Run</span>?</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Selected category</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-12">
                     <div class="text-right">
                         <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Total to Pay</p>
-                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]">90,000 MMK</div>
+                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]">120,000 MMK</div>
                     </div>
                     <button type="submit" class="bg-[#C3E92D] hover:scale-105 active:scale-95 text-slate-900 px-16 py-6 font-black uppercase tracking-widest text-sm transition-all shadow-xl rounded-full">
                         BUY

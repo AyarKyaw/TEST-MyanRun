@@ -17,7 +17,7 @@
         
         .scan-circle { position: relative; width: 160px; height: 160px; border-radius: 50%; border: 4px dashed #cbd5e1; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; background: #f1f5f9; cursor: pointer; transition: all 0.3s; }
         .scan-circle:hover { border-color: #C3E92D; background: #eff6ff; }
-        .scan-line { position: absolute; width: 100%; height: 2px; background: #C3E92D; top: 0; animation: scanning 3s linear infinite; opacity: 0.3; z-index: 25; }
+        /* .scan-line { position: absolute; width: 100%; height: 2px; background: #C3E92D; top: 0; animation: scanning 3s linear infinite; opacity: 0.3; z-index: 25; }
         @keyframes scanning { 0% { top: 0%; } 100% { top: 100%; } }
 
         .face-guide {
@@ -31,7 +31,7 @@
             border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
             pointer-events: none;
             box-shadow: 0 0 0 1000px rgba(0,0,0,0.4);
-        }
+        } */
 
         /* Visual Shake Animation */
 @keyframes shake {
@@ -43,7 +43,7 @@
 }
 .animate-shake { animation: shake 0.4s ease-in-out; }
 /* Progress Circle Container */
-.progress-ring-container {
+/* .progress-ring-container {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -59,12 +59,12 @@
     transform: rotate(-90deg);
     transform-origin: 50% 50%;
     stroke-linecap: round;
-}
+} */
 /* Dynamic Face Guide Colors */
 .face-guide.border-red-500 { border-color: #ef4444 !important; box-shadow: 0 0 0 1000px rgba(239, 68, 68, 0.2); }
 .face-guide.border-lime-500 { border-color: #C3E92D !important; box-shadow: 0 0 0 1000px rgba(195, 233, 45, 0.2); }
     </style>
-<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script> -->
 </head>
 <body class="py-16 px-4 relative">
 @if(session('success'))
@@ -368,9 +368,16 @@
                     </div>
                     <div>
                         <label class="label-text">Gender</label>
-                        <select name="gender" class="input-field">
-                            <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male</option>
-                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                        <select name="gender" id="gender_select" class="input-field" onchange="updateBib()">
+                            <option value="male" {{ old('gender', $athlete->gender ?? 'male') == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender', $athlete->gender ?? 'male') == 'female' ? 'selected' : '' }}>Female</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label-text">State</label>
+                        <select name="state" class="input-field">
+                            <option value="yangon">Yangon</option>
+                            <option value="mandalay">Mandalay</option>
                         </select>
                     </div>
                     <div class="md:col-span-2">
@@ -392,22 +399,94 @@
                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" readonly>
                     </div>
                     <div>
-                        <label class="label-text">Social Account (FB/Viber)</label>
-                        <input type="text" name="social_account" value="{{ old('social_account', $athlete->social_account ?? '') }}" class="input-field">
+                        <label class="label-text">Viber</label>
+                        <input type="text" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" class="input-field" minlength="11" 
+                        maxlength="13">
                     </div>
                     <div>
-                        <label class="label-text">Mobile Number 1</label>
+                        <label class="label-text">Mobile Number</label>
                         <input type="tel" name="phone_1" value="{{ old('phone', auth()->user()->phone) }}" required 
                                oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" readonly>
                     </div>
                     <div>
-                        <label class="label-text">Mobile Number 2</label>
-                        <input type="tel" name="phone_2" value="{{ old('phone_2', $athlete->phone_2 ?? '') }}" 
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field">
+                        <label class="label-text">Emergency Contact Number</label>
+                        <input type="tel" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="11" 
+                            maxlength="13" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field">
                     </div>
                 </div>
             </div>
 
+            <div class="section-card">
+                <div class="flex items-center mb-8">
+                    <span class="w-10 h-10 bg-[#C3E92D] text-slate-900 rounded-xl flex items-center justify-center font-black mr-4 shadow-lg shadow-lime-100">04</span>
+                    <h3 class="text-xl font-black text-slate-800 uppercase italic">health Info</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="label-text">BIB Name</label>
+                        <input type="text" name="bib_name" value="{{ old('bib_name', auth()->user()->bib_name) }}" required 
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" maxlength="20">
+                    </div>
+                    <div>
+                        <label class="label-text">BIB Number</label>
+                        <input type="text" name="bib_number" id="bib_input" value="{{ $bibNumber }}" class="input-field" readonly>
+                    </div>
+                    <div>
+                        <label class="label-text">T Shirt Size</label>
+                        <select name="t_shirt_size" class="input-field">
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                            <option value="XXXL">XXXL</option>
+                            <option value="XXXXL">XXXXL</option>
+                            <option value="XXXXXL">XXXXXL</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label-text">Experience</label>
+                        <select name="exp" class="input-field">
+                            <option value="Never">Never</option>
+                            <option value="25KM">Within 25KM</option>
+                            <option value="25KM-50KM">Within 25KM and 50KM</option>
+                            <option value="50KM+">50KM+</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="label-text">Blood Type</label>
+                        <select name="blood_type" class="input-field">
+                            <option value="O">O</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="AB">AB</option>
+                            <option value="Unknown">Unknown</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="label-text mb-3 block">Do you have any existing medical conditions?</label>
+                        <div class="flex gap-4 mb-4">
+                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                                <input type="radio" name="has_condition" value="no" class="hidden" checked onchange="toggleCondition(false)">
+                                <span class="text-xs font-black uppercase text-slate-600">No, I'm Healthy</span>
+                            </label>
+                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                                <input type="radio" name="has_condition" value="yes" class="hidden" onchange="toggleCondition(true)">
+                                <span class="text-xs font-black uppercase text-slate-600">Yes, I Have</span>
+                            </label>
+                        </div>
+                        
+                        <div id="condition_details_container" class="hidden">
+                            <label class="label-text text-[#C3E92D] animate-pulse">Please specify your condition</label>
+                            <textarea name="medical_conditions" id="medical_conditions" rows="3" 
+                                    class="input-field resize-none border-red-100 focus:border-red-400" 
+                                    placeholder="e.g. Asthma, Heart Disease, Recent Surgery, etc.">{{ old('medical_conditions', $athlete->medical_conditions ?? '') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="flex flex-col md:flex-row gap-4 pt-6">
                 <button type="submit" class="flex-1 bg-[#C3E92D] hover:bg-slate-800 text-slate-900 hover:text-white font-black py-5 rounded-[2rem] shadow-xl shadow-lime-100 transition-all uppercase tracking-widest">
                     Submit Registration
@@ -431,70 +510,93 @@ let stream = null;
 let modelAI = null;
 
 // UI Helper: Updates the glassmorphism box and the face guide oval
-function updateSmartStatus(type, message) {
-    const box = document.getElementById('smartStatusBox');
-    const icon = document.getElementById('statusIcon');
-    const heading = document.getElementById('statusHeading');
-    const msg = document.getElementById('statusMessage');
-    const container = document.getElementById('videoContainer');
-    const guide = document.querySelector('.face-guide');
+// function updateSmartStatus(type, message) {
+//     const box = document.getElementById('smartStatusBox');
+//     const icon = document.getElementById('statusIcon');
+//     const heading = document.getElementById('statusHeading');
+//     const msg = document.getElementById('statusMessage');
+//     const container = document.getElementById('videoContainer');
+//     const guide = document.querySelector('.face-guide');
 
-    box.classList.remove('translate-y-24', 'opacity-0');
-    box.classList.add('translate-y-0', 'opacity-100');
+//     box.classList.remove('translate-y-24', 'opacity-0');
+//     box.classList.add('translate-y-0', 'opacity-100');
 
-    // Reset Guide Colors
-    guide.classList.remove('border-red-500', 'border-lime-500');
+//     // Reset Guide Colors
+//     guide.classList.remove('border-red-500', 'border-lime-500');
 
-    if (type === 'error') {
-        box.style.backgroundColor = 'rgba(239, 68, 68, 0.9)'; 
-        icon.innerHTML = '<i class="fas fa-triangle-exclamation"></i>';
-        heading.innerText = "Verification Failed";
-        msg.innerText = message;
-        guide.classList.add('border-red-500');
+//     if (type === 'error') {
+//         box.style.backgroundColor = 'rgba(239, 68, 68, 0.9)'; 
+//         icon.innerHTML = '<i class="fas fa-triangle-exclamation"></i>';
+//         heading.innerText = "Verification Failed";
+//         msg.innerText = message;
+//         guide.classList.add('border-red-500');
         
-        container.classList.add('animate-shake');
-        setTimeout(() => container.classList.remove('animate-shake'), 500);
-    } 
-    else if (type === 'processing') {
-        box.style.backgroundColor = 'rgba(30, 41, 59, 0.8)';
-        icon.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
-        heading.innerText = "Analyzing...";
-        msg.innerText = "Stay still for a second";
-    }
-    else if (type === 'success') {
-        box.style.backgroundColor = 'rgba(195, 233, 45, 0.95)';
-        icon.innerHTML = '<i class="fas fa-check text-slate-900"></i>';
-        heading.innerText = "Identity Verified";
-        heading.style.color = "#0f172a";
-        msg.innerText = "Profile photo updated.";
-        msg.style.color = "#0f172a";
-        guide.classList.add('border-lime-500');
+//         container.classList.add('animate-shake');
+//         setTimeout(() => container.classList.remove('animate-shake'), 500);
+//     } 
+//     else if (type === 'processing') {
+//         box.style.backgroundColor = 'rgba(30, 41, 59, 0.8)';
+//         icon.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
+//         heading.innerText = "Analyzing...";
+//         msg.innerText = "Stay still for a second";
+//     }
+//     else if (type === 'success') {
+//         box.style.backgroundColor = 'rgba(195, 233, 45, 0.95)';
+//         icon.innerHTML = '<i class="fas fa-check text-slate-900"></i>';
+//         heading.innerText = "Identity Verified";
+//         heading.style.color = "#0f172a";
+//         msg.innerText = "Profile photo updated.";
+//         msg.style.color = "#0f172a";
+//         guide.classList.add('border-lime-500');
+//     }
+// }
+
+// async function loadAI() {
+//     try {
+//         // Using a more reliable CDN for weights
+//         const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/';
+        
+//         // Load the 3 models required for "Strict" mode
+//         await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL); 
+//         await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+//         await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+        
+//         modelAI = true; 
+//         statusText.innerText = "Strict AI System Online";
+//         statusText.classList.replace('text-slate-400', 'text-lime-500');
+//     } catch (err) {
+//         console.error("AI Loading Error:", err);
+//         statusText.innerText = "AI System Offline (Check Connection)";
+//         statusText.classList.replace('text-slate-400', 'text-red-500');
+//     }
+// }
+// loadAI();
+function updateBib() {
+    const genderSelect = document.getElementById('gender_select');
+    const bibInput = document.getElementById('bib_input');
+    let currentBib = bibInput.value;
+
+    // Only update if it's not a 'PENDING' status
+    if (currentBib !== 'PENDING') {
+        const prefix = (genderSelect.value === 'female') ? 'F' : 'M';
+        
+        // Replace the first character (M/F) with the new prefix
+        // This keeps the distance (36) and the counter (0001) the same
+        bibInput.value = prefix + currentBib.substring(1);
     }
 }
 
-async function loadAI() {
-    try {
-        // Using a more reliable CDN for weights
-        const MODEL_URL = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/';
-        
-        // Load the 3 models required for "Strict" mode
-        await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL); 
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-        
-        modelAI = true; 
-        statusText.innerText = "Strict AI System Online";
-        statusText.classList.replace('text-slate-400', 'text-lime-500');
-    } catch (err) {
-        console.error("AI Loading Error:", err);
-        statusText.innerText = "AI System Offline (Check Connection)";
-        statusText.classList.replace('text-slate-400', 'text-red-500');
+// Medical toggle helper (since I noticed the 'hidden' logic in your code)
+function toggleCondition(show) {
+    const container = document.getElementById('condition_details_container');
+    if (show) {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
     }
 }
-loadAI();
-
 function openUploadModal() { 
-    if(!modelAI) return alert("AI is still warming up...");
+    // if(!modelAI) return alert("AI is still warming up...");
     modal.classList.replace('hidden', 'flex'); 
 }
 
@@ -527,7 +629,18 @@ async function startCamera() {
 }
 
 function triggerGallery() { faceInput.click(); }
-faceInput.onchange = e => { if(e.target.files[0]) processAI(e.target.files[0]); };
+faceInput.onchange = e => { 
+    if(e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            facePreview.src = ev.target.result;
+            facePreview.classList.remove('hidden');
+            placeholder.classList.add('opacity-0');
+            closeUploadModal();
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+};
 
 async function takeSnapshot() {
     const canvas = document.createElement('canvas');
@@ -537,7 +650,26 @@ async function takeSnapshot() {
     
     canvas.toBlob(blob => {
         const file = new File([blob], "capture.jpg", {type:"image/jpeg"});
-        processAI(file);
+        
+        // 1. Manually trigger the preview instead of AI
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            facePreview.src = e.target.result;
+            facePreview.classList.remove('hidden');
+            placeholder.classList.add('opacity-0');
+            if(scannerLine) scannerLine.style.display = 'none';
+            statusText.innerText = "PHOTO CAPTURED ✅";
+            statusText.classList.replace('text-slate-400', 'text-lime-500');
+        };
+        reader.readAsDataURL(file);
+
+        // 2. Put the file into the hidden input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        faceInput.files = dataTransfer.files;
+
+        // 3. Close modal immediately
+        closeUploadModal();
     }, 'image/jpeg');
 }
 
@@ -549,76 +681,89 @@ function setProgress(percent) {
     circle.style.strokeDashoffset = offset;
 }
 
-async function processAI(file) {
-    updateSmartStatus('processing');
-    setProgress(20);
+// async function processAI(file) {
+//     updateSmartStatus('processing');
+//     setProgress(20);
     
-    const img = await faceapi.bufferToImage(file);
+//     const img = await faceapi.bufferToImage(file);
     
-    // CHANGED: Using SsdMobilenetv1Options for the "Strict" model
-    // minConfidence: 0.8 ensures it only accepts very clear faces
-    const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.8 });
+//     // CHANGED: Using SsdMobilenetv1Options for the "Strict" model
+//     // minConfidence: 0.8 ensures it only accepts very clear faces
+//     const options = new faceapi.SsdMobilenetv1Options({ minConfidence: 0.8 });
     
-    const result = await faceapi.detectSingleFace(img, options)
-                                .withFaceLandmarks()
-                                .withFaceDescriptor(); // Added for biometric consistency
+//     const result = await faceapi.detectSingleFace(img, options)
+//                                 .withFaceLandmarks()
+//                                 .withFaceDescriptor(); // Added for biometric consistency
     
-    setProgress(60);
+//     setProgress(60);
 
-    if (!result) {
-        updateSmartStatus('error', "Strict Check Failed: Face not clear or too dark.");
-        setProgress(0);
-        return;
-    }
+//     if (!result) {
+//         updateSmartStatus('error', "Strict Check Failed: Face not clear or too dark.");
+//         setProgress(0);
+//         return;
+//     }
 
-    const { detection, landmarks } = result;
-    const score = detection.score; 
-    const box = detection.box; 
+//     const { detection, landmarks } = result;
+//     const score = detection.score; 
+//     const box = detection.box; 
 
-    // --- STRICT VALIDATION LOGIC ---
-    let errorMsg = "";
+//     // --- STRICT VALIDATION LOGIC ---
+//     let errorMsg = "";
     
-    // 1. Check Alignment (Is the person looking straight?)
-    const nose = landmarks.getNose()[0];
-    const leftEye = landmarks.getLeftEye()[0];
-    const rightEye = landmarks.getRightEye()[3];
-    const eyeCenter = (leftEye.x + rightEye.x) / 2;
-    const noseOffset = Math.abs(nose.x - eyeCenter);
+//     // 1. Check Alignment (Is the person looking straight?)
+//     const nose = landmarks.getNose()[0];
+//     const leftEye = landmarks.getLeftEye()[0];
+//     const rightEye = landmarks.getRightEye()[3];
+//     const eyeCenter = (leftEye.x + rightEye.x) / 2;
+//     const noseOffset = Math.abs(nose.x - eyeCenter);
     
-    // If nose is too far from center of eyes, they are looking sideways
-    if (noseOffset > (rightEye.x - leftEye.x) * 0.2) {
-        errorMsg = "Please look directly at the camera.";
-    }
-    // 2. Check Size (Is the face large enough in the frame?)
-    else if (box.width < img.width * 0.4) {
-        errorMsg = "Move closer to the camera.";
-    }
-    // 3. Check Head Tilt
-    else if (Math.abs(leftEye.y - rightEye.y) > 15) {
-        errorMsg = "Keep your head level.";
-    }
+//     // If nose is too far from center of eyes, they are looking sideways
+//     if (noseOffset > (rightEye.x - leftEye.x) * 0.2) {
+//         errorMsg = "Please look directly at the camera.";
+//     }
+//     // 2. Check Size (Is the face large enough in the frame?)
+//     else if (box.width < img.width * 0.4) {
+//         errorMsg = "Move closer to the camera.";
+//     }
+//     // 3. Check Head Tilt
+//     else if (Math.abs(leftEye.y - rightEye.y) > 15) {
+//         errorMsg = "Keep your head level.";
+//     }
 
-    if (errorMsg === "") {
-        setProgress(100);
-        updateSmartStatus('success');
+//     if (errorMsg === "") {
+//         setProgress(100);
+//         updateSmartStatus('success');
         
-        // Update hidden input and preview
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        faceInput.files = dataTransfer.files;
-        facePreview.src = img.src;
-        facePreview.classList.remove('hidden');
-        placeholder.classList.add('opacity-0');
-        if(scannerLine) scannerLine.style.display = 'none';
+//         // Update hidden input and preview
+//         const dataTransfer = new DataTransfer();
+//         dataTransfer.items.add(file);
+//         faceInput.files = dataTransfer.files;
+//         facePreview.src = img.src;
+//         facePreview.classList.remove('hidden');
+//         placeholder.classList.add('opacity-0');
+//         if(scannerLine) scannerLine.style.display = 'none';
         
-        setTimeout(closeUploadModal, 1500);
+//         setTimeout(closeUploadModal, 1500);
+//     } else {
+//         setProgress(0);
+//         updateSmartStatus('error', errorMsg);
+//         faceInput.value = "";
+//     }
+// }
+function toggleCondition(show) {
+    const container = document.getElementById('condition_details_container');
+    const textarea = document.getElementById('medical_conditions');
+    
+    if (show) {
+        container.classList.remove('hidden');
+        textarea.setAttribute('required', 'required');
+        textarea.focus();
     } else {
-        setProgress(0);
-        updateSmartStatus('error', errorMsg);
-        faceInput.value = "";
+        container.classList.add('hidden');
+        textarea.removeAttribute('required');
+        textarea.value = ''; // Clear text if they change back to 'No'
     }
 }
-
 // Helper Function: Check if the photo is too dark
 async function checkLighting(imgElement) {
     const canvas = document.createElement('canvas');

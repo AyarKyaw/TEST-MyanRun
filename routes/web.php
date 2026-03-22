@@ -2,12 +2,18 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\StoryController;
 use App\Http\Controllers\AthleteController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\DinnerController;
@@ -24,47 +30,114 @@ Route::get('/contact', function () { return view('contact'); });
 Route::get('/race', function () { return view('race'); });
 Route::get('/term', function () { return view('term'); });
 Route::get('/pp', function () { return view('pp'); });
+Route::get('/result', function () { return view('result'); });
 Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
-Route::get('/score', function () {
-    $pc = "000001";
-    $rid = "104742";
-    $token = "fe95a4e0d6c442129469f65e9c7a3ff9";
-    $base = "https://rqs.racetigertiming.com/Dif";
-    $headers = ['User-Agent' => 'Mozilla/5.0'];
+Route::get('/score', function (Request $request) {
+    set_time_limit(120);
+    $cacheKey = 'race_scores_104742_v2';
 
-    try {
-        // 1. Get Event Config (Static, only one call needed)
-        $configReq = Http::withoutVerifying()->withHeaders($headers)->post("$base/info?pc=$pc&rid=$rid&token=$token");
-        $raceData = $configReq->json()['data'] ?? [];
+    // 1. Fetch or Retrieve the Cached Data
+    $data = Cache::remember($cacheKey, 10, function () {
+        $pc = "000001";
+        $rid = "104742";
+        $token = "fe95a4e0d6c442129469f65e9c7a3ff9";
+        $base = "https://rqs.racetigertiming.com/Dif";
+        $headers = ['User-Agent' => 'Mozilla/5.0'];
 
-        // 2. Get ALL Athletes (Loop through pages)
-        $athletes = [];
-        $page = 1;
-        do {
-            $res = Http::withoutVerifying()->withHeaders($headers)->post("$base/bio?pc=$pc&rid=$rid&token=$token&page=$page");
-            $data = $res->json()['data'] ?? [];
-            $athletes = array_merge($athletes, $data);
-            $page++;
-        } while (count($data) >= 50); // If we got 50, there's likely another page
+        try {
+            // Get Event Config
+            $configReq = Http::timeout(15)->withoutVerifying()->withHeaders($headers)
+                ->post("$base/info?pc=$pc&rid=$rid&token=$token");
+            $raceData = $configReq->json()['data'] ?? [];
 
-        // 3. Get ALL Scores (Loop through pages)
-        $scores = [];
-        $page = 1;
-        do {
-            $res = Http::withoutVerifying()->withHeaders($headers)->post("$base/score?pc=$pc&rid=$rid&token=$token&page=$page");
-            $data = $res->json()['data'] ?? [];
-            $scores = array_merge($scores, $data);
-            $page++;
-        } while (count($data) >= 50);
+            // Fetch Athletes
+            $athletes = [];
+            $page = 1;
+            do {
+                $res = Http::timeout(15)->withoutVerifying()->withHeaders($headers)
+                    ->post("$base/bio?pc=$pc&rid=$rid&token=$token&page=$page");
+                $pageData = $res->json()['data'] ?? [];
+                $athletes = array_merge($athletes, $pageData);
+                $page++;
+            } while (count($pageData) >= 50 && $page <= 20);
 
-        return view('score', compact('raceData', 'athletes', 'scores'));
+            // Fetch Main Scores
+            $baseScores = [];
+            $page = 1;
+            do {
+                $res = Http::timeout(15)->withoutVerifying()->withHeaders($headers)
+                    ->post("$base/score?pc=$pc&rid=$rid&token=$token&page=$page");
+                $pageData = $res->json()['data'] ?? [];
+                $baseScores = array_merge($baseScores, $pageData);
+                $page++;
+            } while (count($pageData) >= 50 && $page <= 20);
 
-    } catch (\Exception $e) {
-        return "Connection Error: " . $e->getMessage();
+            // Fetch Split Scores
+            $allSplits = [];
+            $page = 1;
+            do {
+                $res = Http::timeout(15)->withoutVerifying()->withHeaders($headers)
+                    ->post("$base/splitScore?pc=$pc&rid=$rid&token=$token&page=$page");
+                $pageData = $res->json()['data'] ?? [];
+                $allSplits = array_merge($allSplits, $pageData);
+                $page++;
+            } while (count($pageData) >= 50 && $page <= 20);
+
+            // Merge Logic
+            $groupedSplits = collect($allSplits)->groupBy('AthleteId');
+            $finalScores = collect($baseScores)->map(function ($score) use ($groupedSplits) {
+                $athleteId = $score['AthleteId'];
+                $score['TimingPoints'] = $groupedSplits->get($athleteId, collect())->values()->all();
+                return $score;
+            })->all();
+
+            return [
+                'raceData' => $raceData,
+                'athletes' => $athletes,
+                'scores'   => $finalScores,
+                'last_updated' => now()->toDateTimeString()
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("RaceTiger API Error: " . $e->getMessage());
+            return null;
+        }
+    });
+
+    if (!$data) {
+        return "The timing service is currently unavailable. Please refresh in a moment.";
     }
+
+    // 2. Manual Pagination Logic (10 per page)
+    $perPage = 10;
+    $currentPage = (int) $request->input('page', 1);
+    $allScores = collect($data['scores']);
+    
+    // Slice the collection to get only the items for the current page
+    $pagedData = $allScores->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+    // Create the Paginator instance
+    $paginatedScores = new LengthAwarePaginator(
+        $pagedData, 
+        $allScores->count(), 
+        $perPage, 
+        $currentPage, 
+        [
+            'path'  => $request->url(),
+            'query' => $request->query(),
+        ]
+    );
+
+    // 3. Return View with Paginated Scores
+    return view('score', [
+        'raceData'     => $data['raceData'],
+        'athletes'     => $data['athletes'],
+        'scores'       => $paginatedScores, // Use this in your @foreach
+        'last_updated' => $data['last_updated']
+    ]);
 });
 
 
@@ -127,6 +200,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ticket', [TicketController::class, 'showTicket'])->name('ticket');
     Route::post('/select-race', [AthleteController::class, 'handleSelection'])->name('athlete.selection.handle');
     Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment'])->name('initiatePayment');
+    Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
+    Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
     Route::get('/register-athlete', [AthleteController::class, 'showAthleteForm'])->name('athlete.register');
     Route::post('/register-athlete', [AthleteController::class, 'submit'])->name('athlete.register.submit');
     Route::get('/checkout/review', [TicketController::class, 'showReviewPage'])->name('checkout.review');
@@ -134,6 +209,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPDF'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
+    Route::post('/tickets/{id}/approve', [TicketController::class, 'approve'])->name('tickets.approve');
+    Route::post('/tickets/{id}/reject', [TicketController::class, 'reject'])->name('tickets.reject');
 });
 
 /*
@@ -210,7 +287,7 @@ Route::get('/api/validate-discount', function (Illuminate\Http\Request $request)
         'message' => 'Code applied!'
     ]);
 });
-
+Route::get('/register/consent', [AthleteController::class, 'showConsent'])->name('athlete.consent');
 /*
 |--------------------------------------------------------------------------
 | External Callbacks

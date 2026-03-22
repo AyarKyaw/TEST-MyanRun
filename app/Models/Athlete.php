@@ -7,21 +7,24 @@ use Illuminate\Database\Eloquent\Model;
 class Athlete extends Model
 {
     protected $fillable = [
-    'runner_id', // MUST BE HERE
-    'face_image_path',
-    'nat_type',
-    'id_number',
-    'first_name',
-    'middle_name',
-    'last_name',
-    'father_name',
-    'dob',
-    'nationality',
-    'gender',
-    'address',
-    'phone_2',
-    'social_account',
-];
+        'runner_id',
+        'nat_type',
+        'id_number',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'father_name',
+        'dob',
+        'gender',
+        'blood_type',
+        'has_medical_condition',
+        'medical_details',
+        'nationality',
+        'address',
+        'contact',
+        'viber',
+        'face_image_path',
+    ];
 
     /**
      * Get the User associated with this Athlete

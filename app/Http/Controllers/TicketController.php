@@ -8,12 +8,13 @@ use App\Models\Ticket;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
+use Laranex\LaravelMyanmarPayments\LaravelMyanmarPayments;
 
 class TicketController extends Controller
 {
     public function showTicket()
     {
-        return view('ticket'); 
+        return view('ticket.ticket'); 
     }
 
     public function dashboard()
@@ -24,6 +25,24 @@ class TicketController extends Controller
 
         return view('dashboard.ticket-sales.ticket', compact('customers', 'totalCount'));
     }
+
+    public function approve($id)
+{
+    $ticket = \App\Models\Ticket::findOrFail($id);
+    $ticket->status = 'approved';
+    $ticket->save();
+
+    return back()->with('success', 'Ticket approved successfully!');
+}
+
+public function reject($id)
+{
+    $ticket = \App\Models\Ticket::findOrFail($id);
+    $ticket->status = 'rejected';
+    $ticket->save();
+
+    return back()->with('error', 'Ticket has been rejected.');
+}
 
     // Helper method to avoid repeating code
     private function getTicketData($id) {
@@ -66,132 +85,153 @@ class TicketController extends Controller
     }
 
     public function initiatePayment($id)
-    {
-        $orderData = session('checkout_data');
+{
+    $orderData = session('checkout_data');
+    if (!$orderData) return redirect()->route('athlete.register')->with('error', 'Session expired.');
 
-        if (!$orderData) {
-            return redirect()->route('athlete.register')->with('error', 'Session expired.');
-        }
+    $price = (string) preg_replace('/[^0-9]/', '', $orderData['price']);
+    $nonce = Str::random(32);
+    $timestamp = (string)time();
+    $merchOrderId = $id . '_' . $timestamp;
 
-        // 1. Create the Ticket as 'pending'
-        $rawPrice = $orderData['price'] ?? 0;
-        $price = (int) preg_replace('/[^0-9]/', '', $rawPrice);
+    // 1. Step 1: Flatten ALL non-empty values into one set (M)
+    // ONLY use the fields shown in your documentation's example stringA
+    $m = [
+        'appid'          => env('KBZ_PAY_APP_ID'),
+        'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
+        'merch_order_id' => $merchOrderId,
+        'method'         => 'kbz.payment.precreate',
+        'nonce_str'      => $nonce,
+        'notify_url'     => env('KBZ_PAY_NOTIFY_URL'),
+        'timestamp'      => $timestamp,
+        'total_amount'   => $price,
+        'trade_type'     => 'PAY_BY_QRCODE',
+        'trans_currency' => 'MMK',
+        'version'        => '1.0',
+    ];
 
-        $ticket = Ticket::create([
-            'runner_id' => $id,
-            'event'     => $orderData['event'] ?? 'Official Race 2026',
-            'category'  => $orderData['category'],
-            'price'     => $price,
-            'status'    => 'pending',
-        ]);
+    // 2. Sort non-empty values in ascending alphabetical order
+    ksort($m);
 
-        // 2. Prepare KBZ API request data
-        $kbzData = [
-            'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
-            'appid'          => env('KBZ_PAY_APP_ID'),
-            'merch_order_id' => (string)$ticket->id,
-            'total_amount'   => (string)$price,
-            'trade_type'     => 'PAY_BY_QRCODE',
-            'title'          => 'MyanRun Registration',
-            'nonce_str'      => Str::random(32),
-            'method'         => 'precreate',
-            'notify_url'     => env('KBZ_PAY_NOTIFY_URL'),
-        ];
-
-        // 3. Generate signature
-        $kbzData['sign'] = $this->generateKbzSignature($kbzData);
-
-        try {
-            // 4. Call KBZ UAT API
-            $response = Http::post(env('KBZ_PAY_API_URL'), [
-                'Request' => $kbzData
-            ]);
-
-            if (!$response->successful()) {
-                Log::error('KBZ HTTP Error', ['body' => $response->body()]);
-                return back()->with('error', 'KBZ API connection failed');
-            }
-
-            $result = $response->json();
-
-            Log::info('KBZ Request:', $kbzData);
-            Log::info('KBZ Response:', $result);
-
-            if (isset($result['Response']['return_code']) && $result['Response']['return_code'] === 'SUCCESS') {
-                // 5. Payment initialized, save QR code string
-                $qrString = $result['Response']['qr_code'] ?? null;
-
-                if (!$qrString) {
-                    return back()->with('error', 'QR code not returned from KBZ');
-                }
-                
-                $ticket->update(['qr_code_str' => $qrString]);
-
-                // 6. Clear session and show QR page
-                session()->forget('checkout_data');
-                return view('payment.kbz_qr', compact('qrString', 'ticket'));
-            }
-
-            // 7. If API call failed
-            return back()->with('error', 'KBZPay Initialization Failed: ' . ($result['Response']['return_msg'] ?? 'Unknown error'));
-
-        } catch (\Exception $e) {
-            // 8. Fallback for local testing
-            $qrString = 'TEST_PAYMENT_DATA_FOR_' . $ticket->id;
-            $ticket->update(['qr_code_str' => $qrString]);
-            return view('payment.kbz_qr', compact('qrString', 'ticket'))
-                ->with('error', 'KBZPay API not reachable, using test QR code.');
+    // 3. Join into string A (key1=value1&key2=value2)
+    $queries = [];
+    foreach ($m as $key => $value) {
+        if ($value !== "" && $value !== null) {
+            $queries[] = $key . "=" . $value;
         }
     }
-    /**
-     * Signature helper for KBZPay
-     */
-    private function generateKbzSignature($params) {
-        ksort($params);
-        $stringA = "";
-        foreach ($params as $key => $value) {
-            if ($value != "" && !is_array($value)) {
-                $stringA .= $key . "=" . $value . "&";
-            }
+    $stringA = implode('&', $queries);
+
+    // 4. Step 2: Add "&key=" and perform SHA256
+    $stringToSign = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
+    $sign = strtoupper(hash('sha256', $stringToSign));
+
+    // 5. Construct the Final JSON (The "Transferred Parameters")
+    $payload = [
+        'Request' => [
+            'timestamp'   => $timestamp,
+            'notify_url'  => env('KBZ_PAY_NOTIFY_URL'),
+            'nonce_str'   => $nonce,
+            'sign_type'   => 'SHA256',
+            'method'      => 'kbz.payment.precreate',
+            'sign'        => $sign,
+            'version'     => '1.0',
+            'biz_content' => [
+                'merch_order_id' => $merchOrderId,
+                'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
+                'appid'          => env('KBZ_PAY_APP_ID'),
+                'trade_type'     => 'PAY_BY_QRCODE',
+                'total_amount'   => $price,
+                'trans_currency' => 'MMK'
+            ]
+        ]
+    ];
+
+    try {
+        // Use HTTP as per your XLSX previously
+        $url = "http://api-uat.kbzpay.com/payment/gateway/uat/precreate";
+        
+        $response = Http::withoutVerifying()
+            ->withBody(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), 'application/json')
+            ->post($url);
+
+        $result = $response->json();
+
+        if (isset($result['Response']['result']) && $result['Response']['result'] === 'SUCCESS') {
+            $qrString = $result['Response']['qr_code'];
+            return view('payment.kbz_qr', compact('qrString'));
         }
-        $stringSignTemp = $stringA . "key=" . env('KBZ_PAY_APP_KEY');
-        return strtoupper(hash('sha256', $stringSignTemp));
+
+        return back()->with('error', 'KBZ Error: ' . ($result['Response']['msg'] ?? 'Auth Failed'));
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Connection Error: ' . $e->getMessage());
     }
+}
+
+private function generateKbzSignature($params) {
+    // 1. Flatten the structure for signing (KBZ standard for Precreate)
+    $biz = $params['biz_content'];
+    
+    $all = [
+        'appid'           => $params['appid'],
+        'merch_code'      => $params['merch_code'],
+        'merch_order_id'  => $biz['merch_order_id'],
+        'method'          => $params['method'],
+        'nonce_str'       => $params['nonce_str'],
+        'notify_url'      => $params['notify_url'],
+        'timestamp'       => $params['timestamp'],
+        'title'           => $biz['title'],
+        'total_amount'    => $biz['total_amount'],
+        'trade_type'      => $biz['trade_type'],
+        'trans_currency'  => $biz['trans_currency'],
+        'version'         => $params['version'],
+    ];
+
+    // 2. Sort alphabetically
+    ksort($all);
+
+    // 3. Build string: key1=value1&key2=value2
+    $queries = [];
+    foreach ($all as $k => $v) {
+        $queries[] = $k . "=" . $v;
+    }
+
+    $stringA = implode('&', $queries);
+    $stringSignTemp = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
+    
+    Log::debug("[KBZ_FINAL_STRING]: " . $stringSignTemp);
+    
+    return strtoupper(hash('sha256', $stringSignTemp));
+}
 
     public function kbzCallback(Request $request)
     {
-        $payload = $request->all();
+        $payload = $request->input('Request');
+        
+        if (!$payload) {
+            return response()->json(['Response' => ['return_code' => 'FAIL', 'return_msg' => 'No Request Data']]);
+        }
+
         Log::info('KBZ Callback received:', $payload);
 
-        // 1. Check if the payload has the 'Request' wrapper from KBZ
-        if (isset($payload['Request'])) {
-            $data = $payload['Request'];
-            
-            // Use 'merch_order_id' which you pass when creating the QR
-            $orderId = $data['merch_order_id'] ?? null;
+        if (($payload['result'] ?? null) === 'SUCCESS') {
+            // 3. EXTRACT THE ID: If we sent "31_1773974866", this gets "31"
+            $fullOrderId = $payload['merch_order_id'];
+            $parts = explode('_', $fullOrderId);
+            $realTicketId = $parts[0]; 
 
-            if (($data['result'] ?? null) === 'SUCCESS' && $orderId) {
-                
-                // 2. Find the ticket. Note: Make sure 'id' matches what you sent to KBZ
-                $ticket = Ticket::find($orderId);
+            $ticket = Ticket::find($realTicketId); 
 
-                if ($ticket && $ticket->status !== 'confirmed') {
-                    $ticket->update([
-                        'status' => 'confirmed',
-                        // Store the KBZ transaction reference for your records
-                        'transaction_id' => $data['kbz_ref_no'] ?? null 
-                    ]);
-                    Log::info("Ticket #{$orderId} successfully paid and confirmed.");
-                }
-            } else {
-                Log::warning("KBZ payment failed", [
-                    'orderId' => $orderId,
-                    'payload' => $data
+            if ($ticket && $ticket->status !== 'confirmed') {
+                $ticket->update([
+                    'status' => 'confirmed',
+                    'transaction_id' => $payload['kbz_ref_no'] ?? null 
                 ]);
+                Log::info("Ticket #{$realTicketId} confirmed via KBZ Callback.");
             }
         }
 
-        // 3. You MUST return this exact JSON so KBZ stops retrying
         return response()->json([
             'Response' => [
                 'return_code' => 'SUCCESS',
@@ -200,6 +240,25 @@ class TicketController extends Controller
         ]);
     }
 
+    public function initiatePayment_s(Request $request)
+    {
+        $order = session('pending_registration');
+        if (!$order) {
+            return redirect()->route('athlete.register')->with('error', 'Session expired.');
+        }
+
+        // Prepare data for the QR page
+        $paymentData = [
+            'amount' => $request->total_amount, // Pass this from a hidden input or recalculate
+            'transaction_id' => 'MR-' . strtoupper(uniqid()),
+            'account_name' => 'Runderful Myanmar Co., Ltd',
+            'kbz_pay_qr' => asset('images/payments/kbzpay-qr.png'), // Path to your QR image
+        ];
+
+        session(['payment_data' => $paymentData]);
+
+        return view('ticket.qr', compact('order', 'paymentData'));
+    }
     /**
      * New Method: Use this for your Static Site (myanrun.com) 
      * to check if payment is done.
@@ -218,9 +277,11 @@ class TicketController extends Controller
         ]);
     }
 
+    
+
     public function showReviewPage()
     {
-        $order = session('checkout_data');
+        $order = session('pending_registration');
         $user = auth()->user();
         if (!$order) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
@@ -235,6 +296,6 @@ class TicketController extends Controller
         $total = $subtotal + $serviceFee;
         $fullName = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
 
-        return view('checkout', compact('order', 'subtotal', 'serviceFee', 'total', 'fullName'));
+        return view('ticket.checkout', compact('order', 'subtotal', 'serviceFee', 'total', 'fullName'));
     }
 }

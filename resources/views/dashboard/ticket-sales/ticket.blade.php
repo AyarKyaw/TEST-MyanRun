@@ -109,11 +109,13 @@
                                         {{-- Status with Badge --}}
                                         <td>
                                             @if($customer->status == 'pending')
-                                                <span class="badge light badge-warning">Pending</span>
-                                            @elseif($customer->status == 'confirmed')
-                                                <span class="badge light badge-success">Confirmed</span>
+                                                <span class="badge light badge-warning">Pending Approval</span>
+                                            @elseif($customer->status == 'approved')
+                                                <span class="badge light badge-success">Approved</span>
+                                            @elseif($customer->status == 'rejected')
+                                                <span class="badge light badge-danger">Rejected</span>
                                             @else
-                                                <span class="badge light badge-danger">{{ ucfirst($customer->status) }}</span>
+                                                <span class="badge light badge-dark">{{ ucfirst($customer->status) }}</span>
                                             @endif
                                         </td>
                                         
@@ -121,12 +123,27 @@
                                         <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
                                         
                                         {{-- Action Buttons --}}
-                                        <td>
-                                            <div class="d-flex">
-                                                <a href="#" class="btn btn-primary shadow btn-xs btn-square me-1"><i class="fas fa-pencil-alt"></i></a>
-                                                <button type="button" class="btn btn-danger shadow btn-xs btn-square"><i class="fa fa-trash"></i></button>
-                                            </div>
-                                        </td>
+<td>
+    <div class="d-flex">
+        @if($customer->status == 'pending')
+            {{-- Approve Button --}}
+            <form action="{{ route('tickets.approve', $customer->id) }}" method="POST" class="me-1">
+                @csrf
+                <button type="submit" class="btn btn-success shadow btn-xs btn-square" title="Approve">
+                    <i class="fa fa-check"></i>
+                </button>
+            </form>
+
+            {{-- Reject Button --}}
+            <form action="{{ route('tickets.reject', $customer->id) }}" method="POST" class="me-1">
+                @csrf
+                <button type="submit" class="btn btn-warning shadow btn-xs btn-square" title="Reject">
+                    <i class="fa fa-times"></i>
+                </button>
+            </form>
+        @endif
+    </div>
+</td>
                                     </tr>
                                     @empty
                                     <tr>

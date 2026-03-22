@@ -1,11 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\Order;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
 class PaymentController extends Controller
 {
     public function handleKbzCallback(Request $request)
@@ -51,5 +52,52 @@ class PaymentController extends Controller
         $expectedSign = strtoupper(hash('sha256', $stringSignTemp));
 
         return hash_equals($expectedSign, $receivedSign);
+    }
+
+    public function verifyPayment(Request $request)
+    {
+        // 1. Validation
+        $request->validate([
+            'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'amount'       => 'required',
+            'bib_name'     => 'required',
+            'category'     => 'required',
+        ]);
+
+        // 2. Retrieve session data
+        $order = session('pending_registration');
+
+        if (!$order) {
+            return redirect()->route('athlete.register')->with('error', 'Session expired. Please try again.');
+        }
+
+        // 3. Handle File Upload
+        $saveDir = public_path('uploads/payments');
+        if (!\File::exists($saveDir)) {
+            \File::makeDirectory($saveDir, 0777, true);
+        }
+
+        $imageName = 'slip_race_' . time() . '.' . $request->payment_slip->extension();
+        $request->payment_slip->move($saveDir, $imageName);
+
+        // 4. Create the Ticket (REMOVED payment_slip to match your DB)
+        Ticket::create([
+            'athlete_id'       => $order['athlete_id'], 
+            'bib_name'         => $request->bib_name,
+            'bib_number'       => $order['bib_number'], 
+            'category'         => $order['category'] ?? $request->category,
+            'price'            => (int)str_replace(',', '', $request->amount),
+            'event'            => $order['event'], 
+            't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
+            'experience_level' => $order['exp_level'] ?? 'Beginner', // Added this as it's in your DB
+            'transaction_id'   => $imageName, // The image name goes here!
+            'status'           => 'pending', 
+        ]);
+
+        // 5. Clear session
+        session()->forget('pending_registration');
+
+        // 6. Redirect
+        return redirect()->route('user.dashboard')->with('success', 'Registration submitted! We will verify your payment slip soon.');
     }
 }
