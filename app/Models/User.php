@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class User extends Authenticatable
 {
@@ -33,10 +34,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-public function tickets(): HasMany
+public function tickets(): HasManyThrough
 {
-    // The second parameter tells Laravel to look for 'athlete_id' instead of 'user_id'
-    return $this->hasMany(Ticket::class, 'athlete_id');
+    return $this->hasManyThrough(
+        Ticket::class,     // The final model we want (Ticket)
+        Athlete::class,    // The middle model (Athlete)
+        'runner_id',       // Foreign key on Athletes table (User's runner_id)
+        'athlete_id',      // Foreign key on Tickets table (Athlete's id)
+        'runner_id',       // Local key on Users table
+        'id'               // Local key on Athletes table
+    );
 }
     /**
      * Auto-generate Runner ID on creation

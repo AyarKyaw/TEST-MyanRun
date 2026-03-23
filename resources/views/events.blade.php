@@ -91,10 +91,9 @@
         
         <div class="card-body p-4">
             <h4 class="h5 font-weight-bold text-dark mb-4">{{ $event->name }}</h4>
-            
+            <div class="bg-dark text-white p-2 mb-3 rounded text-xs" style="font-family: monospace; border: 1px solid #C3E92D;">
             <div class="d-flex justify-content-between align-items-center border-top pt-3">
                 <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
-                
                @php
                     // Trim both sides to ensure a perfect match and check if array exists
                     $eventName = trim($event->name);
