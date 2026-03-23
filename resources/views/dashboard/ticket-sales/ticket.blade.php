@@ -144,12 +144,12 @@
                     <form action="" method="GET">
                         <div class="input-group">
                             <input type="text" 
-                                   id="tableSearch" 
-                                   name="search"
-                                   class="form-control border-primary" 
-                                   placeholder="Search Name or BIB..." 
-                                   value="{{ request('search') }}"
-                                   style="font-size: 18px; height: 50px;">
+                                id="tableSearch" 
+                                name="search"
+                                class="form-control border-primary" 
+                                placeholder="Search Name or BIB..." 
+                                value="{{ request('search') }}"
+                                style="font-size: 18px; height: 50px;">
                             <button class="btn btn-primary px-4" type="submit">
                                 <i class="fa fa-search"></i>
                             </button>
@@ -173,21 +173,24 @@
                     <div class="card">
                         <div class="card-header d-block pb-0 border-0">
                             {{-- TABS NAVIGATION --}}
-                            <ul class="nav nav-tabs" id="ticketTabs" role="tablist">
+                            <ul class="nav nav-tabs">
                                 <li class="nav-item">
-                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending" type="button">
-                                        Pending ({{ $customers->where('status', 'pending')->count() }})
-                                    </button>
+                                    <a class="nav-link {{ request('status', 'pending') == 'pending' ? 'active' : '' }}" 
+                                    href="{{ route('dashboard.events.ticket', ['status' => 'pending', 'search' => request('search')]) }}">
+                                        Pending ({{ $counts['pending'] }})
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approved" type="button">
-                                        Approved ({{ $customers->where('status', 'approved')->count() }})
-                                    </button>
+                                    <a class="nav-link {{ request('status') == 'approved' ? 'active' : '' }}" 
+                                    href="{{ route('dashboard.events.ticket', ['status' => 'approved', 'search' => request('search')]) }}">
+                                        Approved ({{ $counts['approved'] }})
+                                    </a>
                                 </li>
                                 <li class="nav-item">
-                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
-                                        Rejected ({{ $customers->where('status', 'rejected')->count() }})
-                                    </button>
+                                    <a class="nav-link {{ request('status') == 'rejected' ? 'active' : '' }}" 
+                                    href="{{ route('dashboard.events.ticket', ['status' => 'rejected', 'search' => request('search')]) }}">
+                                        Rejected ({{ $counts['rejected'] }})
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -232,6 +235,17 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                        <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
+                                            <div class="text-muted fs-14">
+                                                Showing <strong>{{ $customers->firstItem() }}</strong> 
+                                                to <strong>{{ $customers->lastItem() }}</strong> 
+                                                of <strong>{{ $customers->total() }}</strong> entries
+                                            </div>
+                                            
+                                            <div class="pagination-container">
+                                                {{ $customers->links('pagination::bootstrap-5') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -272,6 +286,17 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                        <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
+                                            <div class="text-muted fs-14">
+                                                Showing <strong>{{ $customers->firstItem() }}</strong> 
+                                                to <strong>{{ $customers->lastItem() }}</strong> 
+                                                of <strong>{{ $customers->total() }}</strong> entries
+                                            </div>
+                                            
+                                            <div class="pagination-container">
+                                                {{ $customers->links('pagination::bootstrap-5') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -312,6 +337,17 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                        <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
+                                            <div class="text-muted fs-14">
+                                                Showing <strong>{{ $customers->firstItem() }}</strong> 
+                                                to <strong>{{ $customers->lastItem() }}</strong> 
+                                                of <strong>{{ $customers->total() }}</strong> entries
+                                            </div>
+                                            
+                                            <div class="pagination-container">
+                                                {{ $customers->links('pagination::bootstrap-5') }}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
