@@ -125,12 +125,12 @@ public function reject($id)
     
     if (\Illuminate\Support\Facades\File::exists($fontPath)) {
         // --- DRAW TEXT ON TICKET ---
-        \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $bibNumber);
-        \imagettftext($image, 22, 0, 1050, 90, $white, $fontPath, strtoupper($bibName));
-        \imagettftext($image, 16, 0, 950, 145, $white, $fontPath, strtoupper($bibName));
+        \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, str_pad($ticket->id, 5, '0', STR_PAD_LEFT));
+        \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
+        \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
 
         // --- ADD SMALL QR CODE ---
-        $qrSize = 120;
+        $qrSize = 200;
         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&data=" . urlencode($qrContent);
         
         $ctx = stream_context_create(['http' => ['timeout' => 5]]);
@@ -139,7 +139,7 @@ public function reject($id)
         if ($qrCodeRaw) {
             $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
             if ($qrCodeImage) {
-                \imagecopy($image, $qrCodeImage, 950, 230, 0, 0, $qrSize, $qrSize);
+                \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
                 \imagedestroy($qrCodeImage);
             }
         }
