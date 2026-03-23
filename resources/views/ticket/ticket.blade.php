@@ -150,7 +150,7 @@
         data-name="36 Kilometer Run" 
         data-local="160,000" 
         data-foreign="250,000"
-        data-img-local="{{ asset('images/local36.JPG') }}"
+        data-img-local="{{ asset('images/local36.jpg') }}"
         data-img-foreign="{{ asset('images/f36.jpg') }}"
         onclick="selectTicket(this)">
         <span class="category-badge">36 Kilometer</span>
