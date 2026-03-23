@@ -95,15 +95,22 @@
             <div class="d-flex justify-content-between align-items-center border-top pt-3">
                 <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
                 
-                @if($alreadyRegistered)
-                    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled>
-                        <i class="fas fa-check-circle"></i> SECURED
-                    </button>
-                @else
-                    <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
-                        ENTER NOW
-                    </a>
-                @endif
+                @php
+    // Check if this specific event name is in the user's active tickets array
+    $isRegistered = in_array($event->name, $userTickets);
+@endphp
+
+@if($isRegistered)
+    {{-- User has a pending, confirmed, or approved ticket --}}
+    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
+        <i class="fas fa-check-circle mr-1"></i> SECURED
+    </button>
+@else
+    {{-- User is free to register --}}
+    <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
+        ENTER NOW
+    </a>
+@endif
             </div>
         </div>
     </div>

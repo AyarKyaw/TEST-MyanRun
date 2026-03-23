@@ -15,6 +15,7 @@ class Athlete extends Model
         'last_name',
         'father_name',
         'dob',
+        'state',
         'gender',
         'blood_type',
         'has_medical_condition',

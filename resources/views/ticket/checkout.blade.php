@@ -115,16 +115,16 @@
         <div claass="checkout-cart-by">
             <div class="d-flex justify-content-between mb-2">
                 <div class="text-title text-muted">Subtotal</div>
-                <div class="text-title">${{ number_format($subtotal, 2) }}</div>
+                <div class="text-title">{{ number_format($subtotal, 2) }}</div>
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <div class="text-title text-muted">Service Fee</div>
-                <div class="text-title">${{ number_format($serviceFee, 2) }}</div>
+                <div class="text-title">{{ number_format($serviceFee, 2) }}</div>
             </div>
             
             <div class="d-flex justify-content-between mt-3 mb-4">
                 <h4 style="font-weight: 800; margin: 0;">Total</h4>
-                <h4 style="font-weight: 800; color: #000; margin: 0;">${{ number_format($total, 2) }}</h4>
+                <h4 style="font-weight: 800; color: #000; margin: 0;">{{ number_format($total, 2) }}</h4>
             </div>
 
             <form action="{{ route('initiatePayment_s', ['id' => Auth::user()->runner_id]) }}" method="POST">

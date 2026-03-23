@@ -133,7 +133,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div class="ticket-card active" id="card-16Kilometer"
                     style="background-image: url('{{ asset('images/home_banner/Run2.JPG') }}');" 
-                    data-name="16 Kilometer Run" data-local="120,000" data-foreign="150,000"
+                    data-name="16 Kilometer Run" data-local="120,000" data-foreign="200,000"
                     data-img-local="{{ asset('images/home_banner/Run2.JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)2.JPG') }}"
                     onclick="selectTicket(this)">
@@ -143,12 +143,12 @@
 
                 <div class="ticket-card" id="card-36Kilometer"
                     style="background-image: url('{{ asset('images/home_banner/Home Banner (2).JPG') }}');" 
-                    data-name="36 Kilometer Run" data-local="150,000" data-foreign="200,000"
+                    data-name="36 Kilometer Run" data-local="160,000" data-foreign="250,000"
                     data-img-local="{{ asset('images/home_banner/Home Banner (2).JPG') }}"
                     data-img-foreign="{{ asset('images/home_banner/Run(F)1.jpeg') }}"
                     onclick="selectTicket(this)">
                     <span class="category-badge">36 Kilometer</span>
-                    <div class="price-display price-tag">150,000 <span class="text-lg opacity-60">MMK</span></div>
+                    <div class="price-display price-tag">160,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
             </div>
 
@@ -180,7 +180,31 @@
 @push('scripts')
 <script>
     let currentType = 'local';
+    document.addEventListener('DOMContentLoaded', function() {
+        const natType = document.getElementById('hidden_nat_type').value;
+        const nrcContainer = document.getElementById('nrc_container');
+        const passportContainer = document.getElementById('passport_container');
+        const idLabel = document.getElementById('id_label');
 
+        // Logic to toggle containers based on the session/request type
+        if (natType === 'foreigner') {
+            nrcContainer.classList.add('hidden');
+            passportContainer.classList.remove('hidden');
+            idLabel.innerText = "Passport Information";
+            
+            // Highlight the Foreigner label visually
+            document.getElementById('label-foreigner').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('label-foreigner').classList.add('border-[#C3E92D]', 'bg-lime-50');
+        } else {
+            nrcContainer.classList.remove('hidden');
+            passportContainer.classList.add('hidden');
+            idLabel.innerText = "NRC Information";
+            
+            // Highlight the National label visually
+            document.getElementById('label-national').classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('label-national').classList.add('border-[#C3E92D]', 'bg-lime-50');
+        }
+    });
     function updatePricing(type) {
         currentType = type;
         const backendValue = (type === 'local') ? 'national' : 'foreigner';

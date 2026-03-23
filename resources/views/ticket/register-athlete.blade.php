@@ -362,10 +362,65 @@
                             class="input-field">
                     </div>
                     <div>
-                        <label class="label-text">Nationality</label>
-                        <input type="text" name="nationality" value="{{ old('nationality', 'Myanmar') }}" 
-                               oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" class="input-field">
-                    </div>
+                    <label class="label-text">Nationality</label>
+                    
+                    @php
+                        $countries = [
+                            "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", 
+                            "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", 
+                            "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", 
+                            "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", 
+                            "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", 
+                            "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", 
+                            "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark", 
+                            "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", 
+                            "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Fiji", 
+                            "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", 
+                            "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", 
+                            "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", 
+                            "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", 
+                            "Kiribati", "Korea, North", "Korea, South", "Kuwait", "Kyrgyzstan", "Laos", 
+                            "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", 
+                            "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", 
+                            "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", 
+                            "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", 
+                            "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", 
+                            "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", 
+                            "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", 
+                            "Russian Federation", "Rwanda", "St Kitts & Nevis", "St Lucia", "Saint Vincent & the Grenadines", 
+                            "Samoa", "San Marino", "Sao Tome & Principe", "Saudi Arabia", "Senegal", "Serbia", 
+                            "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", 
+                            "Somalia", "South Africa", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", 
+                            "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", 
+                            "Thailand", "Togo", "Tonga", "Trinidad & Tobago", "Tunisia", "Turkey", "Turkmenistan", 
+                            "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", 
+                            "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", 
+                            "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+                        ];
+                        
+                        $isNational = (old('nat_type', $athlete->nat_type ?? $type) == 'national');
+                        $currentNationality = old('nationality', $athlete->nationality ?? ($isNational ? 'Myanmar' : ''));
+                    @endphp
+
+                    @if($isNational)
+                        <div class="relative">
+                            <input type="text" value="Myanmar" class="input-field bg-slate-100 cursor-not-allowed opacity-75" readonly>
+                            <input type="hidden" name="nationality" value="Myanmar">
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2">
+                                <i class="fas fa-lock text-slate-400 text-[10px]"></i>
+                            </div>
+                        </div>
+                    @else
+                        <select name="nationality" id="nationality_select" class="input-field w-full" required>
+                            <option value="">Select Country</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country }}" {{ $currentNationality == $country ? 'selected' : '' }}>
+                                    {{ $country }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
+                </div>
                     <div>
                         <label class="label-text">Gender</label>
                         <select name="gender" id="gender_select" class="input-field" onchange="updateBib()">
@@ -373,13 +428,32 @@
                             <option value="female" {{ old('gender', $athlete->gender ?? 'male') == 'female' ? 'selected' : '' }}>Female</option>
                         </select>
                     </div>
+                    @if($isNational)
                     <div>
-                        <label class="label-text">State</label>
-                        <select name="state" class="input-field">
-                            <option value="yangon">Yangon</option>
-                            <option value="mandalay">Mandalay</option>
+                        <label class="label-text font-semibold">Division</label>
+                        <select name="state" class="input-field w-full mt-1">
+                            <option value="">Select Division</option>
+
+                            <option value="kachin" {{ (old('state', $athlete->state ?? '') == 'kachin') ? 'selected' : '' }}>Kachin State</option>
+                            <option value="kayah" {{ (old('state', $athlete->state ?? '') == 'kayah') ? 'selected' : '' }}>Kayah State</option>
+                            <option value="kayin" {{ (old('state', $athlete->state ?? '') == 'kayin') ? 'selected' : '' }}>Kayin State (Karen)</option>
+                            <option value="chin" {{ (old('state', $athlete->state ?? '') == 'chin') ? 'selected' : '' }}>Chin State</option>
+                            <option value="mon" {{ (old('state', $athlete->state ?? '') == 'mon') ? 'selected' : '' }}>Mon State</option>
+                            <option value="rakhine" {{ (old('state', $athlete->state ?? '') == 'rakhine') ? 'selected' : '' }}>Rakhine State</option>
+                            <option value="shan" {{ (old('state', $athlete->state ?? '') == 'shan') ? 'selected' : '' }}>Shan State</option>
+
+                            <option value="sagaing" {{ (old('state', $athlete->state ?? '') == 'sagaing') ? 'selected' : '' }}>Sagaing Region</option>
+                            <option value="tanintharyi" {{ (old('state', $athlete->state ?? '') == 'tanintharyi') ? 'selected' : '' }}>Tanintharyi Region</option>
+                            <option value="bago" {{ (old('state', $athlete->state ?? '') == 'bago') ? 'selected' : '' }}>Bago Region</option>
+                            <option value="magway" {{ (old('state', $athlete->state ?? '') == 'magway') ? 'selected' : '' }}>Magway Region</option>
+                            <option value="mandalay" {{ (old('state', $athlete->state ?? '') == 'mandalay') ? 'selected' : '' }}>Mandalay Region</option>
+                            <option value="yangon" {{ (old('state', $athlete->state ?? '') == 'yangon') ? 'selected' : '' }}>Yangon Region</option>
+                            <option value="ayeyarwady" {{ (old('state', $athlete->state ?? '') == 'ayeyarwady') ? 'selected' : '' }}>Ayeyarwady Region</option>
+
+                            <option value="naypyidaw" {{ (old('state', $athlete->state ?? '') == 'naypyidaw') ? 'selected' : '' }}>Naypyidaw</option>
                         </select>
                     </div>
+                    @endif
                     <div class="md:col-span-2">
                         <label class="label-text">Full Address</label>
                         <textarea name="address" rows="3" class="input-field resize-none" placeholder="Residential Address">{{ old('address', $athlete->address ?? '') }}</textarea>
@@ -400,7 +474,7 @@
                     </div>
                     <div>
                         <label class="label-text">Viber</label>
-                        <input type="text" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="11" 
+                        <input type="text" placeholder="09 Eng-Num Only" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="11" 
                         maxlength="13">
                     </div>
                     <div>
@@ -410,7 +484,7 @@
                     </div>
                     <div>
                         <label class="label-text">Emergency Contact Number</label>
-                        <input type="tel" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="11" 
+                        <input type="tel" placeholder="09 Eng-Num Only" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="11" 
                             maxlength="13" 
                             oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field">
                     </div>
@@ -420,13 +494,13 @@
             <div class="section-card">
                 <div class="flex items-center mb-8">
                     <span class="w-10 h-10 bg-[#C3E92D] text-slate-900 rounded-xl flex items-center justify-center font-black mr-4 shadow-lg shadow-lime-100">04</span>
-                    <h3 class="text-xl font-black text-slate-800 uppercase italic">health Info</h3>
+                    <h3 class="text-xl font-black text-slate-800 uppercase italic">Participant's info</h3>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">BIB Name</label>
-                        <input type="text" name="bib_name" value="{{ old('bib_name', auth()->user()->bib_name) }}" required 
-                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" maxlength="20">
+                        <input type="text" placeholder="Max 10 letter Only" name="bib_name" value="{{ old('bib_name', auth()->user()->bib_name) }}" required 
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9 ]/g, '');" class="input-field" maxlength="10">
                     </div>
                     <div>
                         <label class="label-text">BIB Number</label>
@@ -439,10 +513,10 @@
                             <option value="M">M</option>
                             <option value="L">L</option>
                             <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                            <option value="XXXL">XXXL</option>
-                            <option value="XXXXL">XXXXL</option>
-                            <option value="XXXXXL">XXXXXL</option>
+                            <option value="2XL">2XL</option>
+                            <option value="3XL">3XL</option>
+                            <option value="4XL">4XL</option>
+                            <option value="5XL">5XL</option>
                         </select>
                     </div>
                     <div>
@@ -820,7 +894,7 @@ const districtOptions = {
     9: ["ကဆန", "ကပတ", "ခမစ", "ခအဇ", "ငဇန", "ငသရ", "စကန", "စကတ", "ညဥန", "တကန", "တတဥ", "တသန", "နထက", "ပကခ", "ပဂန", "ပဘန", "ပမန", "ပလန", "ပသက", "ပဥလ", "မမန", "မကန", "မခန", "မတရ", "မထလ", "မနတ", "မနန", "မရတ", "မရမ", "မလန", "မသန", "မဟမ", "ရမသ", "လဝန", "ဝတန", "သစန", "သပက", "အမဇ", "အမရ", "ဇယသ", "ဇဗသ", "ဒဏသ", "ပဗသ", "ဥတသ"],
     10: ["ကခမ", "ကထန", "ကမရ", "ခဆန", "ခဇန", "ပမန", "ဘလန", "မဒန", "မလမ", "ရမန", "လမန", "သထန", "သဖရ"],
     11: ["ကတန", "ကတလ", "ကဖန", "ဂမန", "စတန", "တကန", "တပဝ", "ပဏတ", "ပတန", "ဘသတ", "မတန", "မပတ", "မပန", "မအတ", "မအန", "မဥန", "ရဗန", "ရသတ", "သတန", "အမန"],
-    12: ["ကကက", "ကခက", "ကတတ", "ကတန", "ကမတ", "ကမန", "ကမရ", "ခရန", "စခန","ဆကခ", "ဆကတ", "ဆကန", "တကန", "တတထ", "တတန", "တမန", "ထတပ", "ဒဂဆ", "ဒဂတ", "ဒဂန", "ဒပန", "ပဗတ", "ပဘတ", "မကန", "မဂဒ", "မဂလာ", "ရကန", "လကန", "လှတ", "သကတ", "သဃက", "သလာ", "အလုံ"],
+    12: ["ကကက", "ကခက", "ကတတ", "ကတန", "ကမတ", "ကမန", "ကမရ", "ခရန", "စခန","ဆကခ", "ဆကတ", "ဆကန", "တကန", "တတထ", "တတန", "တမန", "ထတပ", "ဒဂဆ", "ဒဂတ", "ဒဂန", "ဒပန", "ပဗတ", "ပဘတ", "မကန", "မဂဒ", "မဂလာ", "ရကန", "လသန","သကတ", "သဃက", "သလာ"],
     13: ["ကတန", "ကလန", "ကလမ", "ကဟန", "ခလန", "စဆန", "ဆပန", "တကန", "တချလ", "တယန", "နခတ", "နစန", "နပတ", "နမတ", "နသန", "ပခန", "ပဆန", "ပလန", "ဖခန", "မကန", "မခန", "မငန", "မတန", "မထန", "မပန", "မဖန", "မယန", "မရန", "မလန", "မသန", "ယငန", "ရခန", "ရစန", "လခန", "လရှန", "ဟပန", "ဟပတ", "အစန"],
     14: ["ကကန", "ကပန", "ကလန", "ခပန", "ငပတ", "စလန", "ဇလန", "ညတန", "တတန", "ဒနဖ", "နပတ", "ပတန", "ဖပန", "ဗကန", "ဘကလ", "မအပ", "မအန", "မဥန", "ရကန", "လပတ", "ဝခမ", "ဟသတ", "အမန"]
 };

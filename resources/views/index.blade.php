@@ -22,7 +22,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
+                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -30,9 +30,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
+                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -44,7 +44,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -55,7 +55,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -66,7 +66,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
                                     </li>
                                 </ul>
                             </div>
@@ -92,7 +92,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
+                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -100,9 +100,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
+                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -114,7 +114,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -125,7 +125,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -136,7 +136,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
                                     </li>
                                 </ul>
                             </div>
@@ -161,7 +161,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
+                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -169,9 +169,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
+                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -183,7 +183,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -194,7 +194,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -205,7 +205,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
                                     </li>
                                 </ul>
                             </div>
@@ -230,7 +230,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
+                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -238,9 +238,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
+                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -252,7 +252,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -263,7 +263,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -274,7 +274,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
                                     </li>
                                 </ul>
                             </div>
@@ -300,7 +300,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="dinner/tickets/1" class="flat-button">Join Myanrun</a>
+                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -308,9 +308,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                             <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/ticket1_1.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="dinner/tickets/1" class="">KBZ Community 10-mile Run 2026 Dinner</a>
+                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -322,7 +322,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">21 March, 2026(Saturday)</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -333,7 +333,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Start 06:00 PM - Until 9:00 PM</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -344,7 +344,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="dinner/tickets/1">Golden Duck (Kan Taw Min), Yangon</a>
+                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
                                     </li>
                                 </ul>
                             </div>
@@ -618,7 +618,7 @@
                 <div class="item wow fadeInUp animated">
                     <div class="event-infomation">
                         <div class="info">
-                            <h4><a href="event-details.html">10 Mile (Local)</a></h4>
+                            <h4><a href="event-details.html">16 KM (Local)</a></h4>
                             <p>
                                 <span>
                                     <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
@@ -628,7 +628,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                21 March, 2026 (Saturday)
+                                02 May, 2026 ( Saturday )
                             </p>
                             <p>
                                 <span>
@@ -639,7 +639,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 06:00 PM - Until 9:00 PM
+                                Start 05:00 AM
                             </p>
                             <p>
                                 <span>
@@ -650,7 +650,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Golden Duck (Kan Taw Min), Yangon
+                               Pyin Oo Lwin
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Home Banner (2).JPG') }}" alt="denpasar marathon event 2023">
@@ -658,11 +658,11 @@
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
                         <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">110,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">100,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
+                            <span style="">120,000 MMK</span><br>
+                            <!-- <span style="font-size:22px; font-weight:bold; color:#C3E92D;">100,000 MMK</span><br>
+                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small> -->
                         </p>
-                        <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
+                        <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -671,7 +671,7 @@
                 <div class="item wow fadeInUp animated">
                     <div class="event-infomation">
                         <div class="info">
-                            <h4><a href="event-details.html">5 Mile (Local)</a></h4>
+                            <h4><a href="event-details.html">36 KM (Local)</a></h4>
                             <p>
                                 <span>
                                     <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
@@ -681,7 +681,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                21 March, 2026 (Saturday)
+                                02 May, 2026 ( Saturday )
                             </p>
                             <p>
                                 <span>
@@ -692,7 +692,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 06:00 PM - Until 9:00 PM
+                                Start 05:00 AM
                             </p>
                             <p>
                                 <span>
@@ -703,7 +703,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Golden Duck (Kan Taw Min), Yangon
+                               Pyin Oo Lwin
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run2.JPG') }}" alt="denpasar marathon event 2023">
@@ -711,11 +711,9 @@
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
                         <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">100,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">90,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
+                            <span style="">160,000 MMK</span><br>
                         </p>
-                       <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
+                       <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -724,7 +722,7 @@
                 <div class="item wow fadeInUp animated">
                     <div class="event-infomation">
                         <div class="info">
-                            <h4><a href="event-details.html">3 Mile (Local)</a></h4>
+                            <h4><a href="event-details.html">16 KM (Foreigner)</a></h4>
                             <p>
                                 <span>
                                     <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
@@ -734,7 +732,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                21 March, 2026 (Saturday)
+                                02 May, 2026 ( Saturday )
                             </p>
                             <p>
                                 <span>
@@ -745,7 +743,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 06:00 PM - Until 9:00 PM
+                                Start 05:00 AM
                             </p>
                             <p>
                                 <span>
@@ -756,7 +754,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Golden Duck (Kan Taw Min), Yangon
+                               Pyin Oo Lwin
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/local1.jpg') }}" alt="denpasar marathon event 2023">
@@ -764,11 +762,9 @@
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
                         <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">80,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">70,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
+                            <span style="">200,000 MMK</span><br>
                         </p>
-                       <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
+                       <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -777,7 +773,7 @@
                 <div class="item wow fadeInUp animated">
                     <div class="event-infomation">
                         <div class="info">
-                            <h4><a href="event-details.html">10 Mile (Foreigner)</a></h4>
+                            <h4><a href="event-details.html">36 KM (Foreigner)</a></h4>
                             <p>
                                 <span>
                                     <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
@@ -787,7 +783,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               21 March, 2026 (Saturday)
+                               02 May, 2026 ( Saturday )
                             </p>
                             <p>
                                 <span>
@@ -798,7 +794,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 06:00 PM - Until 9:00 PM
+                                Start 05:00 AM
                             </p>
                             <p>
                                 <span>
@@ -809,7 +805,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Golden Duck (Kan Taw Min), Yangon
+                               Pyin Oo Lwin
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/home_banner/Run(F)1.jpeg') }}" alt="denpasar marathon event 2023">
@@ -817,118 +813,9 @@
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
                         <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">200,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">190,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
+                            <span style="">250,000 MMK</span><br>
                         </p>
-                    <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
-                        <div class="item-event-price-bg">
-                        </div>
-                    </div>
-                    <div class="bg-item-event-2"></div>
-                </div>
-                <div class="item wow fadeInUp animated">
-                    <div class="event-infomation">
-                        <div class="info">
-                            <h4><a href="event-details.html">5 Mile (Foreigner)</a></h4>
-                            <p>
-                                <span>
-                                    <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M16.5 2H14.25V1.25C14.25 1.05109 14.171 0.860322 14.0303 0.71967C13.8897 0.579018 13.6989 0.5 13.5 0.5C13.3011 0.5 13.1103 0.579018 12.9697 0.71967C12.829 0.860322 12.75 1.05109 12.75 1.25V2H5.25V1.25C5.25 1.05109 5.17098 0.860322 5.03033 0.71967C4.88968 0.579018 4.69891 0.5 4.5 0.5C4.30109 0.5 4.11032 0.579018 3.96967 0.71967C3.82902 0.860322 3.75 1.05109 3.75 1.25V2H1.5C1.10218 2 0.720644 2.15804 0.43934 2.43934C0.158035 2.72064 0 3.10218 0 3.5V18.5C0 18.8978 0.158035 19.2794 0.43934 19.5607C0.720644 19.842 1.10218 20 1.5 20H16.5C16.8978 20 17.2794 19.842 17.5607 19.5607C17.842 19.2794 18 18.8978 18 18.5V3.5C18 3.10218 17.842 2.72064 17.5607 2.43934C17.2794 2.15804 16.8978 2 16.5 2ZM16.5 6.5H1.5V3.5H3.75V4.25C3.75 4.44891 3.82902 4.63968 3.96967 4.78033C4.11032 4.92098 4.30109 5 4.5 5C4.69891 5 4.88968 4.92098 5.03033 4.78033C5.17098 4.63968 5.25 4.44891 5.25 4.25V3.5H12.75V4.25C12.75 4.44891 12.829 4.63968 12.9697 4.78033C13.1103 4.92098 13.3011 5 13.5 5C13.6989 5 13.8897 4.92098 14.0303 4.78033C14.171 4.63968 14.25 4.44891 14.25 4.25V3.5H16.5V6.5Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                21 March, 2026 (Saturday)
-                            </p>
-                            <p>
-                                <span>
-                                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9 3.75C7.21997 3.75 5.47991 4.27784 3.99987 5.26677C2.51983 6.25571 1.36628 7.66131 0.685088 9.30585C0.00389957 10.9504 -0.17433 12.76 0.172937 14.5058C0.520204 16.2516 1.37737 17.8553 2.63604 19.114C3.89472 20.3726 5.49836 21.2298 7.24419 21.5771C8.99002 21.9243 10.7996 21.7461 12.4442 21.0649C14.0887 20.3837 15.4943 19.2302 16.4832 17.7501C17.4722 16.2701 18 14.53 18 12.75C17.9973 10.3639 17.0482 8.07629 15.361 6.38905C13.6737 4.70182 11.3861 3.75273 9 3.75ZM13.2806 9.53063L9.53063 13.2806C9.46095 13.3503 9.37822 13.4056 9.28718 13.4433C9.19613 13.481 9.09855 13.5004 9 13.5004C8.90146 13.5004 8.80388 13.481 8.71283 13.4433C8.62179 13.4056 8.53906 13.3503 8.46938 13.2806C8.3997 13.2109 8.34442 13.1282 8.30671 13.0372C8.269 12.9461 8.24959 12.8485 8.24959 12.75C8.24959 12.6515 8.269 12.5539 8.30671 12.4628C8.34442 12.3718 8.3997 12.2891 8.46938 12.2194L12.2194 8.46938C12.2891 8.39969 12.3718 8.34442 12.4628 8.30671C12.5539 8.26899 12.6515 8.24958 12.75 8.24958C12.8486 8.24958 12.9461 8.26899 13.0372 8.30671C13.1282 8.34442 13.2109 8.39969 13.2806 8.46938C13.3503 8.53906 13.4056 8.62178 13.4433 8.71283C13.481 8.80387 13.5004 8.90145 13.5004 9C13.5004 9.09855 13.481 9.19613 13.4433 9.28717C13.4056 9.37822 13.3503 9.46094 13.2806 9.53063ZM6 1.5C6 1.30109 6.07902 1.11032 6.21967 0.96967C6.36033 0.829018 6.55109 0.75 6.75 0.75H11.25C11.4489 0.75 11.6397 0.829018 11.7803 0.96967C11.921 1.11032 12 1.30109 12 1.5C12 1.69891 11.921 1.88968 11.7803 2.03033C11.6397 2.17098 11.4489 2.25 11.25 2.25H6.75C6.55109 2.25 6.36033 2.17098 6.21967 2.03033C6.07902 1.88968 6 1.69891 6 1.5Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                Start 06:00 PM - Until 9:00 PM
-                            </p>
-                            <p>
-                                <span>
-                                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9 0.5C6.81273 0.502481 4.71575 1.37247 3.16911 2.91911C1.62247 4.46575 0.752481 6.56273 0.75 8.75C0.75 15.8094 8.25 21.1409 8.56969 21.3641C8.69579 21.4524 8.84603 21.4998 9 21.4998C9.15397 21.4998 9.30421 21.4524 9.43031 21.3641C9.75 21.1409 17.25 15.8094 17.25 8.75C17.2475 6.56273 16.3775 4.46575 14.8309 2.91911C13.2843 1.37247 11.1873 0.502481 9 0.5ZM9 5.75C9.59334 5.75 10.1734 5.92595 10.6667 6.25559C11.1601 6.58524 11.5446 7.05377 11.7716 7.60195C11.9987 8.15013 12.0581 8.75333 11.9424 9.33527C11.8266 9.91721 11.5409 10.4518 11.1213 10.8713C10.7018 11.2909 10.1672 11.5766 9.58527 11.6924C9.00333 11.8081 8.40013 11.7487 7.85195 11.5216C7.30377 11.2946 6.83524 10.9101 6.50559 10.4167C6.17595 9.92336 6 9.34334 6 8.75C6 7.95435 6.31607 7.19129 6.87868 6.62868C7.44129 6.06607 8.20435 5.75 9 5.75Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                Golden Duck (Kan Taw Min), Yangon
-                            </p>
-                        </div>
-                        <img decoding="async" src="{{ asset('images/home_banner/Run(F)2.JPG') }}" alt="denpasar marathon event 2023">
-                    </div>
-                    <div class="tf-info-price">
-                        <h4>Ticket</h4>
-                        <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">150,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">140,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
-                        </p>
-                            <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
-                        <div class="item-event-price-bg">
-                        </div>
-                    </div>
-                    <div class="bg-item-event-2"></div>
-                </div>
-                <div class="item wow fadeInUp animated">
-                    <div class="event-infomation">
-                        <div class="info">
-                            <h4><a href="event-details.html">3 Mile (Foreigner)</a></h4>
-                            <p>
-                                <span>
-                                    <svg width="18" height="20" viewBox="0 0 18 20" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M16.5 2H14.25V1.25C14.25 1.05109 14.171 0.860322 14.0303 0.71967C13.8897 0.579018 13.6989 0.5 13.5 0.5C13.3011 0.5 13.1103 0.579018 12.9697 0.71967C12.829 0.860322 12.75 1.05109 12.75 1.25V2H5.25V1.25C5.25 1.05109 5.17098 0.860322 5.03033 0.71967C4.88968 0.579018 4.69891 0.5 4.5 0.5C4.30109 0.5 4.11032 0.579018 3.96967 0.71967C3.82902 0.860322 3.75 1.05109 3.75 1.25V2H1.5C1.10218 2 0.720644 2.15804 0.43934 2.43934C0.158035 2.72064 0 3.10218 0 3.5V18.5C0 18.8978 0.158035 19.2794 0.43934 19.5607C0.720644 19.842 1.10218 20 1.5 20H16.5C16.8978 20 17.2794 19.842 17.5607 19.5607C17.842 19.2794 18 18.8978 18 18.5V3.5C18 3.10218 17.842 2.72064 17.5607 2.43934C17.2794 2.15804 16.8978 2 16.5 2ZM16.5 6.5H1.5V3.5H3.75V4.25C3.75 4.44891 3.82902 4.63968 3.96967 4.78033C4.11032 4.92098 4.30109 5 4.5 5C4.69891 5 4.88968 4.92098 5.03033 4.78033C5.17098 4.63968 5.25 4.44891 5.25 4.25V3.5H12.75V4.25C12.75 4.44891 12.829 4.63968 12.9697 4.78033C13.1103 4.92098 13.3011 5 13.5 5C13.6989 5 13.8897 4.92098 14.0303 4.78033C14.171 4.63968 14.25 4.44891 14.25 4.25V3.5H16.5V6.5Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                21 March, 2026 (Saturday)
-                            </p>
-                            <p>
-                                <span>
-                                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9 3.75C7.21997 3.75 5.47991 4.27784 3.99987 5.26677C2.51983 6.25571 1.36628 7.66131 0.685088 9.30585C0.00389957 10.9504 -0.17433 12.76 0.172937 14.5058C0.520204 16.2516 1.37737 17.8553 2.63604 19.114C3.89472 20.3726 5.49836 21.2298 7.24419 21.5771C8.99002 21.9243 10.7996 21.7461 12.4442 21.0649C14.0887 20.3837 15.4943 19.2302 16.4832 17.7501C17.4722 16.2701 18 14.53 18 12.75C17.9973 10.3639 17.0482 8.07629 15.361 6.38905C13.6737 4.70182 11.3861 3.75273 9 3.75ZM13.2806 9.53063L9.53063 13.2806C9.46095 13.3503 9.37822 13.4056 9.28718 13.4433C9.19613 13.481 9.09855 13.5004 9 13.5004C8.90146 13.5004 8.80388 13.481 8.71283 13.4433C8.62179 13.4056 8.53906 13.3503 8.46938 13.2806C8.3997 13.2109 8.34442 13.1282 8.30671 13.0372C8.269 12.9461 8.24959 12.8485 8.24959 12.75C8.24959 12.6515 8.269 12.5539 8.30671 12.4628C8.34442 12.3718 8.3997 12.2891 8.46938 12.2194L12.2194 8.46938C12.2891 8.39969 12.3718 8.34442 12.4628 8.30671C12.5539 8.26899 12.6515 8.24958 12.75 8.24958C12.8486 8.24958 12.9461 8.26899 13.0372 8.30671C13.1282 8.34442 13.2109 8.39969 13.2806 8.46938C13.3503 8.53906 13.4056 8.62178 13.4433 8.71283C13.481 8.80387 13.5004 8.90145 13.5004 9C13.5004 9.09855 13.481 9.19613 13.4433 9.28717C13.4056 9.37822 13.3503 9.46094 13.2806 9.53063ZM6 1.5C6 1.30109 6.07902 1.11032 6.21967 0.96967C6.36033 0.829018 6.55109 0.75 6.75 0.75H11.25C11.4489 0.75 11.6397 0.829018 11.7803 0.96967C11.921 1.11032 12 1.30109 12 1.5C12 1.69891 11.921 1.88968 11.7803 2.03033C11.6397 2.17098 11.4489 2.25 11.25 2.25H6.75C6.55109 2.25 6.36033 2.17098 6.21967 2.03033C6.07902 1.88968 6 1.69891 6 1.5Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                Start 06:00 PM - Until 9:00 PM
-                            </p>
-                            <p>
-                                <span>
-                                    <svg width="18" height="22" viewBox="0 0 18 22" fill="none"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M9 0.5C6.81273 0.502481 4.71575 1.37247 3.16911 2.91911C1.62247 4.46575 0.752481 6.56273 0.75 8.75C0.75 15.8094 8.25 21.1409 8.56969 21.3641C8.69579 21.4524 8.84603 21.4998 9 21.4998C9.15397 21.4998 9.30421 21.4524 9.43031 21.3641C9.75 21.1409 17.25 15.8094 17.25 8.75C17.2475 6.56273 16.3775 4.46575 14.8309 2.91911C13.2843 1.37247 11.1873 0.502481 9 0.5ZM9 5.75C9.59334 5.75 10.1734 5.92595 10.6667 6.25559C11.1601 6.58524 11.5446 7.05377 11.7716 7.60195C11.9987 8.15013 12.0581 8.75333 11.9424 9.33527C11.8266 9.91721 11.5409 10.4518 11.1213 10.8713C10.7018 11.2909 10.1672 11.5766 9.58527 11.6924C9.00333 11.8081 8.40013 11.7487 7.85195 11.5216C7.30377 11.2946 6.83524 10.9101 6.50559 10.4167C6.17595 9.92336 6 9.34334 6 8.75C6 7.95435 6.31607 7.19129 6.87868 6.62868C7.44129 6.06607 8.20435 5.75 9 5.75Z"
-                                            fill="#C3E92D" />
-                                    </svg>
-                                </span>
-                                Golden Duck (Kan Taw Min), Yangon
-                            </p>
-                        </div>
-                        <img decoding="async" src="{{ asset('images/home_banner/Run(F)3.JPG') }}" alt="denpasar marathon event 2023">
-                    </div>
-                    <div class="tf-info-price">
-                        <h4>Ticket</h4>
-                        <p class="price">
-                            <span style="text-decoration: line-through; color:#999;">100,000 MMK</span><br>
-                            <span style="font-size:22px; font-weight:bold; color:#C3E92D;">90,000 MMK</span><br>
-                            <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small>
-                        </p>
-
-                        <a href="https://tikkat.com.mm/detail/runderful-communityrun2026" target="_blank" class="flat-button">BUY NOW</a>
+                    <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -1013,7 +900,7 @@
                                         </select>
                                     </fieldset>
                                     <p class="form-submit">
-                                        <a name="submit" href="dinner/tickets/1" id="comment-reply"
+                                        <a name="submit" href="/ticket?event=Cherry+Trail+Run+2026" id="comment-reply"
                                 class="flat-button btn-submit-comment"><span>Join our event</span></a>
                                     </p>
                                 </form>
@@ -1548,7 +1435,7 @@
                 </h2>
                 <!-- <span class="sale wow fadeInUp animated ">-30%</span> -->
                 <!-- <img src="images/retinal/runclub.png" alt="runclub" class="wow fadeInUp animated"> -->
-                <br><br><a href="dinner/tickets/1" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
+                <br><br><a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
             </div>
         </div>
     </div><!-- banner-paralax -->
@@ -1740,7 +1627,7 @@
                                 </select>
                             </fieldset>
                             <p class="form-submit">
-                                <a name="submit" href="dinner/tickets/1" id="comment-reply"
+                                <a name="submit" href="/ticket?event=Cherry+Trail+Run+2026" id="comment-reply"
                                 class="submit-register"span>Join our event</span></a>
                             </p>
                         </form>
@@ -1764,30 +1651,30 @@
                 <div class="marathon-body">
                     
                     <div class="marathon-image">
-                      <img src="{{ asset('images/ticket1_1.jpg') }}" alt="KBZ Community 10-mile Run 2026 Dinner">
+                      <img src="{{ asset('images/cherry.jpg') }}" alt="Cherry Trail Run 2026">
                     </div>
         <!-- LEFT TEXT -->
         <div class="marathon-text">
-          <h4 class="mb-2">KBZ Community 10-mile Run 2026 Dinner</h4>
+          <h4 class="mb-2">Cherry Trail Run 2026</h4>
 
           <p class="mb-3 primary-text">
-            Registration for the KBZ Community 10-mile Run 2026 Dinner
+            Registration for the Cherry Trail Run 2026
           </p>
 
-          <p class="mb-4">
+          <!-- <p class="mb-4">
             <strong>
-              KBZ Community 10-mile Run 2026 Dinner ညစာအတွက် မှတ်ပုံတင်ခြင်း တိုက်ရိုက်ထုတ်လွှင့်နေပါသည်။
+              Cherry Trail Run 2026 ညစာအတွက် မှတ်ပုံတင်ခြင်း တိုက်ရိုက်ထုတ်လွှင့်နေပါသည်။
             </strong>
-          </p>
+          </p> -->
 
         <div class="button">
-            <a href="dinner/tickets/1" class="flat-button">Join our dinner</a>
+            <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join our event</a>
         </div>
 
           <hr>
 
-          <p class="mb-1"><strong>Date:</strong> 21 March, 2026 (Saturday)</p>
-          <p class="mb-0"><strong>Venue:</strong> Golden Duck (Kan Taw Min), Yangon</p>
+          <p class="mb-1"><strong>Date:</strong> 02 May, 2026 ( Saturday )</p>
+          <p class="mb-0"><strong>Venue:</strong>Pyin Oo Lwin</p>
         </div>
 
         <!-- RIGHT IMAGE -->
@@ -2092,7 +1979,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <script>
-const targetDate = new Date("March 21, 2026 04:00:00").getTime();
+const targetDate = new Date("May 2, 2026 05:00:00").getTime();
 
 const countdown = setInterval(() => {
     const now = new Date().getTime();

@@ -190,7 +190,7 @@ Route::post('/logout', function () {
     request()->session()->regenerateToken();
     return redirect('/')->with('success', 'You have been logged out!');
 })->name('logout');
-
+Route::get('/get-new-bib', [TicketController::class, 'getNewBib']);
 /*
 |--------------------------------------------------------------------------
 | Protected Routes (Athlete Registration)
@@ -207,7 +207,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/review', [TicketController::class, 'showReviewPage'])->name('checkout.review');
     Route::post('/checkout/process', [TicketController::class, 'processPayment'])->name('tickets.process-payment');
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
-    Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPDF'])->name('ticket.download');
+    Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
     Route::post('/tickets/{id}/approve', [TicketController::class, 'approve'])->name('tickets.approve');
     Route::post('/tickets/{id}/reject', [TicketController::class, 'reject'])->name('tickets.reject');

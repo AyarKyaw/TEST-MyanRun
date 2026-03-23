@@ -53,7 +53,7 @@
                     <span class="font-bold text-sm tracking-tight">Dashboard</span>
                 </a>
 
-                <a href="#" class="sidebar-item flex items-center p-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 group">
+                <!-- <a href="#" class="sidebar-item flex items-center p-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 group">
                     <div class="w-8"><i class="fas fa-running text-lg group-hover:text-brandDark transition-colors"></i></div>
                     <span class="font-semibold text-sm">My Races</span>
                 </a>
@@ -71,18 +71,18 @@
                 <a href="#" class="sidebar-item flex items-center p-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 group">
                     <div class="w-8"><i class="fas fa-medal text-lg group-hover:text-brandDark transition-colors"></i></div>
                     <span class="font-semibold text-sm">Achievements</span>
-                </a>
+                </a> -->
             </nav>
 
 
-<div class="p-6 mx-4 mb-6 rounded-3xl bg-slate-900 text-white relative overflow-hidden group">
+            <!-- <div class="p-6 mx-4 mb-6 rounded-3xl bg-slate-900 text-white relative overflow-hidden group">
                 <div class="relative z-10">
                     <p class="text-xs text-slate-400 font-medium">Want more perks?</p>
                     <p class="text-sm font-bold mt-1">Upgrade to Pro</p>
                     <button class="mt-3 bg-brand text-black text-[11px] px-4 py-2 rounded-xl font-bold hover:bg-white transition-colors uppercase tracking-wider">Get Started</button>
                 </div>
                 <i class="fas fa-bolt absolute -right-2 -bottom-2 text-white/10 text-6xl group-hover:scale-110 transition-transform"></i>
-            </div>
+            </div> -->
 
             <div class="p-6 border-t border-slate-50">
                 <form method="POST" action="{{ route('logout') }}">
@@ -169,7 +169,7 @@
                 </header>
 
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-12">
+<!-- <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 mb-12">
                     <div class="bg-white p-6 md:p-8 rounded-[32px] border border-slate-50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
                         <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110">
                             <i class="fas fa-route text-xl"></i>
@@ -202,7 +202,7 @@
                         </div>
                         <i class="fas fa-calendar absolute -right-4 -bottom-4 text-black/10 text-8xl transition-transform group-hover:rotate-12 group-hover:scale-110"></i>
                     </div>
-                </div>
+                </div> -->
 
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -265,10 +265,16 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <!-- <a href="{{ route('ticket.download', $ticket->id) }}" 
-                            class="flex-1 bg-slate-900 text-white text-[11px] text-center font-bold py-3 rounded-xl hover:bg-black transition-all">
-                                <i class="fas fa-file-pdf mr-2 text-brand"></i> Download Ticket
-                            </a> -->
+                            @if($ticket->status === 'approved')
+                                <a href="{{ route('ticket.download', $ticket->id) }}" 
+                                class="flex-1 bg-slate-900 text-white text-[11px] text-center font-bold py-3 rounded-xl hover:bg-black transition-all">
+                                    <i class="fas fa-file-pdf mr-2 text-brand"></i> Download Ticket
+                                </a>
+                            @else
+                                <div class="flex-1 bg-slate-100 text-slate-400 text-[11px] text-center font-bold py-3 rounded-xl cursor-not-allowed">
+                                    <i class="fas fa-lock mr-2"></i> Payment Pending
+                                </div>
+                            @endif
                             <button class="px-4 bg-slate-50 text-slate-400 rounded-xl hover:bg-slate-100 transition-all">
                                 <i class="fas fa-ellipsis-h"></i>
                             </button>
@@ -292,7 +298,7 @@
         {{ $tickets->links() }}
     </div>
 </div>
-                        <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-50">
+                        <!-- <div class="bg-white p-8 rounded-[40px] shadow-sm border border-slate-50">
                             <div class="flex justify-between items-center mb-8">
                                 <h3 class="text-xl font-extrabold text-slate-900">Runner Gallery</h3>
                                 <a href="#" class="text-brandDark font-extrabold text-xs uppercase tracking-widest hover:underline">See All Gallery</a>
@@ -350,7 +356,7 @@
                 </div>
             </div>
         </main>
-    </div>
+    </div> -->
 
     <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-4 z-50">
         <button class="text-brandDark"><i class="fas fa-th-large text-xl"></i></button>

@@ -52,9 +52,10 @@ class EventController extends Controller
 
     $userTickets = [];
     if (auth()->check()) {
-        // We pluck the 'event' column which contains the name (e.g., "Cherry Trail Run")
+        // Including 'confirmed' and 'pending' 
+        // These are the statuses that should block a new registration
         $userTickets = auth()->user()->tickets()
-            ->whereIn('status', ['pending', 'approved'])
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
             ->pluck('event') 
             ->toArray();
     }

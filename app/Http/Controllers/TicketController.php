@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Laranex\LaravelMyanmarPayments\LaravelMyanmarPayments;
 
@@ -70,12 +71,87 @@ public function reject($id)
         ];
     }
 
-    public function downloadPDF($id) {
-        $data = $this->getTicketData($id);
-        $pdf = Pdf::loadView('pdf', $data);
-        return $pdf->download("MyanRun_Ticket_{$id}.pdf");
+    public function downloadPNG($id) 
+{
+    // 1. Get Ticket Data
+    $data = $this->getTicketData($id);
+    $ticket = $data['ticket']; 
+
+    // 2. Fetch Athlete and User
+    $athlete = \App\Models\Athlete::find($ticket->athlete_id);
+    $user = $athlete ? \App\Models\User::where('runner_id', $athlete->runner_id)->first() : null;
+
+    if (!$athlete || !$user) {
+        return "ERROR: Personal information (Athlete or User) not found.";
     }
 
+    // 3. Map variables across the three tables
+    $id_doc      = $athlete->id_number ?? 'N/A';
+    $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
+    $bibName     = $ticket->bib_name ?? 'N/A';
+    $bibNumber   = $ticket->bib_number ?? '0000';
+    $category    = $ticket->category ?? 'N/A';
+    $nationality = $athlete->nationality ?? 'N/A';
+    $dob         = $athlete->dob ?? 'N/A';
+    $gender      = $athlete->gender ?? 'N/A';
+    $division    = $athlete->state ?? 'N/A';
+    $email       = $user->email ?? 'N/A';
+    $viber       = $athlete->viber ?? 'N/A';
+    $phone       = $user->phone ?? 'N/A';
+    $contact     = $athlete->contact ?? 'N/A';
+    $tSize       = $ticket->t_shirt_size ?? 'N/A';
+    $blood       = $athlete->blood_type ?? 'N/A';
+    $exp         = $ticket->experience_level ?? 'N/A';
+    $medical     = $athlete->medical_details ?? 'None';
+
+    // 4. QR Code Content (Exact Order)
+    $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical";
+
+    if (str_contains($category, '36')) {
+        $templatePath = public_path('images/ticket2_1.jpg'); 
+    } elseif (str_contains($category, '16')) {
+        $templatePath = public_path('images/ticket2.jpg'); 
+    } else {
+        $templatePath = public_path('images/ticket.jpg'); // Default fallback
+    }
+    $fontPath = public_path('assets/fonts/arial.ttf');
+
+    if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
+
+    $image = @\imagecreatefromjpeg($templatePath);
+    if (!$image) return "ERROR: GD Library not enabled.";
+
+    $white = \imagecolorallocate($image, 255, 255, 255);
+    
+    if (\Illuminate\Support\Facades\File::exists($fontPath)) {
+        // --- DRAW TEXT ON TICKET ---
+        \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, $bibNumber);
+        \imagettftext($image, 22, 0, 1050, 90, $white, $fontPath, strtoupper($bibName));
+        \imagettftext($image, 16, 0, 950, 145, $white, $fontPath, strtoupper($bibName));
+
+        // --- ADD SMALL QR CODE ---
+        $qrSize = 120;
+        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&data=" . urlencode($qrContent);
+        
+        $ctx = stream_context_create(['http' => ['timeout' => 5]]);
+        $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
+        
+        if ($qrCodeRaw) {
+            $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
+            if ($qrCodeImage) {
+                \imagecopy($image, $qrCodeImage, 950, 230, 0, 0, $qrSize, $qrSize);
+                \imagedestroy($qrCodeImage);
+            }
+        }
+    }
+
+    return response()->streamDownload(function () use ($image) {
+        \imagepng($image);
+        \imagedestroy($image);
+    }, "MyanRun_{$bibNumber}.png", [
+        'Content-Type' => 'image/png',
+    ]);
+}
     public function previewPDF($id) 
     {
         $data = $this->getTicketData($id); // Now it has the logo!
@@ -168,7 +244,16 @@ public function reject($id)
         return back()->with('error', 'Connection Error: ' . $e->getMessage());
     }
 }
+public function getNewBib(Request $request)
+{
+    $gender = $request->query('gender');
+    $category = $request->query('category');
 
+    // Use the private function we built earlier
+    $newBib = $this->generateBib($gender, $category);
+
+    return response()->json(['bib_number' => $newBib]);
+}
 private function generateKbzSignature($params) {
     // 1. Flatten the structure for signing (KBZ standard for Precreate)
     $biz = $params['biz_content'];
@@ -292,7 +377,7 @@ private function generateKbzSignature($params) {
         $subtotal = (float) preg_replace('/[^0-9.]/', '', $rawPrice);
 
         // 2. Perform the math
-        $serviceFee = 5.00; 
+        $serviceFee = 0.00; 
         $total = $subtotal + $serviceFee;
         $fullName = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
 

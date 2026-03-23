@@ -194,6 +194,7 @@
                             <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
                             <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
                             <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
+                            <tr><td><strong>State:</strong></td> <td id="modal-state"></td></tr>
                         </table>
                     </div>
                 </div>
@@ -250,7 +251,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-blood').innerText = data.athlete ? data.athlete.blood_type : 'N/A';
             document.getElementById('modal-price').innerText = data.price + ' MMK';
             document.getElementById('modal-exp').innerText = data.experience_level || 'N/A';
-            document.getElementById('modal-medical').innerText = data.medical_details || 'None';
+            document.getElementById('modal-medical').innerText = data.athlete.medical_details || 'None';
+            document.getElementById('modal-state').innerText = data.athlete.state || 'None';
 
             // Set the Image Source to the Transaction ID image
             const imgContainer = document.getElementById('modal-transaction-img');

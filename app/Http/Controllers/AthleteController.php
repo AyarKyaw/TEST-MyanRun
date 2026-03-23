@@ -50,26 +50,29 @@ class AthleteController extends Controller
     }
 
     private function generateBib($gender, $category)
-    {
-        $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
-        preg_match('/\d+/', $category, $matches);
-        $distance = $matches[0] ?? '00';
-        $searchPattern = $prefix . $distance;
+{
+    $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
+    
+    preg_match('/\d+/', $category, $matches);
+    $distance = $matches[0] ?? '00';
+    $searchPattern = $prefix . $distance; // e.g., "F16"
 
-        // Search the TICKETS table now, not Athletes
-        $lastTicket = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
-                            ->orderBy('bib_number', 'desc')
-                            ->first();
+    // Find the highest existing BIB for this specific prefix + distance
+    $lastBib = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
+        ->where('status', '!=', 'rejected')
+        ->orderBy('bib_number', 'desc')
+        ->first();
 
-        if ($lastTicket) {
-            $lastNumber = (int) substr($lastTicket->bib_number, -4);
-            $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $newNumber = '0001';
-        }
-
-        return $searchPattern . $newNumber;
+    if ($lastBib) {
+        // Extract the last 4 digits from the string (e.g., F160011 -> 0011)
+        $lastNumber = (int) substr($lastBib->bib_number, -4);
+        $newNumberInt = $lastNumber + 1;
+    } else {
+        $newNumberInt = 11; // Starting point
     }
+
+    return $searchPattern . str_pad($newNumberInt, 4, '0', STR_PAD_LEFT);
+}
 
     public function handleSelection(Request $request) 
     {
@@ -119,6 +122,8 @@ class AthleteController extends Controller
             $path = $request->file('face_image')->store('athletes', 'public');
         }
 
+        $finalBib = $this->generateBib($request->gender, session('ticket_category'));
+
         $athlete = Athlete::updateOrCreate(
             ['runner_id' => Auth::user()->runner_id],
             [
@@ -132,6 +137,7 @@ class AthleteController extends Controller
                 'gender' => $request->gender,
                 'blood_type' => $request->blood_type,
                 'contact' => $request->contact,
+                'state' => $request->state,
                 'viber' => $request->viber,
                 'has_medical_condition' => $request->has_condition === 'yes',
                 'medical_details' => $request->medical_conditions,
@@ -143,7 +149,7 @@ class AthleteController extends Controller
             'pending_registration' => [
                 'athlete_id'   => $athlete->id,
                 'bib_name'     => $request->bib_name,
-                'bib_number'   => $request->bib_number,
+                'bib_number'   => $finalBib,
                 't_shirt_size' => $request->t_shirt_size,
                 'category'     => session('ticket_category'),
                 'price'        => session('ticket_price'),
