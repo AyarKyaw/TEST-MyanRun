@@ -50,13 +50,13 @@ class EventController extends Controller
     $comingEvents = $allEvents->where('is_active', 2);
     $pastEvents = $allEvents->where('is_active', 0);
 
+    // In your Controller
     $userTickets = [];
     if (auth()->check()) {
-        // Including 'confirmed' and 'pending' 
-        // These are the statuses that should block a new registration
         $userTickets = auth()->user()->tickets()
-            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->whereIn('status', ['pending', 'confirmed', 'approved']) // Ensure 'confirmed' is here!
             ->pluck('event') 
+            ->map(fn($item) => trim($item)) // Remove any hidden spaces
             ->toArray();
     }
 
