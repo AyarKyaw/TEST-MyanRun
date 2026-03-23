@@ -85,7 +85,7 @@ public function reject($id)
         return "ERROR: Personal information (Athlete or User) not found.";
     }
 
-    // 3. Map variables across the three tables
+    // 3. Map variables
     $id_doc      = $athlete->id_number ?? 'N/A';
     $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
     $bibName     = $ticket->bib_name ?? 'N/A';
@@ -104,17 +104,19 @@ public function reject($id)
     $exp         = $ticket->experience_level ?? 'N/A';
     $medical     = $athlete->medical_details ?? 'None';
 
-    // 4. QR Code Content (Exact Order)
     $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical";
 
+    // 4. Paths
     if (str_contains($category, '36')) {
         $templatePath = public_path('images/ticket2_1.jpg'); 
     } elseif (str_contains($category, '16')) {
         $templatePath = public_path('images/ticket2.jpg'); 
     } else {
-        $templatePath = public_path('images/ticket.jpg'); // Default fallback
+        $templatePath = public_path('images/ticket.jpg'); 
     }
+    
     $fontPath = public_path('assets/fonts/arial.ttf');
+    $logoPath = public_path('images/MyanRun_Orange_RM2.png'); // Your Logo Path
 
     if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
 
@@ -129,15 +131,43 @@ public function reject($id)
         \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
         \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
 
-        // --- ADD SMALL QR CODE ---
+        // --- ADD QR CODE WITH LOGO ---
         $qrSize = 200;
-        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&data=" . urlencode($qrContent);
+        // Tip: Use ecc=H (High error correction) so the QR stays scannable even with a logo in the middle
+        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
         
         $ctx = stream_context_create(['http' => ['timeout' => 5]]);
         $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
         
         if ($qrCodeRaw) {
             $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
+            
+            if ($qrCodeImage && \Illuminate\Support\Facades\File::exists($logoPath)) {
+                $logo = @\imagecreatefrompng($logoPath);
+                if ($logo) {
+                    $qrWidth = \imagesx($qrCodeImage);
+                    $qrHeight = \imagesy($qrCodeImage);
+                    $logoWidth = \imagesx($logo);
+                    $logoHeight = \imagesy($logo);
+
+                    // Scale logo to be ~22% of the QR code width
+                    $logoTargetWidth = $qrWidth * 0.25;
+                    $logoTargetHeight = $logoHeight * ($logoTargetWidth / $logoWidth);
+
+                    // Find Center
+                    $dstX = ($qrWidth - $logoTargetWidth) / 2;
+                    $dstY = ($qrHeight - $logoTargetHeight) / 2;
+
+                    // OPTIONAL: Draw a small white background behind the logo for better scanning
+                    \imagefilledrectangle($qrCodeImage, $dstX - 2, $dstY - 2, $dstX + $logoTargetWidth + 2, $dstY + $logoTargetHeight + 2, $white);
+
+                    // Merge Logo
+                    \imagecopyresampled($qrCodeImage, $logo, $dstX, $dstY, 0, 0, $logoTargetWidth, $logoTargetHeight, $logoWidth, $logoHeight);
+                    
+                    \imagedestroy($logo);
+                }
+            }
+
             if ($qrCodeImage) {
                 \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
                 \imagedestroy($qrCodeImage);
