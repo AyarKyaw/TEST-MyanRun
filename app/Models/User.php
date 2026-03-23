@@ -73,4 +73,9 @@ public function tickets(): HasManyThrough
     {
         return $this->hasOne(Athlete::class, 'runner_id', 'runner_id');
     }
+
+    public function getFullNameAttribute()
+{
+    return trim("{$this->first_name} {$this->middle_name} {$this->last_name}");
+}
 }

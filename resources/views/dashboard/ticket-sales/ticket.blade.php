@@ -6,10 +6,9 @@
         width: 100%;
         overflow-x: auto; 
         display: block;
-        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        -webkit-overflow-scrolling: touch;
     }
 
-    /* Custom Scrollbar Styling (Optional, makes it look better) */
     .table-responsive::-webkit-scrollbar {
         height: 6px;
     }
@@ -21,12 +20,63 @@
         background: #f1f1f1;
     }
 
-    /* Force the table cells not to wrap text onto new lines */
-    #example5 td, #example5 th {
+    #example5 td, #example5 th, .custom-table td, .custom-table th {
         white-space: nowrap;
         vertical-align: middle;
     }
+
+    /* Tab Styling */
+    .nav-tabs {
+        border-bottom: 2px solid #f1f1f1;
+        margin-bottom: 20px;
+    }
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6e6e6e;
+        font-weight: 600;
+        padding: 1rem 1.5rem;
+    }
+    .nav-tabs .nav-link.active {
+        color: #C3E92D !important; /* Your theme primary color */
+        background: transparent;
+        border-bottom: 3px solid #C3E92D;
+    }
+    /* Increase Table Font Size */
+    .table td {
+        font-size: 17px !important;
+        padding: 18px 15px !important; /* Added padding for better breathing room */
+    }
+
+    .table th {
+        font-size: 16px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Target the Name specifically */
+    .table td .fw-bold {
+        font-size: 19px !important;
+        display: inline-block;
+        margin-bottom: 3px;
+    }
+
+    /* Make the Search Input bigger and easier to read */
+    #tableSearch {
+        font-size: 18px !important;
+        height: 55px !important;
+    }
+
+    .input-group .btn {
+        padding: 0 25px !important;
+        font-size: 18px !important;
+    }
+
+    /* Small text (Category/BIB sub-text) */
+    .table td small.text-muted {
+        font-size: 14px !important;
+    }
 </style>       
+
     <div class="event-sidebar dz-scroll" id="eventSidebar">
         <div class="card shadow-none rounded-0 bg-transparent h-auto mb-0">
             <div class="card-body text-center event-calender pb-2">
@@ -39,7 +89,6 @@
                 <h4 class="text-black">Upcoming Events</h4>
             </div>
             <div class="card-body">
-                {{-- Example Event Item --}}
                 <div class="d-flex mb-5 align-items-center event-list">
                     <div class="p-3 text-center rounded me-3 date-bx bgl-primary">
                         <h2 class="mb-0 text-black">3</h2>
@@ -52,18 +101,12 @@
                         </div>
                     </div>
                 </div>
-                {{-- Add more event logic here --}}
-            </div>
-            <div class="card-footer justify-content-between border-0 d-flex fs-14">
-                <span>5 events more</span>
-                <a href="#" class="text-primary">View more <i class="las la-long-arrow-alt-right ms-2"></i></a>
             </div>
         </div>
     </div>
 
     <main class="content-body">
         <div class="container-fluid">
-            
             <div class="page-title">
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
@@ -75,100 +118,217 @@
             </div>
 
             <div class="row mb-5 align-items-center">
-                <div class="col-xl-3 mb-4 mb-xl-0">
-                    <a href="" class="btn btn-primary light btn-lg d-block rounded fs-18">+ New Customer</a>
+                <div class="col-xl-3 mb-4 mb-xl-0 d-flex flex-column gap-3">
+                    <a href="" class="btn btn-primary light btn-lg d-block rounded fs-18">
+                        + New Customer
+                    </a>
+                    <!-- <a href="{{ route('tickets.export.excel') }}" class="btn btn-success light btn-lg d-block rounded fs-18">
+                        <i class="fa fa-file-excel me-2"></i>Export Excel
+                    </a> -->
                 </div>
-
                 <div class="col-xl-9">
-                    <div class="card m-0">
-                        <div class="card-body py-3">
-                            <div class="row align-items-center">
-                                <div class="col-md-5 d-flex align-items-center">
-                                    <div class="ms-1">
-                                        <p class="mb-0 fs-14">Total Customers</p>
-                                        <h3 class="mb-0 text-black fw-semibold fs-16">{{ $customers->count() }} Person</h3>
-                                    </div>
-                                </div>
-                                <div class="col-md-7 text-md-end">
-                                    <button class="btn btn-outline-primary btn-xs px-4">Active</button>
-                                    <button class="btn btn-danger btn-xs px-4 ms-2">Bulk Delete</button>
-                                </div>
-                            </div>
-                        </div>
+    <div class="card m-0">
+        <div class="card-body py-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                
+                <div class="d-flex align-items-center">
+                    <div class="ms-1">
+                        <p class="mb-0 fs-14 text-muted">Total Approved</p>
+                        <h3 class="mb-0 text-black fw-bold fs-18">
+                            {{ $customers->where('status', 'approved')->count() }} Persons
+                        </h3>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-body p-0"> {{-- p-0 helps the table touch the edges on mobile --}}
                 
-                <div class="table-responsive" style="width: 100%; overflow-x: auto !important; display: block; -webkit-overflow-scrolling: touch;">
-                    <table class="table table-borderless table-hover dataTablesCard mb-0" id="example5" style="min-width: 2500px !important;">
-                        <thead>
-                            <tr>
-                                <th style="width:50px;"><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                                <th>BIB Number</th>
-                                <th>Event & Category</th>
-                                <th>Price</th>
-                                <th>Status</th>
-                                <th>Reg. Date</th>
-                                <th class="text-end">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($customers as $customer)
-                            <tr>
-                                <td><input type="checkbox" class="form-check-input"></td>
-                                <td><strong>#{{ $customer->bib_number }}</strong></td>
-                                <td>
-                                    <span class="text-black fw-bold">{{ $customer->event }}</span><br>
-                                    <small class="text-muted">{{ $customer->category }}</small>
-                                </td>
-                                <td>{{ number_format($customer->price) }} MMK</td>
-                                <td>
-                                    @if($customer->status == 'pending')
-                                        <span class="badge light badge-warning">Pending Approval</span>
-                                    @elseif($customer->status == 'approved')
-                                        <span class="badge light badge-success">Approved</span>
-                                    @elseif($customer->status == 'rejected')
-                                        <span class="badge light badge-danger">Rejected</span>
-                                    @else
-                                        <span class="badge light badge-dark">{{ ucfirst($customer->status) }}</span>
-                                    @endif
-                                </td>
-                                <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
-                                <td class="text-end">
-                                    <button type="button" 
-                                        class="btn btn-primary shadow btn-xs btn-square view-details" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#ticketDetailsModal"
-                                        data-info="{{ json_encode($customer) }}"
-                                        data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
-                                        <i class="fa fa-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" class="text-center">No tickets found.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                <div style="min-width: 400px; max-width: 500px;" class="ms-auto">
+                    <form action="" method="GET">
+                        <div class="input-group">
+                            <input type="text" 
+                                   id="tableSearch" 
+                                   name="search"
+                                   class="form-control border-primary" 
+                                   placeholder="Search Name or BIB..." 
+                                   value="{{ request('search') }}"
+                                   style="font-size: 18px; height: 50px;">
+                            <button class="btn btn-primary px-4" type="submit">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            @if(request('search'))
+                                <a href="" class="btn btn-light border-primary d-flex align-items-center">
+                                    <i class="fa fa-times text-danger"></i>
+                                </a>
+                            @endif
+                        </div>
+                    </form>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-header d-block pb-0 border-0">
+                            {{-- TABS NAVIGATION --}}
+                            <ul class="nav nav-tabs" id="ticketTabs" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending" type="button">
+                                        Pending ({{ $customers->where('status', 'pending')->count() }})
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#approved" type="button">
+                                        Approved ({{ $customers->where('status', 'approved')->count() }})
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link" data-bs-toggle="tab" data-bs-target="#rejected" type="button">
+                                        Rejected ({{ $customers->where('status', 'rejected')->count() }})
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="card-body p-0">
+                            <div class="tab-content">
+                                
+                                {{-- TAB: PENDING --}}
+                                <div class="tab-pane fade show active" id="pending">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-hover mb-0" style="min-width: 1200px;">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-end">Action</th>
+                                                    <th>User Name</th>
+                                                    <th>BIB Name</th>
+                                                    <th>BIB Number</th>
+                                                    <th>Status</th>
+                                                    <th>Price</th>
+                                                    <th>Event & Category</th>
+                                                    <th>Reg. Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($customers->where('status', 'pending') as $customer)
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <button type="button" class="btn btn-primary shadow btn-xs btn-square view-details" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" data-info="{{ json_encode($customer) }}" data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td><strong>{{ $customer->athlete?->user?->full_name ?? 'Guest Runner' }}</strong></td>
+                                                    <td><strong>{{ $customer->bib_name }}</strong></td>
+                                                    <td><strong>#{{ $customer->bib_number }}</strong></td>
+                                                    <td><span class="badge light badge-warning">Pending</span></td>
+                                                    <td>{{ number_format($customer->price) }} MMK</td>
+                                                    <td><span class="text-black fw-bold">{{ $customer->event }}</span><br><small class="text-muted">{{ $customer->category }}</small></td>
+                                                    <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                                @empty
+                                                <tr><td colspan="6" class="text-center p-5">No pending tickets.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- TAB: APPROVED --}}
+                                <div class="tab-pane fade" id="approved">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-hover mb-0" style="min-width: 1200px;">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-end">Action</th>
+                                                    <th>User Name</th>
+                                                    <th>BIB Name</th>
+                                                    <th>BIB Number</th>
+                                                    <th>Status</th>
+                                                    <th>Price</th>
+                                                    <th>Event & Category</th>
+                                                    <th>Reg. Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($customers->where('status', 'approved') as $customer)
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <button type="button" class="btn btn-primary shadow btn-xs btn-square view-details" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" data-info="{{ json_encode($customer) }}" data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td><strong>{{ $customer->athlete?->user?->full_name ?? 'Guest Runner' }}</strong></td>
+                                                    <td><strong>{{ $customer->bib_name }}</strong></td>
+                                                    <td><strong>#{{ $customer->bib_number }}</strong></td>
+                                                    <td><span class="badge light badge-success">Approved</span></td>
+                                                    <td>{{ number_format($customer->price) }} MMK</td>
+                                                    <td><span class="text-black fw-bold">{{ $customer->event }}</span><br><small class="text-muted">{{ $customer->category }}</small></td>
+                                                    <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                                @empty
+                                                <tr><td colspan="6" class="text-center p-5">No approved tickets.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {{-- TAB: REJECTED --}}
+                                <div class="tab-pane fade" id="rejected">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-hover mb-0" style="min-width: 1200px;">
+                                            <thead>
+                                                <tr>
+                                                    <th class="text-end">Action</th>
+                                                    <th>User Name</th>
+                                                    <th>BIB Name</th>
+                                                    <th>BIB Number</th>
+                                                    <th>Status</th>
+                                                    <th>Price</th>
+                                                    <th>Event & Category</th>
+                                                    <th>Reg. Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse($customers->where('status', 'rejected') as $customer)
+                                                <tr>
+                                                    <td class="text-end">
+                                                        <button type="button" class="btn btn-primary shadow btn-xs btn-square view-details" data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" data-info="{{ json_encode($customer) }}" data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </td>
+                                                    <td><strong>{{ $customer->athlete?->user?->full_name ?? 'Guest Runner' }}</strong></td>
+                                                    <td><strong>{{ $customer->bib_name }}</strong></td>
+                                                    <td><strong>#{{ $customer->bib_number }}</strong></td>
+                                                    <td><span class="badge light badge-danger">Rejected</span></td>
+                                                    <td>{{ number_format($customer->price) }} MMK</td>
+                                                    <td><span class="text-black fw-bold">{{ $customer->event }}</span><br><small class="text-muted">{{ $customer->category }}</small></td>
+                                                    <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                                @empty
+                                                <tr><td colspan="6" class="text-center p-5">No rejected tickets.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div> {{-- End tab content --}}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
-<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true">
+
+{{-- MODAL --}}
+<div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="ticketDetailsModalLabel">Runner Registration Details</h5>
+                <h5 class="modal-title">Runner Registration Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -176,7 +336,8 @@
                     <div class="col-md-6">
                         <h6>Personal Information</h6>
                         <table class="table table-sm">
-                            <tr><td><strong>BIB Name:</strong></td> <td id="modal-bib-name"></td></tr>
+                            <tr><td><strong>Name:</strong></td> <td id="modal-name"></td></tr>
+                            <tr><td><strong>Bib Name:</strong></td> <td id="modal-bib-name"></td></tr>
                             <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
                             <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
                             <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
@@ -193,9 +354,7 @@
                         </table>
                     </div>
                 </div>
-
                 <hr>
-
                 <div class="row align-items-center">
                     <div class="col-md-5">
                         <h6 class="fw-bold text-success">Transaction Image Proof</h6>
@@ -211,25 +370,16 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                
                 <div class="d-flex align-items-center" id="modal-action-buttons">
-                    {{-- Reject Form --}}
                     <form id="reject-form" action="" method="POST" class="me-2">
                         @csrf
-                        <button type="submit" class="btn btn-warning px-4" title="Reject">
-                            <i class="fa fa-times mr-1"></i> Reject
-                        </button>
+                        <button type="submit" class="btn btn-warning px-4"><i class="fa fa-times mr-1"></i> Reject</button>
                     </form>
-
-                    {{-- Approve Form --}}
                     <form id="approve-form" action="" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success px-4" title="Approve">
-                            <i class="fa fa-check mr-1"></i> Approve
-                        </button>
+                        <button type="submit" class="btn btn-success px-4"><i class="fa fa-check mr-1"></i> Approve</button>
                     </form>
                 </div>
             </div>
@@ -240,14 +390,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const detailButtons = document.querySelectorAll('.view-details');
-    
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
             const data = JSON.parse(this.getAttribute('data-info'));
             const transactionImageUrl = this.getAttribute('data-image');
 
-            // 1. DYNAMIC FORM ACTION UPDATE
-            // This ensures when you click Approve, it goes to /tickets/approve/{id}
             const approveForm = document.getElementById('approve-form');
             const rejectForm = document.getElementById('reject-form');
             const actionContainer = document.getElementById('modal-action-buttons');
@@ -255,39 +402,73 @@ document.addEventListener('DOMContentLoaded', function () {
             if (approveForm) approveForm.action = `/tickets/approve/${data.id}`;
             if (rejectForm) rejectForm.action = `/tickets/reject/${data.id}`;
 
-            // 2. SHOW/HIDE BUTTONS BASED ON STATUS
-            // If the ticket is already confirmed or rejected, hide the buttons
             if (data.status === 'pending') {
                 actionContainer.classList.remove('d-none');
             } else {
                 actionContainer.classList.add('d-none');
             }
 
-            // Force "16 mile" to display as "16km" in the modal
-            let categoryLabel = data.category || 'N/A';
-            if (categoryLabel.toLowerCase().includes('16 mile')) {
-                categoryLabel = '16km';
-            }
+            const athlete = data.athlete;
+            const firstName = athlete.first_name || '';
+            const midName = athlete.middle_name ? athlete.middle_name + " " : ""; // Add space only if it exists
+            const lastName = athlete.last_name || '';
 
-            // Fill text fields
+            document.getElementById('modal-name').innerText = `${firstName} ${midName}${lastName}`.trim() || 'N/A';
             document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
             document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
-            document.getElementById('modal-category').innerText = categoryLabel;
+            document.getElementById('modal-category').innerText = data.category || 'N/A';
             document.getElementById('modal-event').innerText = data.event;
             document.getElementById('modal-price').innerText = (data.price || 0) + ' MMK';
             document.getElementById('modal-exp').innerText = data.experience_level || 'N/A';
             
-            // Handle Athlete data safely
             if (data.athlete) {
                 document.getElementById('modal-blood').innerText = data.athlete.blood_type || 'N/A';
                 document.getElementById('modal-medical').innerText = data.athlete.medical_details || 'None';
                 document.getElementById('modal-state').innerText = data.athlete.state || 'None';
             }
+            document.getElementById('modal-transaction-img').src = transactionImageUrl;
+        });
+    });
+});
 
-            // Set the Image Source
-            const imgContainer = document.getElementById('modal-transaction-img');
-            imgContainer.src = transactionImageUrl;
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('tableSearch');
+    
+    searchInput.addEventListener('keyup', function () {
+        const searchTerm = this.value.toLowerCase();
+        
+        // Target all table bodies across all tabs
+        const tableBodies = document.querySelectorAll('.tab-pane tbody');
+
+        tableBodies.forEach(tbody => {
+            const rows = tbody.querySelectorAll('tr');
+            let hasVisibleRow = false;
+
+            rows.forEach(row => {
+                // Get text from the Name and BIB Number columns
+                const text = row.textContent.toLowerCase();
+                
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                    hasVisibleRow = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Handle "No results found" logic per tab
+            const noResultsRow = tbody.querySelector('.no-results-found');
+            if (!hasVisibleRow) {
+                if (!noResultsRow) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'no-results-found';
+                    tr.innerHTML = `<td colspan="6" class="text-center p-5">No matching records found for "${searchTerm}"</td>`;
+                    tbody.appendChild(tr);
+                }
+            } else if (noResultsRow) {
+                noResultsRow.remove();
+            }
         });
     });
 });

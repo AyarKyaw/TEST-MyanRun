@@ -76,7 +76,9 @@ class PaymentController extends Controller
         if (!\File::exists($saveDir)) {
             \File::makeDirectory($saveDir, 0777, true);
         }
-
+        $athlete = \App\Models\Athlete::find($order['athlete_id']);
+        $gender = $athlete ? $athlete->gender : 'male';
+        $generatedBib = $this->generateBib($gender, $order['category'] ?? $request->category);
         $imageName = 'slip_race_' . time() . '.' . $request->payment_slip->extension();
         $request->payment_slip->move($saveDir, $imageName);
 
@@ -84,7 +86,7 @@ class PaymentController extends Controller
         Ticket::create([
             'athlete_id'       => $order['athlete_id'], 
             'bib_name'         => $request->bib_name,
-            'bib_number'       => $order['bib_number'], 
+            'bib_number'       => $generatedBib, 
             'category'         => $order['category'] ?? $request->category,
             'price'            => (int)str_replace(',', '', $request->amount),
             'event'            => $order['event'], 
@@ -100,4 +102,29 @@ class PaymentController extends Controller
         // 6. Redirect
         return redirect()->route('user.dashboard')->with('success', 'Registration submitted! We will verify your payment slip soon.');
     }
+
+    private function generateBib($gender, $category)
+{
+    $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
+    
+    preg_match('/\d+/', $category, $matches);
+    $distance = $matches[0] ?? '00';
+    $searchPattern = $prefix . $distance; // e.g., "F16"
+
+    // Find the highest existing BIB for this specific prefix + distance
+    $lastBib = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
+        ->where('status', '!=', 'rejected')
+        ->orderBy('bib_number', 'desc')
+        ->first();
+
+    if ($lastBib) {
+        // Extract the last 4 digits from the string (e.g., F160011 -> 0011)
+        $lastNumber = (int) substr($lastBib->bib_number, -4);
+        $newNumberInt = $lastNumber + 1;
+    } else {
+        $newNumberInt = 11; // Starting point
+    }
+
+    return $searchPattern . str_pad($newNumberInt, 4, '0', STR_PAD_LEFT);
+}
 }

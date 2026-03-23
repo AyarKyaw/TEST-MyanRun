@@ -510,6 +510,7 @@
                     <div>
                         <label class="label-text">T Shirt Size</label>
                         <select name="t_shirt_size" class="input-field">
+                            <option value="XS">XS</option>
                             <option value="S">S</option>
                             <option value="M">M</option>
                             <option value="L">L</option>

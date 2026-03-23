@@ -35,6 +35,7 @@ Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
+
 Route::get('/score', function (Request $request) {
     set_time_limit(120);
     $cacheKey = 'race_scores_104742_v2';
@@ -258,6 +259,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
     Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
+    Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('tickets.export.excel');
 }); 
 
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
