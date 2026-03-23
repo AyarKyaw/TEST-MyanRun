@@ -131,26 +131,32 @@
 
             {{-- Grid changed to 2 columns on medium screens --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="ticket-card active" id="card-16Kilometer"
-                    style="background-image: url('{{ asset('images/local16.JPG') }}');" 
-                    data-name="16 Kilometer Run" data-local="120,000" data-foreign="200,000"
-                    data-img-local="asset('images/local16.jpg')"
-                    data-img-foreign="{{ asset('images/f16.jpg') }}"
-                    onclick="selectTicket(this)">
-                    <span class="category-badge">16 Kilometer</span>
-                    <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
-                </div>
+    {{-- Card 16KM --}}
+    <div class="ticket-card active" id="card-16Kilometer"
+        style="background-image: url('{{ asset('images/local16.jpg') }}');" 
+        data-name="16 Kilometer Run" 
+        data-local="120,000" 
+        data-foreign="200,000"
+        data-img-local="{{ asset('images/local16.jpg') }}" {{-- FIXED: Added brackets --}}
+        data-img-foreign="{{ asset('images/f16.jpg') }}"
+        onclick="selectTicket(this)">
+        <span class="category-badge">16 Kilometer</span>
+        <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
+    </div>
 
-                <div class="ticket-card" id="card-36Kilometer"
-                    style="background-image: url('{{ asset('images/local36.JPG') }}');" 
-                    data-name="36 Kilometer Run" data-local="160,000" data-foreign="250,000"
-                    data-img-local="{{ asset('images/local36.JPG') }}"
-                    data-img-foreign="{{ asset('images/f36.jpg') }}"
-                    onclick="selectTicket(this)">
-                    <span class="category-badge">36 Kilometer</span>
-                    <div class="price-display price-tag">160,000 <span class="text-lg opacity-60">MMK</span></div>
-                </div>
-            </div>
+    {{-- Card 36KM --}}
+    <div class="ticket-card" id="card-36Kilometer"
+        style="background-image: url('{{ asset('images/local36.jpg') }}');" 
+        data-name="36 Kilometer Run" 
+        data-local="160,000" 
+        data-foreign="250,000"
+        data-img-local="{{ asset('images/local36.JPG') }}"
+        data-img-foreign="{{ asset('images/f36.jpg') }}"
+        onclick="selectTicket(this)">
+        <span class="category-badge">36 Kilometer</span>
+        <div class="price-display price-tag">160,000 <span class="text-lg opacity-60">MMK</span></div>
+    </div>
+</div>
 
             <div class="mt-16 bg-slate-900 p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl rounded-[40px]">
                 <div class="flex items-center gap-6">
