@@ -59,7 +59,7 @@ class TicketController extends Controller
             });
         }
 
-        $customers = $query->paginate(1)->withQueryString();
+        $customers = $query->paginate(10)->withQueryString();
         
         // Get counts for the tab badges
         $counts = [
