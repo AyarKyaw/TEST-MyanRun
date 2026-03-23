@@ -474,8 +474,8 @@
                     </div>
                     <div>
                         <label class="label-text">Viber</label>
-                        <input type="text" placeholder="09 Eng-Num Only" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="11" 
-                        maxlength="13">
+                        <input type="text" placeholder="09 Eng-Num Only" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="9" 
+                        maxlength="11">
                     </div>
                     <div>
                         <label class="label-text">Mobile Number</label>
@@ -484,8 +484,8 @@
                     </div>
                     <div>
                         <label class="label-text">Emergency Contact Number</label>
-                        <input type="tel" placeholder="09 Eng-Num Only" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="11" 
-                            maxlength="13" 
+                        <input type="tel" placeholder="09 Eng-Num Only" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="9" 
+                        maxlength="11"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field">
                     </div>
                 </div>
