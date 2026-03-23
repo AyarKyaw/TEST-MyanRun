@@ -653,7 +653,7 @@
                                Pyin Oo Lwin
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/home_banner/Home Banner (2).JPG') }}" alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/local16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: 20% center;"alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
@@ -706,7 +706,7 @@
                                Pyin Oo Lwin
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/home_banner/Run2.JPG') }}" alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/local36.jpg') }}"style="width:100%; height:500px; object-fit:cover; object-position: 10% center;" alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
@@ -757,7 +757,7 @@
                                Pyin Oo Lwin
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/local1.jpg') }}" alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/f16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: center 90%;"alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
@@ -808,7 +808,7 @@
                                Pyin Oo Lwin
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/home_banner/Run(F)1.jpeg') }}" alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/f36.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: center 90%;" alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
