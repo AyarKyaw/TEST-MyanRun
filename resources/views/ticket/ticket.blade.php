@@ -132,20 +132,20 @@
             {{-- Grid changed to 2 columns on medium screens --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <div class="ticket-card active" id="card-16Kilometer"
-                    style="background-image: url('{{ asset('images/home_banner/Run2.JPG') }}');" 
+                    style="background-image: url('{{ asset('images/local16.JPG') }}');" 
                     data-name="16 Kilometer Run" data-local="120,000" data-foreign="200,000"
-                    data-img-local="{{ asset('images/home_banner/Run2.JPG') }}"
-                    data-img-foreign="{{ asset('images/home_banner/Run(F)2.JPG') }}"
+                    data-img-local="asset('images/local16.jpg')"
+                    data-img-foreign="{{ asset('images/f16.jpg') }}"
                     onclick="selectTicket(this)">
                     <span class="category-badge">16 Kilometer</span>
                     <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
                 </div>
 
                 <div class="ticket-card" id="card-36Kilometer"
-                    style="background-image: url('{{ asset('images/home_banner/Home Banner (2).JPG') }}');" 
+                    style="background-image: url('{{ asset('images/local36.JPG') }}');" 
                     data-name="36 Kilometer Run" data-local="160,000" data-foreign="250,000"
-                    data-img-local="{{ asset('images/home_banner/Home Banner (2).JPG') }}"
-                    data-img-foreign="{{ asset('images/home_banner/Run(F)1.jpeg') }}"
+                    data-img-local="{{ asset('images/local36.JPG') }}"
+                    data-img-foreign="{{ asset('images/f36.jpg') }}"
                     onclick="selectTicket(this)">
                     <span class="category-badge">36 Kilometer</span>
                     <div class="price-display price-tag">160,000 <span class="text-lg opacity-60">MMK</span></div>
