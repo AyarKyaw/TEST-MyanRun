@@ -346,7 +346,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">Father Name</label>
-                        <input type="text" name="father_name" value="{{ old('father_name', $athlete->father_name ?? '') }}" 
+                        <input type="text" placeholder="Optional" name="father_name" value="{{ old('father_name', $athlete->father_name ?? '') }}" 
                                oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" class="input-field">
                     </div>
                     <div>

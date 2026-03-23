@@ -98,7 +98,9 @@
         <main class="flex-1 overflow-y-auto custom-scrollbar relative">
             
             <div class="lg:hidden flex items-center justify-between p-6 bg-white border-b">
+                <a href="{{ url('/') }}" class="inline-block group">
                 <img src="{{ asset('images/MyanRun_Orange_RM2.png') }}" class="h-8">
+</a>
                 <button class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600">
                     <i class="fas fa-bars"></i>
                 </button>

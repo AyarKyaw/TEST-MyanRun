@@ -13,9 +13,29 @@ use Laranex\LaravelMyanmarPayments\LaravelMyanmarPayments;
 
 class TicketController extends Controller
 {
-    public function showTicket()
+    public function showTicket(Request $request)
     {
-        return view('ticket.ticket'); 
+        // 1. Get the event name from the URL (?event=Cherry+Trail+Run+2026)
+        $eventName = $request->query('event');
+
+        // 2. Security Check: Only logged-in users
+        if (auth()->check()) {
+            
+            // 3. Check if they have an active ticket for THIS specific event
+            $hasActiveTicket = auth()->user()->tickets()
+                ->where('event', $eventName)
+                ->whereIn('status', ['pending', 'confirmed', 'approved'])
+                ->exists();
+
+            // 4. If they have one, kick them out!
+            if ($hasActiveTicket) {
+                return redirect()->route('public.events') // Change to your events list route name
+                    ->with('error', "You already have a registration (Pending/Accepted) for $eventName.");
+            }
+        }
+
+        // 5. If they are clear, show the registration form
+        return view('ticket.ticket', compact('eventName'));
     }
 
     public function dashboard()
@@ -116,7 +136,11 @@ public function reject($id)
     }
     
     $fontPath = public_path('assets/fonts/arial.ttf');
-    $logoPath = public_path('images/MyanRun_Orange_RM2.png'); // Your Logo Path
+    $logoPath = public_path('images/myan_logo.jpg');
+
+    if (!file_exists($logoPath)) {
+        return "Error: Image not found at " . $logoPath;
+    } // Your Logo Path
 
     if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
 
@@ -132,7 +156,7 @@ public function reject($id)
         \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
 
         // --- ADD QR CODE WITH LOGO ---
-        $qrSize = 200;
+        $qrSize = 150;
         // Tip: Use ecc=H (High error correction) so the QR stays scannable even with a logo in the middle
         $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
         
@@ -143,7 +167,7 @@ public function reject($id)
             $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
             
             if ($qrCodeImage && \Illuminate\Support\Facades\File::exists($logoPath)) {
-                $logo = @\imagecreatefrompng($logoPath);
+                $logo = @\imagecreatefromjpeg($logoPath);
                 if ($logo) {
                     $qrWidth = \imagesx($qrCodeImage);
                     $qrHeight = \imagesy($qrCodeImage);
@@ -151,7 +175,7 @@ public function reject($id)
                     $logoHeight = \imagesy($logo);
 
                     // Scale logo to be ~22% of the QR code width
-                    $logoTargetWidth = $qrWidth * 0.25;
+                    $logoTargetWidth = $qrWidth * 0.22;
                     $logoTargetHeight = $logoHeight * ($logoTargetWidth / $logoWidth);
 
                     // Find Center

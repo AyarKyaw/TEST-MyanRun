@@ -103,7 +103,7 @@ class AthleteController extends Controller
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'bib_name' => 'required|string|max:20', 
-            'contact' => 'required|digits_between:11,13',
+            'contact' => 'required|digits_between:9,11',
             'dob' => 'required|date_format:d/m/Y',
             'gender' => 'required',
             't_shirt_size' => 'required',
