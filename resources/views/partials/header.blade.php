@@ -50,7 +50,7 @@
 
                         @auth
                             <li class="mobile-only-menu">
-                                <a href="/profile">My Account ({{ Auth::user()->first_name }})</a>
+                                <a href="/user/dashboard">My Account ({{ Auth::user()->first_name }})</a>
                             </li>
                             <li class="mobile-only-menu">
                                 <form action="{{ route('logout') }}" method="POST">

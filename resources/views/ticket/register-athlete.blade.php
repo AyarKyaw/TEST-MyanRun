@@ -502,10 +502,11 @@
                         <input type="text" placeholder="Max 10 letter Only" name="bib_name" value="{{ old('bib_name', auth()->user()->bib_name) }}" required 
                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9 ]/g, '');" class="input-field" maxlength="10">
                     </div>
-                    <div>
+                    <!-- <div>
                         <label class="label-text">BIB Number</label>
                         <input type="text" name="bib_number" id="bib_input" value="{{ $bibNumber }}" class="input-field" readonly>
-                    </div>
+                    </div> -->
+                    <input type="hidden" name="bib_number" id="bib_input" value="{{ $bibNumber }}">
                     <div>
                         <label class="label-text">T Shirt Size</label>
                         <select name="t_shirt_size" class="input-field">

@@ -135,24 +135,6 @@
         data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
     <i class="fa fa-eye"></i>
 </button>
-
-        @if($customer->status == 'pending')
-            {{-- Approve Button --}}
-            <form action="{{ route('tickets.approve', $customer->id) }}" method="POST" class="me-1">
-                @csrf
-                <button type="submit" class="btn btn-success shadow btn-xs btn-square" title="Approve">
-                    <i class="fa fa-check"></i>
-                </button>
-            </form>
-
-            {{-- Reject Button --}}
-            <form action="{{ route('tickets.reject', $customer->id) }}" method="POST" class="me-1">
-                @csrf
-                <button type="submit" class="btn btn-warning shadow btn-xs btn-square" title="Reject">
-                    <i class="fa fa-times"></i>
-                </button>
-            </form>
-        @endif
     </div>
 </td>
                                     </tr>
@@ -202,25 +184,41 @@
                 <hr>
 
                 <div class="row align-items-center">
-        <div class="col-md-5">
-            <h6 class="fw-bold text-success">Transaction Image Proof</h6>
-            <p class="small text-muted">This image is retrieved from the transaction_id record.</p>
-            <div class="alert alert-info py-2">
-                <strong>Medical Info:</strong><br>
-                <span id="modal-medical" class="small"></span>
+                    <div class="col-md-5">
+                        <h6 class="fw-bold text-success">Transaction Image Proof</h6>
+                        <div class="alert alert-info py-2">
+                            <strong>Medical Info:</strong><br>
+                            <span id="modal-medical" class="small"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-7 text-center">
+                        <div class="border rounded p-1 bg-light shadow-sm">
+                            <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-7 text-center">
-            <div class="border rounded p-1 bg-light shadow-sm">
-                {{-- This is where the transaction image displays --}}
-                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
-            </div>
-            <p class="small text-muted mt-2">Click image to open full size</p>
-        </div>
-    </div>
-            </div>
-            <div class="modal-footer">
+
+            <div class="modal-footer justify-content-between">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                
+                <div class="d-flex align-items-center" id="modal-action-buttons">
+                    {{-- Reject Form --}}
+                    <form id="reject-form" action="" method="POST" class="me-2">
+                        @csrf
+                        <button type="submit" class="btn btn-warning px-4" title="Reject">
+                            <i class="fa fa-times mr-1"></i> Reject
+                        </button>
+                    </form>
+
+                    {{-- Approve Form --}}
+                    <form id="approve-form" action="" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success px-4" title="Approve">
+                            <i class="fa fa-check mr-1"></i> Approve
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -235,6 +233,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = JSON.parse(this.getAttribute('data-info'));
             const transactionImageUrl = this.getAttribute('data-image');
 
+            // 1. DYNAMIC FORM ACTION UPDATE
+            // This ensures when you click Approve, it goes to /tickets/approve/{id}
+            const approveForm = document.getElementById('approve-form');
+            const rejectForm = document.getElementById('reject-form');
+            const actionContainer = document.getElementById('modal-action-buttons');
+
+            if (approveForm) approveForm.action = `/tickets/approve/${data.id}`;
+            if (rejectForm) rejectForm.action = `/tickets/reject/${data.id}`;
+
+            // 2. SHOW/HIDE BUTTONS BASED ON STATUS
+            // If the ticket is already confirmed or rejected, hide the buttons
+            if (data.status === 'pending') {
+                actionContainer.classList.remove('d-none');
+            } else {
+                actionContainer.classList.add('d-none');
+            }
+
             // Force "16 mile" to display as "16km" in the modal
             let categoryLabel = data.category || 'N/A';
             if (categoryLabel.toLowerCase().includes('16 mile')) {
@@ -245,16 +260,19 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
             document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
-            document.getElementById('modal-blood').innerText = data.blood_type || 'N/A';
             document.getElementById('modal-category').innerText = categoryLabel;
             document.getElementById('modal-event').innerText = data.event;
-            document.getElementById('modal-blood').innerText = data.athlete ? data.athlete.blood_type : 'N/A';
-            document.getElementById('modal-price').innerText = data.price + ' MMK';
+            document.getElementById('modal-price').innerText = (data.price || 0) + ' MMK';
             document.getElementById('modal-exp').innerText = data.experience_level || 'N/A';
-            document.getElementById('modal-medical').innerText = data.athlete.medical_details || 'None';
-            document.getElementById('modal-state').innerText = data.athlete.state || 'None';
+            
+            // Handle Athlete data safely
+            if (data.athlete) {
+                document.getElementById('modal-blood').innerText = data.athlete.blood_type || 'N/A';
+                document.getElementById('modal-medical').innerText = data.athlete.medical_details || 'None';
+                document.getElementById('modal-state').innerText = data.athlete.state || 'None';
+            }
 
-            // Set the Image Source to the Transaction ID image
+            // Set the Image Source
             const imgContainer = document.getElementById('modal-transaction-img');
             imgContainer.src = transactionImageUrl;
         });
