@@ -105,7 +105,7 @@
             <div class="card-body p-0"> {{-- p-0 helps the table touch the edges on mobile --}}
                 
                 <div class="table-responsive" style="width: 100%; overflow-x: auto !important; display: block; -webkit-overflow-scrolling: touch;">
-                    <table class="table table-borderless table-hover dataTablesCard mb-0" id="example5" style="min-width: 1200px;">
+                    <table class="table table-borderless table-hover dataTablesCard mb-0" id="example5" style="min-width: 2500px !important;">
                         <thead>
                             <tr>
                                 <th style="width:50px;"><input type="checkbox" id="checkAll" class="form-check-input"></th>
