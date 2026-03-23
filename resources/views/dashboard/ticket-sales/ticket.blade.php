@@ -164,15 +164,16 @@
                             </table>
                             
                             <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
-                                <div class="text-muted fs-14">
-                                    Showing <strong>{{ $customers->firstItem() ?? 0 }}</strong> 
-                                    to <strong>{{ $customers->lastItem() ?? 0 }}</strong> 
-                                    of <strong>{{ $customers->total() }}</strong> entries
-                                </div>
-                                <div class="pagination-container">
-                                    {{ $customers->appends(request()->input())->links('pagination::bootstrap-5') }}
-                                </div>
-                            </div>
+                                            <div class="text-muted fs-14">
+                                                Showing <strong>{{ $customers->firstItem() }}</strong> 
+                                                to <strong>{{ $customers->lastItem() }}</strong> 
+                                                of <strong>{{ $customers->total() }}</strong> entries
+                                            </div>
+                                            
+                                            <div class="pagination-container">
+                                                {{ $customers->links('pagination::bootstrap-5') }}
+                                            </div>
+                                        </div>
                         </div>
                     </div>
                 </div>
