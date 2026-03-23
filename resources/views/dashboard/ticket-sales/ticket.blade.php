@@ -1,6 +1,32 @@
 @extends('dashboard.layouts.master')
 
-@section('content')        
+@section('content') 
+<style>
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto; 
+        display: block;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+
+    /* Custom Scrollbar Styling (Optional, makes it look better) */
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    /* Force the table cells not to wrap text onto new lines */
+    #example5 td, #example5 th {
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+</style>       
     <div class="event-sidebar dz-scroll" id="eventSidebar">
         <div class="card shadow-none rounded-0 bg-transparent h-auto mb-0">
             <div class="card-body text-center event-calender pb-2">
@@ -74,81 +100,68 @@
             </div>
 
             <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="table-responsive">
-                            <table class="table table-borderless table-hover dataTablesCard" id="example5">
-                                <thead>
-                                    <tr>
-                                        <th><input type="checkbox" id="checkAll" class="form-check-input"></th>
-                                        <th>BIB Number</th>
-                                        <th>Event & Category</th>
-                                        <th>Price</th>
-                                        <th>Status</th>
-                                        <th>Reg. Date</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($customers as $customer)
-                                    <tr>
-                                        <td><input type="checkbox" class="form-check-input"></td>
-                                        
-                                        {{-- Runner ID --}}
-                                        <td><strong>#{{ $customer->bib_number }}</strong></td>
-                                        
-                                        {{-- Event and Category combined --}}
-                                        <td>
-                                            <span class="text-black fw-bold">{{ $customer->event }}</span><br>
-                                            <small class="text-muted">{{ $customer->category }}</small>
-                                        </td>
-                                        
-                                        {{-- Price --}}
-                                        <td>{{ $customer->price }} MMK</td>
-                                        
-                                        {{-- Status with Badge --}}
-                                        <td>
-                                            @if($customer->status == 'pending')
-                                                <span class="badge light badge-warning">Pending Approval</span>
-                                            @elseif($customer->status == 'approved')
-                                                <span class="badge light badge-success">Approved</span>
-                                            @elseif($customer->status == 'rejected')
-                                                <span class="badge light badge-danger">Rejected</span>
-                                            @else
-                                                <span class="badge light badge-dark">{{ ucfirst($customer->status) }}</span>
-                                            @endif
-                                        </td>
-                                        
-                                        {{-- Created At --}}
-                                        <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
-                                        
-                                        {{-- Action Buttons --}}
-{{-- Action Buttons --}}
-<td>
-    <div class="d-flex">
-        {{-- Details Button --}}
-        <button type="button" 
-        class="btn btn-primary shadow btn-xs btn-square me-1 view-details" 
-        data-bs-toggle="modal" 
-        data-bs-target="#ticketDetailsModal"
-        data-info="{{ json_encode($customer) }}"
-        data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
-    <i class="fa fa-eye"></i>
-</button>
-    </div>
-</td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="7" class="text-center">No tickets found.</td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body p-0"> {{-- p-0 helps the table touch the edges on mobile --}}
+                
+                <div class="table-responsive" style="width: 100%; overflow-x: auto !important; display: block; -webkit-overflow-scrolling: touch;">
+                    <table class="table table-borderless table-hover dataTablesCard mb-0" id="example5" style="min-width: 1200px;">
+                        <thead>
+                            <tr>
+                                <th style="width:50px;"><input type="checkbox" id="checkAll" class="form-check-input"></th>
+                                <th>BIB Number</th>
+                                <th>Event & Category</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                                <th>Reg. Date</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($customers as $customer)
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input"></td>
+                                <td><strong>#{{ $customer->bib_number }}</strong></td>
+                                <td>
+                                    <span class="text-black fw-bold">{{ $customer->event }}</span><br>
+                                    <small class="text-muted">{{ $customer->category }}</small>
+                                </td>
+                                <td>{{ number_format($customer->price) }} MMK</td>
+                                <td>
+                                    @if($customer->status == 'pending')
+                                        <span class="badge light badge-warning">Pending Approval</span>
+                                    @elseif($customer->status == 'approved')
+                                        <span class="badge light badge-success">Approved</span>
+                                    @elseif($customer->status == 'rejected')
+                                        <span class="badge light badge-danger">Rejected</span>
+                                    @else
+                                        <span class="badge light badge-dark">{{ ucfirst($customer->status) }}</span>
+                                    @endif
+                                </td>
+                                <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
+                                <td class="text-end">
+                                    <button type="button" 
+                                        class="btn btn-primary shadow btn-xs btn-square view-details" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#ticketDetailsModal"
+                                        data-info="{{ json_encode($customer) }}"
+                                        data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="7" class="text-center">No tickets found.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
         </div>
     </main>
 <div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-labelledby="ticketDetailsModalLabel" aria-hidden="true">
