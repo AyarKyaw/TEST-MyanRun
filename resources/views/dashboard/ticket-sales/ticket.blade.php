@@ -53,6 +53,24 @@
                 <a href="#" class="btn btn-primary light btn-lg d-block rounded fs-18">
                     <i class="fa fa-plus me-2"></i>New Customer
                 </a>
+
+                <div class="dropdown">
+    <button type="button" class="btn btn-outline-success btn-lg d-block w-100 rounded fs-18 dropdown-toggle" data-bs-toggle="dropdown">
+        <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
+    </button>
+    <ul class="dropdown-menu w-100">
+        <li>
+            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">
+                16KM ({{ ucfirst(request('status', 'all')) }})
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">
+                36KM ({{ ucfirst(request('status', 'all')) }})
+            </a>
+        </li>
+    </ul>
+</div>
             </div>
             <div class="col-xl-9">
                 <div class="card m-0">
@@ -301,8 +319,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const transactionImageUrl = this.getAttribute('data-image');
 
             // Update Form Actions
-            document.getElementById('approve-form').action = `/tickets/approve/${data.id}`;
-            document.getElementById('reject-form').action = `/tickets/reject/${data.id}`;
+            document.getElementById('approve-form').action = `dashboard/tickets/approve/${data.id}`;
+            document.getElementById('reject-form').action = `dashboard/tickets/reject/${data.id}`;
 
             // Toggle Action Buttons Visibility
             const actionContainer = document.getElementById('modal-action-buttons');

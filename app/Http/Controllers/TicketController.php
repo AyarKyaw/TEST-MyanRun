@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Laranex\LaravelMyanmarPayments\LaravelMyanmarPayments;
+use App\Exports\TicketExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TicketController extends Controller
 {
@@ -236,6 +238,18 @@ public function reject($id)
         $pdf = Pdf::loadView('pdf', $data);
 
         return $pdf->stream('ticket-' . $id . '.pdf');
+    }
+
+    public function exportExcel(Request $request) 
+    {
+        $category = $request->get('category', 'all');
+        // Get the status from the URL (e.g., ?status=approved), default to 'all'
+        $status = $request->get('status', 'all'); 
+        
+        $fileName = 'Tickets_' . $status . '_' . $category . '_' . date('d-m-Y') . '.xlsx';
+        
+        // Pass both category AND status to the Export class
+        return Excel::download(new TicketExport($category, $status), $fileName);
     }
 
     public function initiatePayment($id)

@@ -210,8 +210,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
-    Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
-    Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
 });
 
 /*
@@ -259,7 +257,9 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
     Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
-    Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('tickets.export.excel');
+    Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('dashboard.tickets.export');
+    Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
+    Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
 }); 
 
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');

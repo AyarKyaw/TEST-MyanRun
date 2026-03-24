@@ -43,6 +43,15 @@
         object-fit: cover;
         width: 100%;
     }
+    /* Custom Scrollbar for Modal Content */
+.modal-content-scroll::-webkit-scrollbar { width: 6px; }
+.modal-content-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.animate-in { animation: modalIn 0.3s ease-out forwards; }
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
 </style>
 
 <div class="page-title">
@@ -86,6 +95,13 @@
         @else
             <div class="ribbon-red status-ribbon">LIVE EVENT</div>
         @endif
+        <button type="button" 
+                {{-- Use json_encode to handle all special characters and long text safely --}}
+                onclick="openDescModal({{ json_encode($event->name) }}, {{ json_encode($event->description ?? 'No description available.') }})" 
+                class="position-absolute border-0 rounded-circle d-flex align-items-center justify-content-center bg-white text-dark shadow-sm hover:scale-110 transition-all" 
+                style="top: 12px; right: 12px; width: 35px; height: 35px; z-index: 20; cursor: pointer;">
+            <i class="fas fa-info-circle text-primary"></i>
+        </button>
 
         <img src="{{ asset('storage/' . $event->image_path) }}" class="card-img-top event-card-img">
         
@@ -179,4 +195,47 @@
 
     </div>
 </div>
+<div id="descModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-6" onclick="if(event.target === this) closeDescModal()">
+    <div class="bg-white w-full max-w-lg rounded-[2rem] shadow-2xl transform transition-all animate-modal relative overflow-hidden">
+        
+        <button onclick="closeDescModal()" class="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-all z-50">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="p-10">
+            <h3 id="descModalTitle" class="text-xl font-black text-slate-800 uppercase italic mb-6 border-b-4 border-yellow-400 d-inline-block pb-1">Event Details</h3>
+            
+            <div id="descModalContent" class="text-slate-600 text-lg leading-relaxed max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar font-medium">
+                </div>
+        </div>
+
+        <div class="px-10 pb-8">
+            <button onclick="closeDescModal()" class="w-full py-4 bg-slate-900 text-white font-bold rounded-xl uppercase tracking-widest text-xs hover:bg-slate-800 transition-all">
+                Got it
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+</style>
+<script>
+    function openDescModal(title, description) {
+        document.getElementById('descModalTitle').innerText = title;
+        document.getElementById('descModalContent').innerText = description;
+        
+        const modal = document.getElementById('descModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDescModal() {
+        const modal = document.getElementById('descModal');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+</script>
 @endsection
