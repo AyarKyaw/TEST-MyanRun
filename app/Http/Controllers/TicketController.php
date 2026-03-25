@@ -454,8 +454,6 @@ private function generateKbzSignature($params) {
         ]);
     }
 
-    
-
     public function showReviewPage()
     {
         $order = session('pending_registration');
@@ -475,4 +473,29 @@ private function generateKbzSignature($params) {
 
         return view('ticket.checkout', compact('order', 'subtotal', 'serviceFee', 'total', 'fullName'));
     }
+
+public function updateId(Request $request)
+{
+    $ticket = Ticket::with('athlete')->find($request->id);
+    
+    if (!$ticket || !$ticket->athlete) {
+        return redirect()->back()->with('error', 'Athlete not found');
+    }
+
+    $idNumber = '';
+
+    // Check if it's an NRC (has state, district, type, number) or a Passport
+    if ($request->has(['nrc_state', 'nrc_district', 'nrc_type', 'nrc_number'])) {
+        $idNumber = "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_type}){$request->nrc_number}";
+    } else {
+        // Fallback for Passport/Other
+        $idNumber = $request->id_number;
+    }
+
+    $ticket->athlete->update([
+        'id_number' => $idNumber
+    ]);
+
+    return redirect()->back()->with('success', 'ID Updated Successfully');
+}
 }

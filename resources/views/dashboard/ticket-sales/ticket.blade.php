@@ -55,22 +55,22 @@
                 </a>
 
                 <div class="dropdown">
-    <button type="button" class="btn btn-outline-success btn-lg d-block w-100 rounded fs-18 dropdown-toggle" data-bs-toggle="dropdown">
-        <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
-    </button>
-    <ul class="dropdown-menu w-100">
-        <li>
-            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">
-                16KM ({{ ucfirst(request('status', 'all')) }})
-            </a>
-        </li>
-        <li>
-            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">
-                36KM ({{ ucfirst(request('status', 'all')) }})
-            </a>
-        </li>
-    </ul>
-</div>
+                    <button type="button" class="btn btn-outline-success btn-lg d-block w-100 rounded fs-18 dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
+                    </button>
+                    <ul class="dropdown-menu w-100">
+                        <li>
+                            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">
+                                16KM ({{ ucfirst(request('status', 'all')) }})
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">
+                                36KM ({{ ucfirst(request('status', 'all')) }})
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
             <div class="col-xl-9">
                 <div class="card m-0">
@@ -182,16 +182,15 @@
                             </table>
                             
                             <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
-                                            <div class="text-muted fs-14">
-                                                Showing <strong>{{ $customers->firstItem() }}</strong> 
-                                                to <strong>{{ $customers->lastItem() }}</strong> 
-                                                of <strong>{{ $customers->total() }}</strong> entries
-                                            </div>
-                                            
-                                            <div class="pagination-container">
-                                                {{ $customers->links('pagination::bootstrap-5') }}
-                                            </div>
-                                        </div>
+                                <div class="text-muted fs-14">
+                                    Showing <strong>{{ $customers->firstItem() }}</strong> 
+                                    to <strong>{{ $customers->lastItem() }}</strong> 
+                                    of <strong>{{ $customers->total() }}</strong> entries
+                                </div>
+                                <div class="pagination-container">
+                                    {{ $customers->links('pagination::bootstrap-5') }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,7 +218,10 @@
                             <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
                             <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
                             <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
-                            <tr><td><strong>ID Number:</strong></td> <td id="modal-id"></td></tr>
+                            <tr>
+                                <td><strong>ID Number:</strong></td> 
+                                <td><div id="modal-id-container"></div></td>
+                            </tr>
                         </table>
                     </div>
                     <div class="col-md-6">
@@ -253,7 +255,7 @@
                     </div>
                 </div>
             </div>
-            <div class="modal-footer justify-content-between">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <div class="d-flex align-items-center" id="modal-action-buttons">
                     <form id="reject-form" action="" method="POST" class="me-2">
@@ -271,74 +273,64 @@
 </div>
 
 <script>
+const districtOptions = {
+    "1": ["ကပတ", "ကမတ", "ခပန", "ခလဖ", "ဆဒန", "ဆပရ", "ဆဘန", "တဆလ", "တနန", "ဒဖယ", "နမန", "ပတအ", "ပနဒ", "ပဝန", "ဖကန", "ဗမန", "မကတ", "မကန", "မခဘ", "မစန", "မညန", "မမန", "မလန", "ရှကန", "ရှဗယ", "လဂျန", "ဟပန", "အဂျယ", "၀မန"],
+    "2": ["ဒမဆ", "ဖဆန", "ဖရဆ", "ဘလခ", "မစန", "ရတန", "ရသန", "လကန"],
+    "3": ["ကကရ", "ကဆက", "ကဒတ", "ကဒန", "ကမမ", "စကလ", "ပကန", "ဖပန", "ဘဂလ", "ဘသဆ", "ဘအန", "မဝတ", "ရသန", "လဘန", "လသန", "ဝလမ", "သတက", "သတန"],
+    "4": ["ကခန", "ကပလ", "ဆမန", "တဇန", "တတန", "ထတလ", "ပလဝ", "ဖလန", "မတန", "မတပ", "ရခဒ", "ရဇန", "ဟခန"],
+    "5": ["ကနန", "ကဘလ", "ကမန", "ကလတ", "ကလထ", "ကလန", "ကလဝ", "ကသန", "ခတန", "ခပန", "ခဥတ", "ခဥန", "ငဇန", "စကန", "ဆလက", "တဆန", "တမန", "ထခန", "ဒပယ", "နယန", "ပလန", "ပလဘ", "ဖပန", "ဗမန", "ဘတလ", "မကန", "မမတ", "မမန", "မရန", "မလန", "ယမပ", "ရဘန", "ရဥန", "လရန", "လဟန", "ဝလန", "ဝသန", "ဟမလ", "အတန", "အရတ"],
+    "6": ["ကစန", "ကရရ", "ကလအ", "ကသန", "ခမန", "တသရ", "ထဝန", "ပလတ", "ပလန", "ဘပန", "မတန", "မမန", "ရဖြန", "လလန", "သရခ"],
+    "7": ["ကကန", "ကတခ", "ကပက", "ကဝန", "ဇကန", "ညလပ", "တငန", "ထတပ", "ဒဥန", "နတလ", "ပခတ", "ပခန", "ပတဆ", "ပတတ", "ပတန", "ပနက", "ပမန", "ဖမန", "မညန", "မလန", "ရကန", "ရတန", "ရတရှ", "လပတ", "ဝမန", "သကန", "သဆန", "သနပ", "သဝတ", "အတန", "အဖန"],
+    "8": ["ကထန", "ကမန", "ခမန", "ဂဂန", "ငဖန", "စတရ", "စလန", "ဆပဝ", "ဆဖန", "ဆမန", "တတက", "ထလန", "နမန", "ပခက", "ပဖြန", "ပမန", "မကန", "မတန", "မထန", "မဘန", "မမန", "မလန", "မသန", "ရစက", "ရနခ", "သရန", "အလန"],
+    "9": ["ကဆန", "ကပတ", "ခမစ", "ခအစ", "ငဇန", "ငသရ", "စကတ", "စကန", "ဇဗသ", "ဇယသ", "ညဥန", "တကတ", "တကန", "တတဥ", "တသန", "ဒခသ", "နထက", "ပကခ", "ပဗသ", "ပဘန", "ပမန", "ပသက", "ပဥလ", "မကန", "မခန", "မတရ", "မထလ", "မမန", "မလန", "မသန", "မဟမ", "ရမသ", "လဝန", "ဝတန", "သစန", "သပက", "အမစ", "အမရ", "ဥတသ"],
+    "10": ["ကထန", "ကမရ", "ခဆန", "ခဇန", "ပမန", "ဘလန", "မဒန", "မလမ", "ရမန", "လမန", "သထန", "သဖြရ"],
+    "11": ["ကတန", "ကတလ", "ကဖန", "ဂမန", "စတန", "တကန", "တပဝ", "ပဏတ", "ပတန", "ဗတထ", "ဘသတ", "မတန", "မပတ", "မပန", "မအတ", "မအန", "မဥန", "ရဗန", "ရသတ", "သတန", "အမန"],
+    "12": ["ကကက", "ကခက", "ကတတ", "ကတန", "ကမတ", "ကမန", "ကမရ", "ခရန", "စခန", "ဆကခ", "ဆကန", "တကန", "တတထ", "တတန", "တမန", "ထတပ", "ဒဂဆ", "ဒဂတ", "ဒဂန", "ဒဂမ", "ဒဂရ", "ဒပန", "ဒလန", "ပဇတ", "ပဘတ", "ဗဟန", "မဂတ", "မဂဒ", "မဘန", "မရက", "ရကန", "ရပသ", "လကန", "လမတ", "လမန", "လသန", "လသယ", "သကတ", "သခန", "သဃက", "သလန", "အစန", "အလန", "ဥကတ", "ဥကန", "ဥကမ"],
+    "13": ["ကခန", "ကတတ", "ကတန", "ကတလ", "ကမဆ", "ကမန", "ကရန", "ကလတ", "ကလဒ", "ကလန", "ကလဖ", "ကသန", "ကဟန", "ခမန", "ခရဟ", "ခလန", "ဆဆန", "ဆဖန", "ညရန", "တကန", "တခလ", "တမည", "တယန", "တလန", "နကန", "နခတ", "နခန", "နခဝ", "နဆန", "နတန", "နတယ", "နဖန", "နမတ", "နဝန", "ပခန", "ပဆန", "ပတယ", "ပပက", "ပယန", "ပလတ", "ပလန", "ပဝန", "ဖခန", "မကန", "မခန", "မငန", "မဆတ", "မဆန", "မတတ", "မတန", "မနန", "မပန", "မဖန", "မဗတ", "မဘန", "မမဆ", "မမတ", "မမန", "မယန", "မရတ", "မရန", "မလန", "မဟရ", "ယလန", "ရငန", "ရစန", "ရဖန", "လကတ", "လခတ", "လခန", "လရန", "လလန", "လဟန", "သနန", "သပန", "ဟတန", "ဟပတ", "ဟပန", "အခန", "အတန"],
+    "14": ["ကကထ", "ကကန", "ကခန", "ကပန", "ကလန", "ငဆန", "ငပတ", "ငရက", "ငသခ", "ငသယ", "ဇလန", "ညတန", "ဒဒရ", "ဒနဖြ", "ပစလ", "ပတန", "ပသန", "ဖပန", "ဘကလ", "မမက", "မမန", "မအန", "မအပ", "ရကန", "ရသယ", "လပတ", "လမန", "ဝခမ", "သပန", "ဟကကျ", "ဟသတ", "အဂပ", "အမတ", "အမန"]
+};
+
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('tableSearch');
     const ticketTable = document.getElementById('ticketTable');
 
+    // 1. Search Logic
     if (searchInput) {
-        // Prevent theme-level keyboard shortcuts from capturing the spacebar
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === ' ') {
-                e.stopPropagation();
-            }
-        });
-
         searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase().trim();
             const rows = ticketTable.querySelectorAll('tbody tr:not(.no-results)');
             let visibleCount = 0;
 
             rows.forEach(row => {
-                // 1. Get row text
-                // 2. Replace all newlines, tabs, and multiple spaces with a single space
-                // 3. This ensures "John Doe" matches even if the HTML is multi-line
-                const rowText = row.textContent.replace(/\s+/g, ' ').toLowerCase();
-                
-                const isMatch = rowText.includes(searchTerm);
+                const isMatch = row.textContent.replace(/\s+/g, ' ').toLowerCase().includes(searchTerm);
                 row.style.display = isMatch ? '' : 'none';
-                
                 if (isMatch) visibleCount++;
             });
 
-            // Handle "No Results" message
             let noResRow = ticketTable.querySelector('.no-results');
             if (visibleCount === 0 && searchTerm !== "") {
                 if (!noResRow) {
                     const tr = document.createElement('tr');
                     tr.className = 'no-results';
-                    tr.innerHTML = `<td colspan="8" class="text-center p-5">
-                        <div class="text-muted">No results found for "${this.value}"</div>
-                    </td>`;
+                    tr.innerHTML = `<td colspan="8" class="text-center p-5"><div class="text-muted">No results found</div></td>`;
                     ticketTable.querySelector('tbody').appendChild(tr);
                 }
-            } else if (noResRow) {
-                noResRow.remove();
-            }
+            } else if (noResRow) noResRow.remove();
         });
     }
 
-    // Modal Details Logic
+    // 2. Open Modal Logic
     const detailButtons = document.querySelectorAll('.view-details');
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
             const data = JSON.parse(this.getAttribute('data-info'));
             const transactionImageUrl = this.getAttribute('data-image');
-
-            // Update Form Actions
-            document.getElementById('approve-form').action = `dashboard/tickets/approve/${data.id}`;
-            document.getElementById('reject-form').action = `dashboard/tickets/reject/${data.id}`;
-
-            // Toggle Action Buttons Visibility
-            const actionContainer = document.getElementById('modal-action-buttons');
-            data.status === 'pending' ? actionContainer.classList.remove('d-none') : actionContainer.classList.add('d-none');
-
-            // Construct Full Name
             const athlete = data.athlete || {};
-            const fullName = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ');
+            window.currentTicketId = data.id;
 
-            // Populate Modal Fields
-            document.getElementById('modal-name').innerText = fullName || 'Guest Runner';
-            document.getElementById('modal-itra').innerText = data.athlete.itra_details || 'None';
+            // Populate text
+            document.getElementById('modal-name').innerText = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
+            document.getElementById('modal-itra').innerText = athlete.itra_details || 'None';
             document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
             document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
@@ -350,10 +342,91 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-medical').innerText = athlete.medical_details || 'None';
             document.getElementById('modal-state').innerText = athlete.state || 'None';
             document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
-            document.getElementById('modal-id').innerText = athlete.id_number || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
+
+            // Forms & Actions
+            document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
+            document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
+            const actionContainer = document.getElementById('modal-action-buttons');
+            data.status === 'pending' ? actionContainer.classList.remove('d-none') : actionContainer.classList.add('d-none');
+
+            // ID Container Logic - CHANGED TO FORM SUBMISSION
+            const idContainer = document.getElementById('modal-id-container');
+            const isEditable = ['pending', 'approved'].includes(data.status);
+            const currentId = athlete.id_number || '';
+
+            if (isEditable) {
+                let innerHtml = `
+                    <form action="/dashboard/update-id" method="POST" id="update-id-form">
+                        @csrf
+                        <input type="hidden" name="id" value="${data.id}">
+                `;
+
+                if (athlete.nat_type === 'national') {
+                    let state = '', district = '', type = 'နိုင်', num = '';
+                    const match = currentId.match(/^(\d+)\/([^\(]+)\(([^)]+)\)(\d+)$/);
+                    if(match) { state = match[1]; district = match[2]; type = match[3]; num = match[4]; }
+
+                    innerHtml += `
+                        <div class="d-flex gap-1 flex-wrap mb-2">
+                            <select name="nrc_state" id="edit_nrc_state" class="form-control p-1" style="width: 55px;" required>
+                                <option value="">St</option>
+                                ${[...Array(14)].map((_,i)=>`<option value="${i+1}" ${state == i+1 ? 'selected':''}>${i+1}/</option>`).join('')}
+                            </select>
+                            <select name="nrc_district" id="edit_nrc_district" class="form-control p-1" style="width: 80px;" required>
+                                <option value="${district}">${district || 'Dist'}</option>
+                            </select>
+                            <select name="nrc_type" id="edit_nrc_type" class="form-control p-1" style="width: 65px;">
+                                ${['နိုင်','ဧည့်','စ','ပြု','သ','သီ'].map(t => `<option value="${t}" ${type == t ? 'selected':''}>${t}</option>`).join('')}
+                            </select>
+                            <input type="text" name="nrc_number" id="edit_nrc_number" class="form-control p-1" style="width: 80px;" value="${num}" placeholder="123456" maxlength="6" required>
+                        </div>
+                    `;
+                } else {
+                    innerHtml += `
+                        <div class="mb-2">
+                            <input type="text" name="id_number" id="edit_passport" class="form-control" value="${currentId}" placeholder="Passport Number" required>
+                        </div>
+                    `;
+                }
+
+                innerHtml += `
+                        <button type="submit" class="btn btn-primary btn-sm w-100 mt-1">Save ID</button>
+                    </form>
+                `;
+                
+                idContainer.innerHTML = innerHtml;
+                
+                // Trigger district load if NRC
+                if(athlete.nat_type === 'national' && state) {
+                    setTimeout(() => document.getElementById('edit_nrc_state').dispatchEvent(new Event('change')), 50);
+                }
+            } else {
+                idContainer.innerHTML = `<span class="fw-bold">${currentId || 'None'}</span>`;
+            }
         });
     });
+});
+
+// District Load logic remains the same
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'edit_nrc_state') {
+        const state = e.target.value;
+        const districtSelect = document.getElementById('edit_nrc_district');
+        if (!districtSelect) return;
+
+        const currentVal = districtSelect.value;
+        districtSelect.innerHTML = '<option value="">District</option>';
+        if (districtOptions[state]) {
+            districtOptions[state].forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d;
+                opt.textContent = d;
+                if(d === currentVal) opt.selected = true;
+                districtSelect.appendChild(opt);
+            });
+        }
+    }
 });
 </script>
 @endsection

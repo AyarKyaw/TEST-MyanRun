@@ -225,6 +225,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/register/1', [UserController::class, 'dashboard'])->name('dashboard.register-level-1');
     Route::get('/register/2', [AthleteController::class, 'dashboard'])->name('dashboard.register-level-2');
     Route::get('/events/ticket', [TicketController::class, 'dashboard'])->name('dashboard.events.ticket');
+    Route::post('/update-id', [TicketController::class, 'updateId']);
 
     Route::get('/events/{status}', [EventController::class, 'index'])
           ->where('status', 'now|past|coming')

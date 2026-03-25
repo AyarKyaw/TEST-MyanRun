@@ -109,22 +109,28 @@ class PaymentController extends Controller
     
     preg_match('/\d+/', $category, $matches);
     $distance = $matches[0] ?? '00';
-    $searchPattern = $prefix . $distance; // e.g., "F16"
+    $searchPattern = $prefix . $distance;
 
-    // Find the highest existing BIB for this specific prefix + distance
-    $lastBib = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
+    // Get ALL used bib numbers except rejected
+    $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
         ->where('status', '!=', 'rejected')
-        ->orderBy('bib_number', 'desc')
-        ->first();
+        ->pluck('bib_number')
+        ->toArray();
 
-    if ($lastBib) {
-        // Extract the last 4 digits from the string (e.g., F160011 -> 0011)
-        $lastNumber = (int) substr($lastBib->bib_number, -4);
-        $newNumberInt = $lastNumber + 1;
-    } else {
-        $newNumberInt = 11; // Starting point
+    // Extract numbers only (last 4 digits)
+    $usedNumbers = [];
+    foreach ($usedBibs as $bib) {
+        $usedNumbers[] = (int) substr($bib, -4);
     }
 
-    return $searchPattern . str_pad($newNumberInt, 4, '0', STR_PAD_LEFT);
+    // Start from 11
+    $number = 11;
+
+    // Find first missing number
+    while (in_array($number, $usedNumbers)) {
+        $number++;
+    }
+
+    return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
 }
 }
