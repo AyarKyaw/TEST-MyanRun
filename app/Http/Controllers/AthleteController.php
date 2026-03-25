@@ -105,6 +105,8 @@ class AthleteController extends Controller
             'bib_name' => 'required|string|max:20', 
             'contact' => 'required|digits_between:9,11',
             'dob' => 'required|date_format:d/m/Y',
+            'has_itra' => 'required|in:yes,no',
+            'itra_details' => 'required_if:has_itra,yes',
             'gender' => 'required',
             't_shirt_size' => 'required',
             'blood_type' => 'required',
@@ -141,6 +143,8 @@ class AthleteController extends Controller
                 'viber' => $request->viber,
                 'has_medical_condition' => $request->has_condition === 'yes',
                 'medical_details' => $request->medical_conditions,
+                'has_itra' => $request->has_itra === 'yes',
+                'itra_details' => $request->itra_details,
             ]
         );
 

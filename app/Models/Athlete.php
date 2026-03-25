@@ -25,6 +25,8 @@ class Athlete extends Model
         'contact',
         'viber',
         'face_image_path',
+        'has_itra',
+        'itra_details',
     ];
 
     /**

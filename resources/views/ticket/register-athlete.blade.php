@@ -245,20 +245,20 @@
 
                     <div class="md:col-span-8 space-y-6">
                         <div class="grid grid-cols-2 gap-4">
-                            <label id="label-national" class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl cursor-not-allowed opacity-50 transition-all">
-                                <input type="radio" name="nat_type" id="radio-national" value="national" class="mr-2" 
-                                    {{ (old('nat_type', $athlete->nat_type ?? $type) == 'national') ? 'checked' : '' }} disabled>
-                                <span class="text-xs font-black uppercase text-slate-600">National</span>
+                            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'national' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
+                                <input type="radio" name="nat_type_display" value="national" class="mr-2 pointer-events-none" 
+                                    {{ $type == 'national' ? 'checked' : '' }} disabled>
+                                <span class="text-xs font-black uppercase {{ $type == 'national' ? 'text-slate-900' : 'text-slate-400' }}">National</span>
                             </label>
 
-                            <label id="label-foreigner" class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl cursor-not-allowed opacity-50 transition-all">
-                                <input type="radio" name="nat_type" id="radio-foreigner" value="foreigner" class="mr-2" 
-                                    {{ (old('nat_type', $athlete->nat_type ?? $type) == 'foreigner') ? 'checked' : '' }} disabled>
-                                <span class="text-xs font-black uppercase text-slate-600">Foreigner</span>
+                            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'foreigner' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
+                                <input type="radio" name="nat_type_display" value="foreigner" class="mr-2 pointer-events-none" 
+                                    {{ $type == 'foreigner' ? 'checked' : '' }} disabled>
+                                <span class="text-xs font-black uppercase {{ $type == 'foreigner' ? 'text-slate-900' : 'text-slate-400' }}">Foreigner</span>
                             </label>
                         </div>
 
-                        <input type="hidden" name="nat_type" id="hidden_nat_type" value="{{ old('nat_type', $athlete->nat_type ?? $type) }}">
+                        <input type="hidden" name="nat_type" value="{{ $type }}">
                         <div class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
@@ -285,7 +285,7 @@
                         </div>
                         <div class="space-y-4">
     <label class="label-text" id="id_label">Identity Information</label>
-
+    @if($type == 'national')
     <div id="nrc_container" class="grid grid-cols-1 md:grid-cols-4 gap-2">
         <select name="nrc_state" id="nrc_state" class="input-field !py-3 !text-sm" required>
             <option value="">State</option>
@@ -322,17 +322,18 @@
        required
        class="input-field !py-3 !text-sm">
     </div>
-
-    <div id="passport_container" class="hidden">
+    @else
+    <div id="passport_container" class="">
         <input type="text" 
            id="passport_input" 
            name="passport_id" 
            placeholder="Passport Number" 
            maxlength="15"
-           value="{{ old('id_number', $athlete->id_number ?? '') }}"
+           value=""
            oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()"
            class="input-field">
     </div>
+    @endif
 </div>
                     </div>
                 </div>
@@ -383,7 +384,7 @@
                             "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", 
                             "Luxembourg", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", 
                             "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", 
-                            "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", 
+                            "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", 
                             "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", 
                             "Nigeria", "Norway", "Oman", "Pakistan", "Palau", "Panama", "Papua New Guinea", 
                             "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", 
@@ -402,7 +403,7 @@
                         $currentNationality = old('nationality', $athlete->nationality ?? ($isNational ? 'Myanmar' : ''));
                     @endphp
 
-                    @if($isNational)
+                    @if($type == 'national')
                         <div class="relative">
                             <input type="text" value="Myanmar" class="input-field bg-slate-100 cursor-not-allowed opacity-75" readonly>
                             <input type="hidden" name="nationality" value="Myanmar">
@@ -560,6 +561,33 @@
                                     placeholder="e.g. Asthma, Heart Disease, Recent Surgery, etc.">{{ old('medical_conditions', $athlete->medical_conditions ?? '') }}</textarea>
                         </div>
                     </div>
+                    <div class="md:col-span-2">
+                        <label class="label-text mb-3 block">Do you have an ITRA Profile?</label>
+                        <div class="flex gap-4 mb-4">
+                            {{-- No Option --}}
+                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                                <input type="radio" name="has_itra" value="no" class="hidden" 
+                                    {{ !old('itra_details', $athlete->itra_details ?? '') ? 'checked' : '' }} 
+                                    onchange="toggleITRA(false)">
+                                <span class="text-xs font-black uppercase text-slate-600">No, I don't</span>
+                            </label>
+                            {{-- Yes Option --}}
+                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                                <input type="radio" name="has_itra" value="yes" class="hidden" 
+                                    onchange="toggleITRA(true)">
+                                <span class="text-xs font-black uppercase text-slate-600">Yes, I have</span>
+                            </label>
+                        </div>
+                        
+                        {{-- ITRA Details Input --}}
+                        <div id="itra_details_container" class="{{ old('itra_details', $athlete->itra_details ?? '') ? '' : 'hidden' }}">
+                            <label class="label-text text-[#C3E92D]">ITRA Index or Profile Link</label>
+                            <input type="text" name="itra_details" id="itra_details" 
+                                value=""
+                                class="input-field border-lime-100 focus:border-[#C3E92D]" 
+                                placeholder="Enter Here...">
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -647,6 +675,21 @@ let modelAI = null;
 //     }
 // }
 // loadAI();
+
+function toggleITRA(show) {
+    const container = document.getElementById('itra_details_container');
+    const input = document.getElementById('itra_details');
+    
+    if (show) {
+        container.classList.remove('hidden');
+        input.setAttribute('required', 'required'); // Optional: make it required if they say 'Yes'
+    } else {
+        container.classList.add('hidden');
+        input.removeAttribute('required');
+        input.value = ''; // Clear it if they change their mind
+    }
+}
+
 function updateBib() {
     const genderSelect = document.getElementById('gender_select');
     const bibInput = document.getElementById('bib_input');

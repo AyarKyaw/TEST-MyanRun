@@ -218,6 +218,8 @@
                             <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
                             <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
                             <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
+                            <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
+                            <tr><td><strong>ID Number:</strong></td> <td id="modal-id"></td></tr>
                         </table>
                     </div>
                     <div class="col-md-6">
@@ -238,6 +240,10 @@
                         <div class="alert alert-info py-2">
                             <strong>Medical Info:</strong><br>
                             <span id="modal-medical" class="small"></span>
+                        </div>
+                        <div class="alert alert-info py-2">
+                            <strong>ITRA Info:</strong><br>
+                            <span id="modal-itra" class="small"></span>
                         </div>
                     </div>
                     <div class="col-md-7 text-center">
@@ -332,6 +338,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Populate Modal Fields
             document.getElementById('modal-name').innerText = fullName || 'Guest Runner';
+            document.getElementById('modal-itra').innerText = data.athlete.itra_details || 'None';
             document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
             document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
@@ -342,6 +349,8 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-blood').innerText = athlete.blood_type || 'N/A';
             document.getElementById('modal-medical').innerText = athlete.medical_details || 'None';
             document.getElementById('modal-state').innerText = athlete.state || 'None';
+            document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
+            document.getElementById('modal-id').innerText = athlete.id_number || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
         });
     });
