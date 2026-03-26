@@ -35,7 +35,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
 
     public function headings(): array
     {
-        return ['Full Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Date'];
+        return ['Full Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Date', 'Division', 'Address'];
     }
 
     public function collection()
@@ -80,6 +80,8 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
                 number_format((float)$t->price) . ' MMK',  // Price
                 ucfirst($t->status),                       // Status
                 $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A', // Date
+                $athlete?->state ?? 'N/A',                 // Division (State/Region)
+                $athlete?->address ?? 'N/A',
             ];
         });
     }

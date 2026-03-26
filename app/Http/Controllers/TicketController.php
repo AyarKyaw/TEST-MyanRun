@@ -376,9 +376,8 @@ public function reject($id)
         $distance = $matches[0] ?? '00';
         $searchPattern = $prefix . $distance;
 
-        // Get ALL used bib numbers except rejected
+        // Get ALL used bib numbers (including rejected) for this category
         $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
-            ->where('status', '!=', 'rejected')
             ->pluck('bib_number')
             ->toArray();
 

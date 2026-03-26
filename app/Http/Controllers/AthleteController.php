@@ -135,6 +135,7 @@ class AthleteController extends Controller
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'father_name' => $request->father_name,
+                'address' => $request->address,
                 'dob' => $formattedDob,
                 'gender' => $request->gender,
                 'nationality' => $request->nationality,
