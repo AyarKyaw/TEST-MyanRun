@@ -447,15 +447,17 @@ private function generateKbzSignature($params) {
     public function kbzCallback(Request $request)
     {
         $payload = $request->input('Request');
-        
+
         if (!$payload) {
-            return response()->json(['Response' => ['return_code' => 'FAIL', 'return_msg' => 'No Request Data']]);
+            return response()->json([
+                'Response' => ['return_code' => 'FAIL', 'return_msg' => 'No Request Data']
+            ]);
         }
 
         Log::info('KBZ Callback received:', $payload);
 
-        if (($payload['result'] ?? null) === 'SUCCESS') {
-            // 3. EXTRACT THE ID: If we sent "31_1773974866", this gets "31"
+        // ✅ Check trade_status instead of result
+        if (($payload['trade_status'] ?? null) === 'PAY_SUCCESS') {
             $fullOrderId = $payload['merch_order_id'];
             $parts = explode('_', $fullOrderId);
             $realTicketId = $parts[0]; 
@@ -465,17 +467,14 @@ private function generateKbzSignature($params) {
             if ($ticket && $ticket->status !== 'confirmed') {
                 $ticket->update([
                     'status' => 'confirmed',
-                    'transaction_id' => $payload['kbz_ref_no'] ?? null 
+                    'transaction_id' => $payload['mm_order_id'] ?? null 
                 ]);
                 Log::info("Ticket #{$realTicketId} confirmed via KBZ Callback.");
             }
         }
 
         return response()->json([
-            'Response' => [
-                'return_code' => 'SUCCESS',
-                'return_msg' => 'OK'
-            ]
+            'Response' => ['return_code' => 'SUCCESS', 'return_msg' => 'OK']
         ]);
     }
 
