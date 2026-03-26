@@ -510,7 +510,7 @@ private function generateKbzSignature($params) {
         }
 
         return response()->json([
-            'paid' => $ticket->status === 'confirmed',
+            'paid' => $ticket->status === 'approved',
             'status' => $ticket->status
         ]);
     }
