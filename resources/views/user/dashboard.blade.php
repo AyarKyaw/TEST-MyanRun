@@ -267,7 +267,7 @@
                         </div>
 
                         <div class="flex gap-2">
-                            @if($ticket->status === 'approved')
+                            @if($ticket->status === 'approved' ?? $ticket->status === 'confirmed')
                                 <a href="{{ route('ticket.download', $ticket->id) }}" 
                                 class="flex-1 bg-slate-900 text-white text-[11px] text-center font-bold py-3 rounded-xl hover:bg-black transition-all">
                                     <i class="fas fa-file-pdf mr-2 text-brand"></i> Download Ticket
