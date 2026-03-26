@@ -55,8 +55,8 @@
 <script>
     document.body.classList.add('waiting-payment');
 
-    const ticketId = {{ $ticket->id }};
-    const checkUrl = "{{ url('/payment/status/' . $ticket->id) }}";
+    const ticketId =  {{ $ticket->id}};
+    const checkUrl = "{{ url('/payment/status/' . ($ticket->id)) }}";
     const redirectUrl = "{{ route('user.dashboard') }}?success=PaymentReceived";
 
     let elapsed = 0;

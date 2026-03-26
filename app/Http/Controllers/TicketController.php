@@ -253,89 +253,151 @@ public function reject($id)
     }
 
     public function initiatePayment($id)
-{
-    $orderData = session('checkout_data');
-    if (!$orderData) return redirect()->route('athlete.register')->with('error', 'Session expired.');
-
-    $price = (string) preg_replace('/[^0-9]/', '', $orderData['price']);
-    $nonce = Str::random(32);
-    $timestamp = (string)time();
-    $merchOrderId = $id . '_' . $timestamp;
-
-    // 1. Step 1: Flatten ALL non-empty values into one set (M)
-    // ONLY use the fields shown in your documentation's example stringA
-    $m = [
-        'appid'          => env('KBZ_PAY_APP_ID'),
-        'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
-        'merch_order_id' => $merchOrderId,
-        'method'         => 'kbz.payment.precreate',
-        'nonce_str'      => $nonce,
-        'notify_url'     => env('KBZ_PAY_NOTIFY_URL'),
-        'timestamp'      => $timestamp,
-        'total_amount'   => $price,
-        'trade_type'     => 'PAY_BY_QRCODE',
-        'trans_currency' => 'MMK',
-        'version'        => '1.0',
-    ];
-
-    // 2. Sort non-empty values in ascending alphabetical order
-    ksort($m);
-
-    // 3. Join into string A (key1=value1&key2=value2)
-    $queries = [];
-    foreach ($m as $key => $value) {
-        if ($value !== "" && $value !== null) {
-            $queries[] = $key . "=" . $value;
+    {
+        $order = session('pending_registration');
+        if (!$order) {
+            return redirect()->route('athlete.register')
+                ->with('error', 'Session expired.');
         }
-    }
-    $stringA = implode('&', $queries);
 
-    // 4. Step 2: Add "&key=" and perform SHA256
-    $stringToSign = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
-    $sign = strtoupper(hash('sha256', $stringToSign));
+        $athlete = \App\Models\Athlete::find($order['athlete_id']);
+        $gender = $athlete ? $athlete->gender : 'male';
+        $generatedBib = $this->generateBib($gender, $order['category']);
+    
+        $ticket = Ticket::create([
+            'athlete_id'       => $order['athlete_id'], 
+            'bib_name'         => $order['bib_name'],
+            'bib_number'       => $generatedBib, 
+            'category'         => $order['category'] ?? $request->category,
+            'price'            => (int)str_replace(',', '', $order['price']),
+            'event'            => $order['event'], 
+            't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
+            'experience_level' => $order['exp_level'] ?? 'Beginner', // Added this as it's in your DB
+            'transaction_id'   => null, // The image name goes here!
+            'status'           => 'pending', 
+        ]);
 
-    // 5. Construct the Final JSON (The "Transferred Parameters")
-    $payload = [
-        'Request' => [
-            'timestamp'   => $timestamp,
-            'notify_url'  => env('KBZ_PAY_NOTIFY_URL'),
-            'nonce_str'   => $nonce,
-            'sign_type'   => 'SHA256',
-            'method'      => 'kbz.payment.precreate',
-            'sign'        => $sign,
-            'version'     => '1.0',
-            'biz_content' => [
-                'merch_order_id' => $merchOrderId,
-                'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
-                'appid'          => env('KBZ_PAY_APP_ID'),
-                'trade_type'     => 'PAY_BY_QRCODE',
-                'total_amount'   => $price,
-                'trans_currency' => 'MMK'
+        // ✅ Clean price
+        $price = (string) $ticket->price;
+        $timestamp = (string) time();
+        $nonce     = Str::random(32);
+        $orderId   = $ticket->id . '_' . $timestamp;
+
+        // ✅ STEP 1: Build SIGNATURE DATA (VERY IMPORTANT)
+        $signParams = [
+            'appid'          => env('KBZ_PAY_APP_ID'),
+            'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
+            'merch_order_id' => $orderId,
+            'method'         => 'kbz.payment.precreate',
+            'nonce_str'      => $nonce,
+            'notify_url'     => env('KBZ_PAY_NOTIFY_URL'),
+            'timestamp'      => $timestamp,
+            'total_amount'   => $price,
+            'trade_type'     => 'PAY_BY_QRCODE',
+            'trans_currency' => 'MMK',
+            'version'        => '1.0',
+        ];
+
+        // ✅ STEP 2: SORT
+        ksort($signParams);
+
+        // ✅ STEP 3: BUILD STRING A
+        $stringA = '';
+        foreach ($signParams as $key => $value) {
+            if ($value !== "" && $value !== null) {
+                $stringA .= $key . "=" . $value . "&";
+            }
+        }
+        $stringA = rtrim($stringA, "&");
+
+        // ✅ STEP 4: SIGN
+        $stringToSign = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
+        $sign = strtoupper(hash('sha256', $stringToSign));
+
+        // 🔍 DEBUG (remove later)
+        Log::info('KBZ STRING TO SIGN: ' . $stringToSign);
+
+        // ✅ STEP 5: FINAL PAYLOAD
+        $payload = [
+            'Request' => [
+                'timestamp'   => $timestamp,
+                'notify_url'  => env('KBZ_PAY_NOTIFY_URL'),
+                'nonce_str'   => $nonce,
+                'sign_type'   => 'SHA256',
+                'method'      => 'kbz.payment.precreate',
+                'sign'        => $sign,
+                'version'     => '1.0',
+                'biz_content' => [
+                    'merch_order_id' => $orderId,
+                    'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
+                    'appid'          => env('KBZ_PAY_APP_ID'),
+                    'trade_type'     => 'PAY_BY_QRCODE',
+                    'total_amount'   => $price,
+                    'trans_currency' => 'MMK'
+                ]
             ]
-        ]
-    ];
+        ];
 
-    try {
-        // Use HTTP as per your XLSX previously
-        $url = "http://api-uat.kbzpay.com/payment/gateway/uat/precreate";
+        try {
+            // ✅ STEP 6: SEND REQUEST (JSON BODY — VERY IMPORTANT)
+            $response = Http::withBody(
+                json_encode($payload, JSON_UNESCAPED_SLASHES),
+                'application/json'
+            )->post(env('KBZ_PAY_URL'));
+
+            $result = $response->json();
+
+            Log::info('KBZ RESPONSE:', $result);
+
+            // ✅ SUCCESS
+            if (isset($result['Response']['result']) 
+                && $result['Response']['result'] === 'SUCCESS') {
+
+                $qrString = $result['Response']['qrCode'];
+
+                return view('payment.kbz_qr', compact('qrString', 'ticket'));
+            }
+
+            // ❌ FAIL
+            return back()->with('error', 
+                'KBZ Error: ' . ($result['Response']['msg'] ?? 'Unknown error')
+            );
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Connection Error: ' . $e->getMessage());
+        }
+    }
+
+    private function generateBib($gender, $category)
+    {
+        $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
         
-        $response = Http::withoutVerifying()
-            ->withBody(json_encode($payload, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE), 'application/json')
-            ->post($url);
+        preg_match('/\d+/', $category, $matches);
+        $distance = $matches[0] ?? '00';
+        $searchPattern = $prefix . $distance;
 
-        $result = $response->json();
+        // Get ALL used bib numbers except rejected
+        $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
+            ->where('status', '!=', 'rejected')
+            ->pluck('bib_number')
+            ->toArray();
 
-        if (isset($result['Response']['result']) && $result['Response']['result'] === 'SUCCESS') {
-            $qrString = $result['Response']['qr_code'];
-            return view('payment.kbz_qr', compact('qrString'));
+        // Extract numbers only (last 4 digits)
+        $usedNumbers = [];
+        foreach ($usedBibs as $bib) {
+            $usedNumbers[] = (int) substr($bib, -4);
         }
 
-        return back()->with('error', 'KBZ Error: ' . ($result['Response']['msg'] ?? 'Auth Failed'));
+        // Start from 11
+        $number = 11;
 
-    } catch (\Exception $e) {
-        return back()->with('error', 'Connection Error: ' . $e->getMessage());
+        // Find first missing number
+        while (in_array($number, $usedNumbers)) {
+            $number++;
+        }
+
+        return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
-}
 public function getNewBib(Request $request)
 {
     $gender = $request->query('gender');

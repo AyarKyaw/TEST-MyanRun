@@ -201,7 +201,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ticket', [TicketController::class, 'showTicket'])->name('ticket');
     Route::post('/select-race', [AthleteController::class, 'handleSelection'])->name('athlete.selection.handle');
     Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment'])->name('initiatePayment');
-    Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
+    // Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
     Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
     Route::get('/register-athlete', [AthleteController::class, 'showAthleteForm'])->name('athlete.register');
     Route::post('/register-athlete', [AthleteController::class, 'submit'])->name('athlete.register.submit');
@@ -264,7 +264,16 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
 }); 
 
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
+// Route::get('/test-kbz/{id}', function($id) {
+//     // Fake session for testing
+//     session(['checkout_data' => ['price' => '1000']]);
 
+//     // Fake login if required
+//     Auth::loginUsingId(1); // Use a real user id
+
+//     return app(App\Http\Controllers\TicketController::class)
+//         ->initiatePayment($id);
+// });
 Route::get('/api/validate-discount', function (Illuminate\Http\Request $request) {
     // 1. Find the code in the new table
     $codeRecord = \App\Models\SponsorCode::where('code', $request->code)->first();
