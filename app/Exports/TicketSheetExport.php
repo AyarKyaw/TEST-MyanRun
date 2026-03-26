@@ -35,7 +35,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
 
     public function headings(): array
     {
-        return ['Full Name', 'BIB Name', 'BIB Number', 'Gender', 'Category', 'T-Shirt', 'Blood', 'Price', 'Status', 'Date'];
+        return ['Full Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Date'];
     }
 
     public function collection()
@@ -61,20 +61,25 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
         }
 
         return $query->get()->map(function($t) {
-            $user = $t->athlete?->user;
+            $athlete = $t->athlete;
+            $user = $athlete?->user;
+            
             $fullName = $user ? trim("{$user->first_name} {$user->mid_name} {$user->last_name}") : 'Guest';
 
             return [
                 $fullName,
                 $t->bib_name ?? 'N/A',
                 $t->bib_number ?? '0000',
-                ucfirst($t->athlete?->gender ?? 'N/A'),
-                $t->category ?? 'N/A',
-                $t->t_shirt_size ?? 'N/A',
-                $t->athlete?->blood_type ?? 'N/A',
-                number_format((float)$t->price) . ' MMK',
-                ucfirst($t->status),
-                $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A',
+                $athlete?->id_number ?? 'N/A',             // ID No.
+                $user?->phone ?? 'N/A',                    // Phone no.
+                $athlete?->dob ?? 'N/A',                   // Date of Birth
+                ucfirst($athlete?->gender ?? 'N/A'),       // Gender
+                $t->category ?? 'N/A',                     // Category
+                $t->t_shirt_size ?? 'N/A',                 // T-Shirt size
+                $athlete?->blood_type ?? 'N/A',            // Blood Type
+                number_format((float)$t->price) . ' MMK',  // Price
+                ucfirst($t->status),                       // Status
+                $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A', // Date
             ];
         });
     }

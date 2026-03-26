@@ -183,7 +183,7 @@
     <div class="max-w-4xl mx-auto">
         <div class="text-center mb-12">
             <div class="flex items-center justify-center gap-4 mb-2">
-                <img src="{{ asset('images/MyanRun_Orange_RM2.png') }}" alt="Myan Run Logo" class="h-32 w-auto object-contain">
+                <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="Myan Run Logo" class="h-32 w-auto object-contain">
             </div>
             <p class="text-slate-400 font-bold mt-2 uppercase text-[10px] tracking-[0.4em]">Athlete Registration System</p>
         </div>
@@ -518,7 +518,6 @@
                             <option value="XL">XL</option>
                             <option value="2XL">2XL</option>
                             <option value="3XL">3XL</option>
-                            <option value="4XL">4XL</option>
                             <option value="5XL">5XL</option>
                         </select>
                     </div>
