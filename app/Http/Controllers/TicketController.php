@@ -464,9 +464,9 @@ private function generateKbzSignature($params) {
 
             $ticket = Ticket::find($realTicketId); 
 
-            if ($ticket && $ticket->status !== 'confirmed') {
+            if ($ticket && $ticket->status !== 'approved') {
                 $ticket->update([
-                    'status' => 'confirmed',
+                    'status' => 'approved',
                     'transaction_id' => $payload['mm_order_id'] ?? null 
                 ]);
                 Log::info("Ticket #{$realTicketId} confirmed via KBZ Callback.");
