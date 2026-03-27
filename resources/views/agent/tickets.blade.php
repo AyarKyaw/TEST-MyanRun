@@ -233,6 +233,7 @@
                             <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
                             <tr><td><strong>Division:</strong></td> <td id="modal-state"></td></tr>
                             <tr><td><strong>Status:</strong></td> <td id="modal-status"></td></tr>
+                            <tr><td><strong>Date:</strong></td> <td id="modal-date"></td></tr>
                         </table>
                     </div>
                 </div>
@@ -341,6 +342,16 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-gender').innerText = athlete.gender;
             document.getElementById('modal-dob').innerText = athlete.dob;
             document.getElementById('modal-status').innerText = data.status;
+            const date = new Date(data.created_at);
+            document.getElementById('modal-date').innerText = date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            });
+            // Result: 27 Mar 2026, 12:26
 
             // Forms & Actions
             document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
