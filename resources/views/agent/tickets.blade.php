@@ -215,13 +215,13 @@
                             <tr><td><strong>Name:</strong></td> <td id="modal-name"></td></tr>
                             <tr><td><strong>Bib Name:</strong></td> <td id="modal-bib-name"></td></tr>
                             <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
+                            <tr><td><strong>Phone Number:</strong></td> <td id="modal-phone"></td></tr>
+                            <tr><td><strong>Date of Birth:</strong></td> <td id="modal-dob"></td></tr>
+                            <tr><td><strong>Gender:</strong></td> <td id="modal-gender"></td></tr>
                             <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
                             <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
                             <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
-                            <tr>
-                                <td><strong>ID Number:</strong></td> 
-                                <td><div id="modal-id-container"></div></td>
-                            </tr>
+                            <tr><td><strong>ID Number:</strong></td> <td id="modal-id_number"></td></tr>
                         </table>
                     </div>
                     <div class="col-md-6">
@@ -231,7 +231,8 @@
                             <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
                             <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
                             <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
-                            <tr><td><strong>State:</strong></td> <td id="modal-state"></td></tr>
+                            <tr><td><strong>Division:</strong></td> <td id="modal-state"></td></tr>
+                            <tr><td><strong>Status:</strong></td> <td id="modal-status"></td></tr>
                         </table>
                     </div>
                 </div>
@@ -335,6 +336,11 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-state').innerText = athlete.state || 'None';
             document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
+            document.getElementById('modal-id_number').innerText = athlete.id_number;
+            document.getElementById('modal-phone').innerText = athlete.user.phone;
+            document.getElementById('modal-gender').innerText = athlete.gender;
+            document.getElementById('modal-dob').innerText = athlete.dob;
+            document.getElementById('modal-status').innerText = data.status;
 
             // Forms & Actions
             document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
