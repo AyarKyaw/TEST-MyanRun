@@ -29,7 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // 3. FIX: Redirect unauthenticated Agents to /agent/login
         $middleware->redirectGuestsTo(function (Request $request) {
             // If the user is trying to access an agent route
-            if ($request->is('agent') || $request->is('agent/*')) {
+            if ($request->is('agent') || $request->is('ITPLUS/agent/*')) {
                 return route('agent.login'); 
             }
             
