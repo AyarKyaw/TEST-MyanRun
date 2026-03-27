@@ -1,6 +1,7 @@
 <div class="deznav" style="margin-top: 30px">
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
+            @if(Auth::guard('admin')->check())
             {{-- Registration Section --}}
             <li>
                 <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
@@ -85,6 +86,22 @@
                     <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li>
                 </ul>
             </li> -->
+            @endif
+            @if(Auth::guard('agent')->check())
+                <li>
+                    <a class="ai-icon" href="{{ route('agent.tickets') }}" aria-expanded="false">
+                        <i class="flaticon-381-home"></i>
+                        <span class="nav-text">Event Tickets</span>
+                    </a>
+                </li>
+
+                <!-- <li>
+                    <a class="ai-icon" href="{{ route('staff.scanner') }}" aria-expanded="false">
+                        <i class="flaticon-381-view"></i>
+                        <span class="nav-text">QR Scanner</span>
+                    </a>
+                </li> -->
+            @endif
         </ul>
     </div>
     

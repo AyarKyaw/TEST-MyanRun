@@ -5,6 +5,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request; // Add this import
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,18 +15,29 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
-    // 1. Your existing KBZPay fix
-    $middleware->validateCsrfTokens(except: [
-        '/test-kbz-package',
-        'payment/kbz/callback', 
-    ]);
+        // 1. Your existing KBZPay fix
+        $middleware->validateCsrfTokens(except: [
+            '/test-kbz-package',
+            'payment/kbz/callback', 
+        ]);
 
-    // 2. ADD THIS to fix the "Target class [admin] does not exist" error
-    $middleware->alias([
-        'admin' => \App\Http\Middleware\AdminMiddleware::class,
-    ]);
+        // 2. Middleware Alias
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+        ]);
 
-})
+        // 3. FIX: Redirect unauthenticated Agents to /agent/login
+        $middleware->redirectGuestsTo(function (Request $request) {
+            // If the user is trying to access an agent route
+            if ($request->is('agent') || $request->is('agent/*')) {
+                return route('agent.login'); 
+            }
+            
+            // Default for Admins/Others
+            return route('login'); 
+        });
+
+    })
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

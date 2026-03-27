@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\DinnerController;
 use App\Http\Controllers\SponsorController;
 use App\Models\SponsorCode;
+use App\Http\Controllers\AgentController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -35,6 +36,20 @@ Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
+
+
+Route::prefix('agent')->group(function () {
+    // Login Routes
+    Route::get('/login', [AgentController::class, 'showLogin'])->name('agent.login');
+    Route::post('/login', [AgentController::class, 'login'])->name('agent.login.submit');
+
+    // Protected Routes (Only for logged-in agents)
+    Route::middleware('auth:agent')->group(function () {
+        Route::get('/dashboard', [AgentController::class, 'dashboard'])->name('agent.tickets');
+        Route::get('/ticket/{id}', [AgentController::class, 'viewTicket'])->name('agent.ticket.view');
+        Route::post('/logout', [AgentController::class, 'logout'])->name('agent.logout');
+    });
+});
 
 Route::get('/score', function (Request $request) {
     set_time_limit(120);
@@ -212,6 +227,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
 });
 
+
+Route::middleware(['auth:admin,agent'])->group(function () {
+Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('dashboard.tickets.export');
+});
 /*
 |--------------------------------------------------------------------------
 | Admin Dashboard Routes
@@ -258,7 +277,6 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
     Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
-    Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('dashboard.tickets.export');
     Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
     Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
 }); 
