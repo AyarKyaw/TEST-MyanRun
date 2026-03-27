@@ -38,7 +38,7 @@ Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
 
 
-Route::prefix('agent')->group(function () {
+Route::prefix('ITPLUS/agent')->group(function () {
     // Login Routes
     Route::get('/login', [AgentController::class, 'showLogin'])->name('agent.login');
     Route::post('/login', [AgentController::class, 'login'])->name('agent.login.submit');
