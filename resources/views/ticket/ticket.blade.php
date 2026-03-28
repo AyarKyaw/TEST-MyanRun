@@ -135,13 +135,13 @@
     <div class="ticket-card active" id="card-16Kilometer"
         style="background-image: url('{{ asset('images/local16.jpg') }}');" 
         data-name="16 Kilometer Run" 
-        data-local="1,000" 
+        data-local="120,000" 
         data-foreign="200,000"
         data-img-local="{{ asset('images/local16.jpg') }}" {{-- FIXED: Added brackets --}}
         data-img-foreign="{{ asset('images/f16.jpg') }}"
         onclick="selectTicket(this)">
         <span class="category-badge">16 Kilometer</span>
-        <div class="price-display price-tag">1,000 <span class="text-lg opacity-60">MMK</span></div>
+        <div class="price-display price-tag">120,000 <span class="text-lg opacity-60">MMK</span></div>
     </div>
 
     {{-- Card 36KM --}}
