@@ -149,8 +149,9 @@ public function reject($id)
     $blood       = $athlete->blood_type ?? 'N/A';
     $exp         = $ticket->experience_level ?? 'N/A';
     $medical     = $athlete->medical_details ?? 'None';
+    $itra        = $athlete->itra_details ?? 'None';
 
-    $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical";
+    $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical\nITRA: $itra";
 
     // 4. Paths
     if (str_contains($category, '36')) {
