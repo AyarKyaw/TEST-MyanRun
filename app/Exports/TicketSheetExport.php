@@ -84,7 +84,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
                 $athlete?->blood_type ?? 'N/A',
                 number_format((float)$t->price) . ' MMK',
                 ucfirst($t->status),
-                $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A',
+                $t->created_at ? $t->created_at->format('d/m/Y H:i') : 'N/A',
                 $athlete?->state ?? 'N/A',
                 $athlete?->address ?? 'N/A',
             ];
