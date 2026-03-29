@@ -60,6 +60,11 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
             });
         }
 
+        /** * SORT: FIRST TICKET TO LAST TICKET
+         * 'asc' ensures the earliest registrations are at the top.
+         */
+        $query->orderBy('created_at', 'asc');
+
         return $query->get()->map(function($t) {
             $athlete = $t->athlete;
             $user = $athlete?->user;
@@ -70,17 +75,17 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
                 $fullName,
                 $t->bib_name ?? 'N/A',
                 $t->bib_number ?? '0000',
-                $athlete?->id_number ?? 'N/A',             // ID No.
-                $user?->phone ?? 'N/A',                    // Phone no.
-                $athlete?->dob ?? 'N/A',                   // Date of Birth
-                ucfirst($athlete?->gender ?? 'N/A'),       // Gender
-                $t->category ?? 'N/A',                     // Category
-                $t->t_shirt_size ?? 'N/A',                 // T-Shirt size
-                $athlete?->blood_type ?? 'N/A',            // Blood Type
-                number_format((float)$t->price) . ' MMK',  // Price
-                ucfirst($t->status),                       // Status
-                $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A', // Date
-                $athlete?->state ?? 'N/A',                 // Division (State/Region)
+                $athlete?->id_number ?? 'N/A',
+                $user?->phone ?? 'N/A',
+                $athlete?->dob ?? 'N/A',
+                ucfirst($athlete?->gender ?? 'N/A'),
+                $t->category ?? 'N/A',
+                $t->t_shirt_size ?? 'N/A',
+                $athlete?->blood_type ?? 'N/A',
+                number_format((float)$t->price) . ' MMK',
+                ucfirst($t->status),
+                $t->created_at ? $t->created_at->format('d/m/Y') : 'N/A',
+                $athlete?->state ?? 'N/A',
                 $athlete?->address ?? 'N/A',
             ];
         });
