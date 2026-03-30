@@ -41,37 +41,41 @@ class TicketController extends Controller
     }
 
     public function dashboard(Request $request)
-    {
-        $search = $request->query('search');
-        // Default to 'pending' if no tab is selected
-        $status = $request->query('status', 'pending'); 
+{
+    $search = $request->query('search');
+    $status = $request->query('status', 'pending'); 
 
-        $query = \App\Models\Ticket::with(['athlete.user'])
-            ->where('status', $status) // Filter by tab status in DB
-            ->orderBy('created_at', 'desc');
+    // 1. Start the query with the relationships
+    $query = \App\Models\Ticket::with(['athlete.user'])
+        ->where('status', $status); // Keep the status filter active
 
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('bib_number', 'LIKE', "%{$search}%")
-                ->orWhere('bib_name', 'LIKE', "%{$search}%")
-                ->orWhereHas('athlete.user', function($userQuery) use ($search) {
-                    $userQuery->where('first_name', 'LIKE', "%{$search}%")
-                                ->orWhere('last_name', 'LIKE', "%{$search}%");
-                });
-            });
-        }
-
-        $customers = $query->paginate(10)->withQueryString();
-        
-        // Get counts for the tab badges
-        $counts = [
-            'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
-            'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
-            'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
-        ];
-
-        return view('dashboard.ticket-sales.ticket', compact('customers', 'counts'));
+    // 2. APPLY SEARCH TO ALL ROWS IN THAT STATUS
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('bib_number', 'LIKE', "%{$search}%")
+              ->orWhere('bib_name', 'LIKE', "%{$search}%")
+              // Use 'whereHas' inside the group to stay within the status
+              ->orWhereHas('athlete.user', function($userQuery) use ($search) {
+                  $userQuery->where('first_name', 'LIKE', "%{$search}%")
+                            ->orWhere('last_name', 'LIKE', "%{$search}%")
+                            ->orWhere('phone', 'LIKE', "%{$search}%");
+              });
+        });
     }
+
+    // 3. Order and Paginate AFTER the search is applied
+    $customers = $query->orderBy('created_at', 'desc')
+                       ->paginate(1) // Changed to 10 so you see more than 1 row
+                       ->withQueryString();
+    
+    $counts = [
+        'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
+        'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
+        'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
+    ];
+
+    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts'));
+}
 
     public function approve($id)
 {
