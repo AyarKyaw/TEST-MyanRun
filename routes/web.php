@@ -248,7 +248,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/register/1', [UserController::class, 'dashboard'])->name('dashboard.register-level-1');
     Route::get('/register/2', [AthleteController::class, 'dashboard'])->name('dashboard.register-level-2');
     Route::get('/events/ticket', [TicketController::class, 'dashboard'])->name('dashboard.events.ticket');
-    Route::post('/update-id', [TicketController::class, 'updateId']);
+Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');
 
     Route::get('/events/{status}', [EventController::class, 'index'])
           ->where('status', 'now|past|coming')
@@ -283,6 +283,7 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
     Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
     Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
+    
 }); 
 
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
