@@ -41,41 +41,47 @@ class TicketController extends Controller
     }
 
     public function dashboard(Request $request)
-    {
-        $search = trim($request->query('search')); // Trim any extra spaces
-        $status = $request->query('status', 'pending'); 
+{
+    $search = $request->query('search');
+    $status = $request->query('status', 'pending'); 
 
-        // 1. Initialize the query with the Status filter
-        $query = \App\Models\Ticket::query()
-            ->with(['athlete.user'])
-            ->where('status', $status);
+    $query = \App\Models\Ticket::query()->with(['athlete.user']);
 
-        // 2. Add the Search Logic (Make sure to re-assign to $query)
-        if (!empty($search)) {
-            $query = $query->where(function($q) use ($search) {
-                $q->where('bib_number', 'LIKE', "%{$search}%")
-                ->orWhere('bib_name', 'LIKE', "%{$search}%")
-                ->orWhereHas('athlete.user', function($userQuery) use ($search) {
-                    $userQuery->where('first_name', 'LIKE', "%{$search}%")
-                                ->orWhere('middle_name', 'LIKE', "%{$search}%")
-                                ->orWhere('last_name', 'LIKE', "%{$search}%");
-                });
+    // 1. Always filter by status first
+    $query->where('status', $status);
+
+    // 2. Filter by Search (Nested to protect the status filter)
+    if (!empty($search)) {
+        $request->merge(['page' => 1]);
+        $searchTerm = trim($search);
+
+        $query->where(function($q) use ($searchTerm) {
+            $q->where('bib_number', 'LIKE', "%{$searchTerm}%")
+            ->orWhere('bib_name', 'LIKE', "%{$searchTerm}%")
+            ->orWhereHas('athlete.user', function($userQuery) use ($searchTerm) {
+                // CONCAT_WS is better because it ignores NULL middle names
+                $userQuery->where(\DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                            // Also search by combining just First and Last
+                            ->orWhere(\DB::raw("CONCAT_WS(' ', first_name, last_name)"), 'LIKE', "%{$searchTerm}%");
             });
-        }
-
-        // 3. Final execution
-        $customers = $query->orderBy('created_at', 'desc')
-                        ->paginate(1)
-                        ->withQueryString();
-
-        $counts = [
-            'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
-            'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
-            'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
-        ];
-
-        return view('dashboard.ticket-sales.ticket', compact('customers', 'counts'));
+        });
     }
+
+    // 3. Final Execution
+    $customers = $query->orderBy('created_at', 'desc')
+                       ->paginate(10) // Changed from 1 to 10 for better usability
+                       ->withQueryString();
+
+    $counts = [
+        'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
+        'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
+        'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
+    ];
+
+    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts', 'status'));
+}
 
     public function approve($id)
 {
