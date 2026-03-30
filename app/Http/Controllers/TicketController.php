@@ -40,56 +40,42 @@ class TicketController extends Controller
         return view('ticket.ticket', compact('eventName'));
     }
 
-   public function dashboard(Request $request)
-{
-    $search = $request->query('search');
-    $status = $request->query('status', 'pending'); 
+    public function dashboard(Request $request)
+    {
+        $search = trim($request->query('search')); // Trim any extra spaces
+        $status = $request->query('status', 'pending'); 
 
-    // --- THE FIX: RESET TO PAGE 1 DURING SEARCH ---
-    // If a search is present, we tell Laravel to ignore the current ?page=X 
-    // and start from the beginning of the results.
-    if ($search) {
-        $request->merge(['page' => 1]); 
+        // 1. Initialize the query with the Status filter
+        $query = \App\Models\Ticket::query()
+            ->with(['athlete.user'])
+            ->where('status', $status);
+
+        // 2. Add the Search Logic (Make sure to re-assign to $query)
+        if (!empty($search)) {
+            $query = $query->where(function($q) use ($search) {
+                $q->where('bib_number', 'LIKE', "%{$search}%")
+                ->orWhere('bib_name', 'LIKE', "%{$search}%")
+                ->orWhereHas('athlete.user', function($userQuery) use ($search) {
+                    $userQuery->where('first_name', 'LIKE', "%{$search}%")
+                                ->orWhere('middle_name', 'LIKE', "%{$search}%")
+                                ->orWhere('last_name', 'LIKE', "%{$search}%");
+                });
+            });
+        }
+
+        // 3. Final execution
+        $customers = $query->orderBy('created_at', 'desc')
+                        ->paginate(1)
+                        ->withQueryString();
+
+        $counts = [
+            'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
+            'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
+            'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
+        ];
+
+        return view('dashboard.ticket-sales.ticket', compact('customers', 'counts'));
     }
-
-    $query = \App\Models\Ticket::with(['athlete.user'])
-        ->where('status', $status);
-
-    if ($search) {
-        dd([
-            'Searching_For' => $search,
-            'Active_Status' => $status,
-            'Current_Page' => $request->query('page'),
-            'SQL_Generated' => $query->toSql(),
-            'SQL_Bindings' => $query->getBindings(),
-            'Total_Results_Found' => $query->count(),
-            'First_Result_Data' => $query->first() ? $query->first()->toArray() : 'No Match Found'
-        ]);
-        $query->where(function($q) use ($search) {
-            $q->where('bib_number', 'LIKE', "%{$search}%")
-              ->orWhere('bib_name', 'LIKE', "%{$search}%")
-              ->orWhereHas('athlete.user', function($userQuery) use ($search) {
-                  $userQuery->where('first_name', 'LIKE', "%{$search}%")
-                            ->orWhere('middle_name', 'LIKE', "%{$search}%")
-                            ->orWhere('last_name', 'LIKE', "%{$search}%");
-              });
-        });
-    }
-
-    // This will now search ALL 7 rows (and any future rows) 
-    // and bring "Ayar Kyaw" to the very first page of results.
-    $customers = $query->orderBy('created_at', 'desc')
-                       ->paginate(1) 
-                       ->withQueryString();
-    
-    $counts = [
-        'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
-        'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
-        'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
-    ];
-
-    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts'));
-}
 
     public function approve($id)
 {
