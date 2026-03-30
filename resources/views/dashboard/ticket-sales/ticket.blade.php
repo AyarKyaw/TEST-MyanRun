@@ -82,6 +82,9 @@
                         <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
                     </button>
                     <ul class="dropdown-menu w-100">
+                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => 'all', 'status' => request('status', 'all')]) }}">
+                            All Categories ({{ ucfirst(request('status', 'all')) }})
+                        </a></li>
                         <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">16KM ({{ ucfirst(request('status', 'all')) }})</a></li>
                         <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">36KM ({{ ucfirst(request('status', 'all')) }})</a></li>
                     </ul>
