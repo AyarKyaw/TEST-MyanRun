@@ -71,6 +71,70 @@ class RegisterController extends Controller
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
-
     
+    public function verifyUser(Request $request)
+{
+    $email = trim($request->email);
+    $nameInput = preg_replace('/\s+/', ' ', trim($request->name)); 
+    
+    // 1. Clean the input phone: Remove +, 95, 09, and spaces
+    $cleanInput = preg_replace('/^(\+95|95|09|0)/', '', trim($request->phone));
+    $cleanInput = str_replace(' ', '', $cleanInput);
+
+    // 2. Find the user by Email first
+    $user = User::where('email', $email)->first();
+
+    if ($user) {
+        // 3. Clean the DATABASE phone the same way to compare
+        $cleanDB = preg_replace('/^(\+95|95|09|0)/', '', $user->phone);
+        $cleanDB = str_replace(' ', '', $cleanDB);
+
+        // 4. Compare Phone Numbers
+        if ($cleanInput === $cleanDB) {
+            
+            // 5. Compare Names
+            $dbName = trim("{$user->first_name} {$user->middle_name} {$user->last_name}");
+            $dbName = preg_replace('/\s+/', ' ', $dbName);
+            
+            if (strtolower($dbName) === strtolower($nameInput)) {
+                session(['reset_user_id' => $user->id]);
+                return redirect()->route('password.reset_view');
+            }
+        }
+    }
+
+    return back()->with('error', 'The details provided do not match our records.');
+}
+
+    public function showResetForm()
+    {
+        // Security: If they haven't verified their 3 details, kick them back
+        if (!session()->has('reset_user_id')) {
+            return redirect()->route('login')->with('error', 'Please verify your details first.');
+        }
+
+        return view('password.reset_view');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8|confirmed', // 'confirmed' looks for password_confirmation field
+        ]);
+
+        $userId = session('reset_user_id');
+        $user = User::find($userId);
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'User not found.');
+        }
+
+        // Update password and clear the temporary session
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        session()->forget('reset_user_id');
+
+        return redirect()->route('login')->with('success', 'Password updated successfully! Please login.');
+    }
 }

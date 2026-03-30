@@ -48,7 +48,7 @@
             <div>
                 <div class="flex justify-between mb-2">
                     <label class="block text-sm font-semibold text-slate-700">Password</label>
-                    <a href="#" class="text-xs text-[#C3E92D] hover:underline">Forgot Password?</a>
+                    <a href="/forgot_password" class="text-xs text-[#C3E92D] hover:underline">Forgot Password?</a>
                 </div>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">

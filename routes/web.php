@@ -32,10 +32,14 @@ Route::get('/race', function () { return view('race'); });
 Route::get('/term', function () { return view('term'); });
 Route::get('/pp', function () { return view('pp'); });
 Route::get('/result', function () { return view('result'); });
+Route::get('/forgot_password', function () { return view('password.forgot'); });
 Route::get('/race_guide', function () { return view('race_guide'); });
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
+Route::post('/forgot-password/verify', [RegisterController::class, 'verifyUser'])->name('password.verify_user');
+Route::get('/forgot-password/reset', [RegisterController::class, 'showResetForm'])->name('password.reset_view');
+Route::post('/forgot-password/update', [RegisterController::class, 'updatePassword'])->name('password.update');
 
 
 Route::prefix('ITPLUS/agent')->group(function () {
