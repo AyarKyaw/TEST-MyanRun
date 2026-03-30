@@ -56,6 +56,15 @@ class TicketController extends Controller
         ->where('status', $status);
 
     if ($search) {
+        dd([
+            'Searching_For' => $search,
+            'Active_Status' => $status,
+            'Current_Page' => $request->query('page'),
+            'SQL_Generated' => $query->toSql(),
+            'SQL_Bindings' => $query->getBindings(),
+            'Total_Results_Found' => $query->count(),
+            'First_Result_Data' => $query->first() ? $query->first()->toArray() : 'No Match Found'
+        ]);
         $query->where(function($q) use ($search) {
             $q->where('bib_number', 'LIKE', "%{$search}%")
               ->orWhere('bib_name', 'LIKE', "%{$search}%")
