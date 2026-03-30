@@ -117,7 +117,7 @@
                                 <li class="nav-item">
                                     <a class="nav-link {{ request('status', 'pending') == $status ? 'active' : '' }}" 
                                        href="{{ route('dashboard.events.ticket', ['status' => $status, 'search' => request('search')]) }}">
-                                        {{ ucfirst($status) }} ({{ $counts[$status] ?? 0 }})
+                                         {{ ucfirst($status) }} ({{ $counts[$status] ?? 0 }})
                                     </a>
                                 </li>
                             @endforeach
@@ -207,54 +207,69 @@
                 <h5 class="modal-title">Runner Registration Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="mb-3 fw-bold">Personal Information</h6>
-                        <table class="table table-sm custom-table">
-                            <tr><td><strong>Name:</strong></td> <td id="modal-name"></td></tr>
-                            <tr><td><strong>Bib Name:</strong></td> <td id="modal-bib-name"></td></tr>
-                            <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
-                            <tr><td><strong>T-Shirt Size:</strong></td> <td id="modal-tshirt"></td></tr>
-                            <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
-                            <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
-                            <tr>
-                                <td><strong>ID Number:</strong></td> 
-                                <td><div id="modal-id-container"></div></td>
-                            </tr>
-                        </table>
+            <form action="/dashboard/update-ticket-info" method="POST" id="update-ticket-form">
+                @csrf
+                <input type="hidden" name="id" id="modal-ticket-id-input">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3 fw-bold">Personal Information</h6>
+                            <table class="table table-sm custom-table">
+                                <tr><td><strong>Name:</strong></td> <td id="modal-name"></td></tr>
+                                <tr>
+                                    <td><strong>Bib Name:</strong></td> 
+                                    <td id="modal-bib-container"></td>
+                                </tr>
+                                <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
+                                <tr>
+                                    <td><strong>T-Shirt Size:</strong></td> 
+                                    <td id="modal-tshirt-container"></td>
+                                </tr>
+                                <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
+                                <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
+                                <tr>
+                                    <td><strong>ID Number:</strong></td> 
+                                    <td><div id="modal-id-container"></div></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3 fw-bold">Event Details</h6>
+                            <table class="table table-sm custom-table">
+                                <tr><td><strong>Event:</strong></td> <td id="modal-event"></td></tr>
+                                <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
+                                <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
+                                <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
+                                <tr><td><strong>State:</strong></td> <td id="modal-state"></td></tr>
+                            </table>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <h6 class="mb-3 fw-bold">Event Details</h6>
-                        <table class="table table-sm custom-table">
-                            <tr><td><strong>Event:</strong></td> <td id="modal-event"></td></tr>
-                            <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
-                            <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
-                            <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
-                            <tr><td><strong>State:</strong></td> <td id="modal-state"></td></tr>
-                        </table>
+                    <div class="row mt-2" id="modal-save-button-container">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Update Ticket Information</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row align-items-center">
+                        <div class="col-md-5">
+                            <h6 class="fw-bold text-success">Transaction Image Proof</h6>
+                            <div class="alert alert-info py-2">
+                                <strong>Medical Info:</strong><br>
+                                <span id="modal-medical" class="small"></span>
+                            </div>
+                            <div class="alert alert-info py-2">
+                                <strong>ITRA Info:</strong><br>
+                                <span id="modal-itra" class="small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-7 text-center">
+                            <div class="border rounded p-1 bg-light shadow-sm">
+                                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr>
-                <div class="row align-items-center">
-                    <div class="col-md-5">
-                        <h6 class="fw-bold text-success">Transaction Image Proof</h6>
-                        <div class="alert alert-info py-2">
-                            <strong>Medical Info:</strong><br>
-                            <span id="modal-medical" class="small"></span>
-                        </div>
-                        <div class="alert alert-info py-2">
-                            <strong>ITRA Info:</strong><br>
-                            <span id="modal-itra" class="small"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-7 text-center">
-                        <div class="border rounded p-1 bg-light shadow-sm">
-                            <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </form>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <div class="d-flex align-items-center" id="modal-action-buttons">
@@ -281,7 +296,7 @@ const districtOptions = {
     "5": ["ကနန", "ကဘလ", "ကမန", "ကလတ", "ကလထ", "ကလန", "ကလဝ", "ကသန", "ခတန", "ခပန", "ခဥတ", "ခဥန", "ငဇန", "စကန", "ဆလက", "တဆန", "တမန", "ထခန", "ဒပယ", "နယန", "ပလန", "ပလဘ", "ဖပန", "ဗမန", "ဘတလ", "မကန", "မမတ", "မမန", "မရန", "မလန", "ယမပ", "ရဘန", "ရဥန", "လရန", "လဟန", "ဝလန", "ဝသန", "ဟမလ", "အတန", "အရတ"],
     "6": ["ကစန", "ကရရ", "ကလအ", "ကသန", "ခမန", "တသရ", "ထဝန", "ပလတ", "ပလန", "ဘပန", "မတန", "မမန", "ရဖြန", "လလန", "သရခ"],
     "7": ["ကကန", "ကတခ", "ကပက", "ကဝန", "ဇကန", "ညလပ", "တငန", "ထတပ", "ဒဥန", "နတလ", "ပခတ", "ပခန", "ပတဆ", "ပတတ", "ပတန", "ပနက", "ပမန", "ဖမန", "မညန", "မလန", "ရကန", "ရတန", "ရတရှ", "လပတ", "ဝမန", "သကန", "သဆန", "သနပ", "သဝတ", "အတန", "အဖန"],
-    "8": ["ကထန", "ကမန", "ခမန", "ဂဂန", "ငဖန", "စတရ", "စလန", "ဆပဝ", "ဆဖန", "ဆမန", "တတက", "ထလန", "နမန", "ပခက", "ပဖြန", "ပမန", "မကန", "မတန", "မထန", "မဘန", "မမန", "မလန", "မသန", "ရစက", "ရနခ", "သရန", "အလန"],
+    "8": ["ကထန", "ကမရ", "ခဆန", "ခဇန", "ပမန", "ဘလန", "မဒန", "မလမ", "ရမန", "လမန", "သထန", "သဖြရ"],
     "9": ["ကဆန", "ကပတ", "ခမစ", "ခအစ", "ငဇန", "ငသရ", "စကတ", "စကန", "ဇဗသ", "ဇယသ", "ညဥန", "တကတ", "တကန", "တတဥ", "တသန", "ဒခသ", "နထက", "ပကခ", "ပဗသ", "ပဘန", "ပမန", "ပသက", "ပဥလ", "မကန", "မခန", "မတရ", "မထလ", "မမန", "မလန", "မသန", "မဟမ", "ရမသ", "လဝန", "ဝတန", "သစန", "သပက", "အမစ", "အမရ", "ဥတသ"],
     "10": ["ကထန", "ကမရ", "ခဆန", "ခဇန", "ပမန", "ဘလန", "မဒန", "မလမ", "ရမန", "လမန", "သထန", "သဖြရ"],
     "11": ["ကတန", "ကတလ", "ကဖန", "ဂမန", "စတန", "တကန", "တပဝ", "ပဏတ", "ပတန", "ဗတထ", "ဘသတ", "မတန", "မပတ", "မပန", "မအတ", "မအန", "မဥန", "ရဗန", "ရသတ", "သတန", "အမန"],
@@ -326,14 +341,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = JSON.parse(this.getAttribute('data-info'));
             const transactionImageUrl = this.getAttribute('data-image');
             const athlete = data.athlete || {};
-            window.currentTicketId = data.id;
+            
+            // Set ID in hidden input for update form
+            document.getElementById('modal-ticket-id-input').value = data.id;
 
-            // Populate text
+            // Populate base text
             document.getElementById('modal-name').innerText = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
             document.getElementById('modal-itra').innerText = athlete.itra_details || 'None';
-            document.getElementById('modal-bib-name').innerText = data.bib_name || 'N/A';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
-            document.getElementById('modal-tshirt').innerText = data.t_shirt_size || 'N/A';
             document.getElementById('modal-category').innerText = data.category || 'N/A';
             document.getElementById('modal-event').innerText = data.event || 'N/A';
             document.getElementById('modal-price').innerText = new Intl.NumberFormat().format(data.price || 0) + ' MMK';
@@ -347,27 +362,44 @@ document.addEventListener('DOMContentLoaded', function () {
             // Forms & Actions
             document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
             document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
+            
             const actionContainer = document.getElementById('modal-action-buttons');
-            data.status === 'pending' ? actionContainer.classList.remove('d-none') : actionContainer.classList.add('d-none');
-
-            // ID Container Logic - CHANGED TO FORM SUBMISSION
-            const idContainer = document.getElementById('modal-id-container');
+            const saveBtnContainer = document.getElementById('modal-save-button-container');
             const isEditable = ['pending', 'approved'].includes(data.status);
-            const currentId = athlete.id_number || '';
+
+            if (data.status === 'pending') {
+                actionContainer.classList.remove('d-none');
+            } else {
+                actionContainer.classList.add('d-none');
+            }
 
             if (isEditable) {
-                let innerHtml = `
-                    <form action="/dashboard/update-id" method="POST" id="update-id-form">
-                        @csrf
-                        <input type="hidden" name="id" value="${data.id}">
+                saveBtnContainer.classList.remove('d-none');
+                
+                // --- Handle BIB Name Edit ---
+                document.getElementById('modal-bib-container').innerHTML = `
+                    <input type="text" name="bib_name" class="form-control form-control-sm" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
                 `;
+
+                // --- Handle T-Shirt Size Edit ---
+                const sizes = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "5XL"];
+                let sizeOptions = sizes.map(s => `<option value="${s}" ${data.t_shirt_size === s ? 'selected' : ''}>${s}</option>`).join('');
+                document.getElementById('modal-tshirt-container').innerHTML = `
+                    <select name="t_shirt_size" class="form-control form-control-sm">
+                        ${sizeOptions}
+                    </select>
+                `;
+
+                // --- Handle ID Number Edit (NRC Logic) ---
+                const idContainer = document.getElementById('modal-id-container');
+                const currentId = athlete.id_number || '';
 
                 if (athlete.nat_type === 'national') {
                     let state = '', district = '', type = 'နိုင်', num = '';
                     const match = currentId.match(/^(\d+)\/([^\(]+)\(([^)]+)\)(\d+)$/);
                     if(match) { state = match[1]; district = match[2]; type = match[3]; num = match[4]; }
 
-                    innerHtml += `
+                    idContainer.innerHTML = `
                         <div class="d-flex gap-1 flex-wrap mb-2">
                             <select name="nrc_state" id="edit_nrc_state" class="form-control p-1" style="width: 55px;" required>
                                 <option value="">St</option>
@@ -383,26 +415,22 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     `;
                 } else {
-                    innerHtml += `
-                        <div class="mb-2">
-                            <input type="text" name="id_number" id="edit_passport" class="form-control" value="${currentId}" placeholder="Passport Number" required>
-                        </div>
+                    idContainer.innerHTML = `
+                        <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm" value="${currentId}" placeholder="Passport Number" required>
                     `;
                 }
-
-                innerHtml += `
-                        <button type="submit" class="btn btn-primary btn-sm w-100 mt-1">Save ID</button>
-                    </form>
-                `;
-                
-                idContainer.innerHTML = innerHtml;
                 
                 // Trigger district load if NRC
                 if(athlete.nat_type === 'national' && state) {
                     setTimeout(() => document.getElementById('edit_nrc_state').dispatchEvent(new Event('change')), 50);
                 }
+
             } else {
-                idContainer.innerHTML = `<span class="fw-bold">${currentId || 'None'}</span>`;
+                // Read-only mode
+                saveBtnContainer.classList.add('d-none');
+                document.getElementById('modal-bib-container').innerHTML = `<strong>${data.bib_name || 'N/A'}</strong>`;
+                document.getElementById('modal-tshirt-container').innerHTML = `<strong>${data.t_shirt_size || 'N/A'}</strong>`;
+                document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold">${athlete.id_number || 'None'}</span>`;
             }
         });
     });
