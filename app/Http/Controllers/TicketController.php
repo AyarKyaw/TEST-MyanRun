@@ -61,7 +61,7 @@ class TicketController extends Controller
               ->orWhere('bib_name', 'LIKE', "%{$search}%")
               ->orWhereHas('athlete.user', function($userQuery) use ($search) {
                   $userQuery->where('first_name', 'LIKE', "%{$search}%")
-                            ->orWhere('mid_name', 'LIKE', "%{$search}%")
+                            ->orWhere('middle_name', 'LIKE', "%{$search}%")
                             ->orWhere('last_name', 'LIKE', "%{$search}%");
               });
         });
