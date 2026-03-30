@@ -40,32 +40,37 @@ class TicketController extends Controller
         return view('ticket.ticket', compact('eventName'));
     }
 
-    public function dashboard(Request $request)
+   public function dashboard(Request $request)
 {
     $search = $request->query('search');
     $status = $request->query('status', 'pending'); 
 
-    // 1. Start the query with the relationships
-    $query = \App\Models\Ticket::with(['athlete.user'])
-        ->where('status', $status); // Keep the status filter active
+    // --- THE FIX: RESET TO PAGE 1 DURING SEARCH ---
+    // If a search is present, we tell Laravel to ignore the current ?page=X 
+    // and start from the beginning of the results.
+    if ($search) {
+        $request->merge(['page' => 1]); 
+    }
 
-    // 2. APPLY SEARCH TO ALL ROWS IN THAT STATUS
+    $query = \App\Models\Ticket::with(['athlete.user'])
+        ->where('status', $status);
+
     if ($search) {
         $query->where(function($q) use ($search) {
             $q->where('bib_number', 'LIKE', "%{$search}%")
               ->orWhere('bib_name', 'LIKE', "%{$search}%")
-              // Use 'whereHas' inside the group to stay within the status
               ->orWhereHas('athlete.user', function($userQuery) use ($search) {
                   $userQuery->where('first_name', 'LIKE', "%{$search}%")
-                            ->orWhere('last_name', 'LIKE', "%{$search}%")
-                            ->orWhere('phone', 'LIKE', "%{$search}%");
+                            ->orWhere('mid_name', 'LIKE', "%{$search}%")
+                            ->orWhere('last_name', 'LIKE', "%{$search}%");
               });
         });
     }
 
-    // 3. Order and Paginate AFTER the search is applied
+    // This will now search ALL 7 rows (and any future rows) 
+    // and bring "Ayar Kyaw" to the very first page of results.
     $customers = $query->orderBy('created_at', 'desc')
-                       ->paginate(1) // Changed to 10 so you see more than 1 row
+                       ->paginate(1) 
                        ->withQueryString();
     
     $counts = [
