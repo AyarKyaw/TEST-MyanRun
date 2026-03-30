@@ -34,6 +34,29 @@
     
     #tableSearch { font-size: 18px !important; height: 55px !important; }
     .table td small.text-muted { font-size: 14px !important; }
+
+    /* Modal Styling Enhancements */
+    .modal-content { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .modal-header { background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 15px 15px 0 0; }
+    .info-section { background: #fdfdfd; border: 1px solid #f1f1f1; border-radius: 10px; padding: 15px; height: 100%; }
+    .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 15px; display: block; font-weight: 700; }
+    
+    .custom-table tr td { border: none; padding: 8px 0; font-size: 15px; }
+    .custom-table tr td:first-child { color: #666; width: 40%; }
+    
+    .nrc-group .form-control { 
+        border: 1px solid #e2e2e2; 
+        font-size: 14px; 
+        padding: 5px 8px;
+        background-color: #fff;
+    }
+    .nrc-group select { cursor: pointer; }
+    
+    #modal-transaction-img {
+        transition: transform 0.3s ease;
+        border: 4px solid #fff;
+    }
+    #modal-transaction-img:hover { transform: scale(1.02); }
 </style>       
 
 <main class="content-body">
@@ -59,16 +82,8 @@
                         <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
                     </button>
                     <ul class="dropdown-menu w-100">
-                        <li>
-                            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">
-                                16KM ({{ ucfirst(request('status', 'all')) }})
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">
-                                36KM ({{ ucfirst(request('status', 'all')) }})
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">16KM ({{ ucfirst(request('status', 'all')) }})</a></li>
+                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">36KM ({{ ucfirst(request('status', 'all')) }})</a></li>
                     </ul>
                 </div>
             </div>
@@ -78,26 +93,17 @@
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
                             <div>
                                 <p class="mb-0 fs-14 text-muted">Total Approved</p>
-                                <h3 class="mb-0 text-black fw-bold fs-18">
-                                    {{ $counts['approved'] ?? 0 }} Persons
-                                </h3>
+                                <h3 class="mb-0 text-black fw-bold fs-18">{{ $counts['approved'] ?? 0 }} Persons</h3>
                             </div>
                             
                             <div style="min-width: 400px; max-width: 500px;" class="ms-auto">
                                 <form action="{{ URL::current() }}" method="GET">
                                     <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
                                     <div class="input-group">
-                                        <input type="text" id="tableSearch" name="search"
-                                            class="form-control border-primary" 
-                                            placeholder="Search Name or BIB..." 
-                                            value="{{ request('search') }}">
-                                        <button class="btn btn-primary px-4" type="submit">
-                                            <i class="fa fa-search"></i>
-                                        </button>
+                                        <input type="text" id="tableSearch" name="search" class="form-control border-primary" placeholder="Search Name or BIB..." value="{{ request('search') }}">
+                                        <button class="btn btn-primary px-4" type="submit"><i class="fa fa-search"></i></button>
                                         @if(request('search'))
-                                            <a href="{{ route('dashboard.events.ticket', ['status' => request('status', 'pending')]) }}" class="btn btn-light border-primary d-flex align-items-center">
-                                                <i class="fa fa-times text-danger"></i>
-                                            </a>
+                                            <a href="{{ route('dashboard.events.ticket', ['status' => request('status', 'pending')]) }}" class="btn btn-light border-primary d-flex align-items-center"><i class="fa fa-times text-danger"></i></a>
                                         @endif
                                     </div>
                                 </form>
@@ -154,13 +160,7 @@
                                         <td><strong>{{ $customer->bib_name }}</strong></td>
                                         <td><strong>{{ $customer->bib_number }}</strong></td>
                                         <td>
-                                            @php
-                                                $badgeClass = match($customer->status) {
-                                                    'approved' => 'success',
-                                                    'rejected' => 'danger',
-                                                    default => 'warning',
-                                                };
-                                            @endphp
+                                            @php $badgeClass = match($customer->status) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
                                             <span class="badge light badge-{{ $badgeClass }}">{{ ucfirst($customer->status) }}</span>
                                         </td>
                                         <td>{{ number_format($customer->price) }} MMK</td>
@@ -183,9 +183,7 @@
                             
                             <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
                                 <div class="text-muted fs-14">
-                                    Showing <strong>{{ $customers->firstItem() }}</strong> 
-                                    to <strong>{{ $customers->lastItem() }}</strong> 
-                                    of <strong>{{ $customers->total() }}</strong> entries
+                                    Showing <strong>{{ $customers->firstItem() }}</strong> to <strong>{{ $customers->lastItem() }}</strong> of <strong>{{ $customers->total() }}</strong> entries
                                 </div>
                                 <div class="pagination-container">
                                     {{ $customers->links('pagination::bootstrap-5') }}
@@ -201,81 +199,92 @@
 
 {{-- Ticket Details Modal --}}
 <div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Runner Registration Details</h5>
+            <div class="modal-header px-4">
+                <h5 class="modal-title fw-bold text-black">Runner Registration Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/dashboard/update-ticket-info" method="POST" id="update-ticket-form">
                 @csrf
                 <input type="hidden" name="id" id="modal-ticket-id-input">
-                <div class="modal-body">
-                    <div class="row">
+                <div class="modal-body p-4">
+                    <div class="row g-4">
+                        {{-- Personal Info Card --}}
                         <div class="col-md-6">
-                            <h6 class="mb-3 fw-bold">Personal Information</h6>
-                            <table class="table table-sm custom-table">
-                                <tr><td><strong>Name:</strong></td> <td id="modal-name"></td></tr>
-                                <tr>
-                                    <td><strong>Bib Name:</strong></td> 
-                                    <td id="modal-bib-container"></td>
-                                </tr>
-                                <tr><td><strong>BIB Number:</strong></td> <td id="modal-bib-number"></td></tr>
-                                <tr>
-                                    <td><strong>T-Shirt Size:</strong></td> 
-                                    <td id="modal-tshirt-container"></td>
-                                </tr>
-                                <tr><td><strong>Blood Type:</strong></td> <td id="modal-blood"></td></tr>
-                                <tr><td><strong>National Type:</strong></td> <td id="modal-nat"></td></tr>
-                                <tr>
-                                    <td><strong>ID Number:</strong></td> 
-                                    <td><div id="modal-id-container"></div></td>
-                                </tr>
-                            </table>
+                            <div class="info-section">
+                                <span class="section-title">Personal Information</span>
+                                <table class="table table-sm custom-table mb-0">
+                                    <tr><td>Name</td> <td id="modal-name" class="fw-bold text-black"></td></tr>
+                                    <tr>
+                                        <td>Bib Name</td> 
+                                        <td id="modal-bib-container"></td>
+                                    </tr>
+                                    <tr><td>BIB Number</td> <td id="modal-bib-number" class="text-primary fw-bold"></td></tr>
+                                    <tr>
+                                        <td>T-Shirt Size</td> 
+                                        <td id="modal-tshirt-container"></td>
+                                    </tr>
+                                    <tr><td>Blood Type</td> <td id="modal-blood" class="text-danger fw-bold"></td></tr>
+                                    <tr><td>National Type</td> <td id="modal-nat" class="text-capitalize"></td></tr>
+                                    <tr>
+                                        <td>ID Number</td> 
+                                        <td><div id="modal-id-container" class="nrc-group"></div></td>
+                                    </tr>
+                                </table>
+                            </div>
                         </div>
+
+                        {{-- Event Info Card --}}
                         <div class="col-md-6">
-                            <h6 class="mb-3 fw-bold">Event Details</h6>
-                            <table class="table table-sm custom-table">
-                                <tr><td><strong>Event:</strong></td> <td id="modal-event"></td></tr>
-                                <tr><td><strong>Category:</strong></td> <td id="modal-category"></td></tr>
-                                <tr><td><strong>Exp. Level:</strong></td> <td id="modal-exp"></td></tr>
-                                <tr><td><strong>Price:</strong></td> <td id="modal-price"></td></tr>
-                                <tr><td><strong>State:</strong></td> <td id="modal-state"></td></tr>
-                            </table>
+                            <div class="info-section">
+                                <span class="section-title">Event Details</span>
+                                <table class="table table-sm custom-table mb-0">
+                                    <tr><td>Event</td> <td id="modal-event" class="fw-bold text-black"></td></tr>
+                                    <tr><td>Category</td> <td id="modal-category"></td></tr>
+                                    <tr><td>Exp. Level</td> <td id="modal-exp"></td></tr>
+                                    <tr><td>Price</td> <td id="modal-price" class="fw-bold text-success"></td></tr>
+                                    <tr><td>State</td> <td id="modal-state" class="text-capitalize"></td></tr>
+                                </table>
+                                
+                                <div class="mt-4 pt-2">
+                                    <div class="alert alert-light border-0 small p-2 mb-2">
+                                        <i class="fa fa-notes-medical me-1 text-info"></i> <strong>Medical:</strong> 
+                                        <span id="modal-medical" class="text-muted"></span>
+                                    </div>
+                                    <div class="alert alert-light border-0 small p-2">
+                                        <i class="fa fa-running me-1 text-info"></i> <strong>ITRA:</strong> 
+                                        <span id="modal-itra" class="text-muted"></span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row mt-2" id="modal-save-button-container">
+
+                    {{-- Transaction Image --}}
+                    <div class="row mt-4">
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-sm w-100">Update Ticket Information</button>
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <h6 class="fw-bold mb-3"><i class="fa fa-receipt me-1 text-success"></i> Transaction Proof</h6>
+                                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded shadow-sm" style="max-height: 400px; cursor: zoom-in;" onclick="window.open(this.src)">
+                                <p class="text-muted small mt-2 mb-0">Click image to view full size</p>
+                            </div>
                         </div>
                     </div>
-                    <hr>
-                    <div class="row align-items-center">
-                        <div class="col-md-5">
-                            <h6 class="fw-bold text-success">Transaction Image Proof</h6>
-                            <div class="alert alert-info py-2">
-                                <strong>Medical Info:</strong><br>
-                                <span id="modal-medical" class="small"></span>
-                            </div>
-                            <div class="alert alert-info py-2">
-                                <strong>ITRA Info:</strong><br>
-                                <span id="modal-itra" class="small"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-7 text-center">
-                            <div class="border rounded p-1 bg-light shadow-sm">
-                                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded" style="max-height: 350px; cursor: pointer;" onclick="window.open(this.src)">
-                            </div>
+
+                    <div class="row mt-3 d-none" id="modal-save-button-container">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary w-100 py-2 fs-16"><i class="fa fa-save me-2"></i>Update Runner Information</button>
                         </div>
                     </div>
                 </div>
             </form>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer bg-light px-4 py-3">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
                 <div class="d-flex align-items-center" id="modal-action-buttons">
                     <form id="reject-form" action="" method="POST" class="me-2">
                         @csrf
-                        <button type="submit" class="btn btn-warning px-4"><i class="fa fa-times me-1"></i> Reject</button>
+                        <button type="submit" class="btn btn-danger px-4"><i class="fa fa-times me-1"></i> Reject</button>
                     </form>
                     <form id="approve-form" action="" method="POST">
                         @csrf
@@ -342,10 +351,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const transactionImageUrl = this.getAttribute('data-image');
             const athlete = data.athlete || {};
             
-            // Set ID in hidden input for update form
             document.getElementById('modal-ticket-id-input').value = data.id;
 
-            // Populate base text
             document.getElementById('modal-name').innerText = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
             document.getElementById('modal-itra').innerText = athlete.itra_details || 'None';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
@@ -359,7 +366,6 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
 
-            // Forms & Actions
             document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
             document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
             
@@ -376,21 +382,18 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isEditable) {
                 saveBtnContainer.classList.remove('d-none');
                 
-                // --- Handle BIB Name Edit ---
                 document.getElementById('modal-bib-container').innerHTML = `
-                    <input type="text" name="bib_name" class="form-control form-control-sm" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
+                    <input type="text" name="bib_name" class="form-control form-control-sm border-primary" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
                 `;
 
-                // --- Handle T-Shirt Size Edit ---
                 const sizes = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "5XL"];
                 let sizeOptions = sizes.map(s => `<option value="${s}" ${data.t_shirt_size === s ? 'selected' : ''}>${s}</option>`).join('');
                 document.getElementById('modal-tshirt-container').innerHTML = `
-                    <select name="t_shirt_size" class="form-control form-control-sm">
+                    <select name="t_shirt_size" class="form-control form-control-sm border-primary">
                         ${sizeOptions}
                     </select>
                 `;
 
-                // --- Handle ID Number Edit (NRC Logic) ---
                 const idContainer = document.getElementById('modal-id-container');
                 const currentId = athlete.id_number || '';
 
@@ -400,43 +403,40 @@ document.addEventListener('DOMContentLoaded', function () {
                     if(match) { state = match[1]; district = match[2]; type = match[3]; num = match[4]; }
 
                     idContainer.innerHTML = `
-                        <div class="d-flex gap-1 flex-wrap mb-2">
-                            <select name="nrc_state" id="edit_nrc_state" class="form-control p-1" style="width: 55px;" required>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <select name="nrc_state" id="edit_nrc_state" class="form-control" style="width: 55px;" required>
                                 <option value="">St</option>
                                 ${[...Array(14)].map((_,i)=>`<option value="${i+1}" ${state == i+1 ? 'selected':''}>${i+1}/</option>`).join('')}
                             </select>
-                            <select name="nrc_district" id="edit_nrc_district" class="form-control p-1" style="width: 80px;" required>
+                            <select name="nrc_district" id="edit_nrc_district" class="form-control" style="width: 85px;" required>
                                 <option value="${district}">${district || 'Dist'}</option>
                             </select>
-                            <select name="nrc_type" id="edit_nrc_type" class="form-control p-1" style="width: 65px;">
+                            <select name="nrc_type" id="edit_nrc_type" class="form-control" style="width: 65px;">
                                 ${['နိုင်','ဧည့်','စ','ပြု','သ','သီ'].map(t => `<option value="${t}" ${type == t ? 'selected':''}>${t}</option>`).join('')}
                             </select>
-                            <input type="text" name="nrc_number" id="edit_nrc_number" class="form-control p-1" style="width: 80px;" value="${num}" placeholder="123456" maxlength="6" required>
+                            <input type="text" name="nrc_number" id="edit_nrc_number" class="form-control" style="flex: 1; min-width: 80px;" value="${num}" placeholder="123456" maxlength="6" required>
                         </div>
                     `;
                 } else {
                     idContainer.innerHTML = `
-                        <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm" value="${currentId}" placeholder="Passport Number" required>
+                        <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm border-primary" value="${currentId}" placeholder="Passport Number" required>
                     `;
                 }
                 
-                // Trigger district load if NRC
                 if(athlete.nat_type === 'national' && state) {
                     setTimeout(() => document.getElementById('edit_nrc_state').dispatchEvent(new Event('change')), 50);
                 }
 
             } else {
-                // Read-only mode
                 saveBtnContainer.classList.add('d-none');
-                document.getElementById('modal-bib-container').innerHTML = `<strong>${data.bib_name || 'N/A'}</strong>`;
-                document.getElementById('modal-tshirt-container').innerHTML = `<strong>${data.t_shirt_size || 'N/A'}</strong>`;
-                document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold">${athlete.id_number || 'None'}</span>`;
+                document.getElementById('modal-bib-container').innerHTML = `<span class="fw-bold text-black">${data.bib_name || 'N/A'}</span>`;
+                document.getElementById('modal-tshirt-container').innerHTML = `<span class="badge light badge-primary">${data.t_shirt_size || 'N/A'}</span>`;
+                document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold text-black">${athlete.id_number || 'None'}</span>`;
             }
         });
     });
 });
 
-// District Load logic remains the same
 document.addEventListener('change', function(e) {
     if (e.target.id === 'edit_nrc_state') {
         const state = e.target.value;
