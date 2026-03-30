@@ -77,22 +77,29 @@ class RegisterController extends Controller
     $email = trim($request->email);
     $nameInput = preg_replace('/\s+/', ' ', trim($request->name)); 
     
-    // 1. Clean the input phone: Remove +, 95, 09, and spaces
-    $cleanInput = preg_replace('/^(\+95|95|09|0)/', '', trim($request->phone));
-    $cleanInput = str_replace(' ', '', $cleanInput);
+    // CLEAN THE INPUT: 
+    // This regex looks for +959, 959, or 09 at the start and strips it
+    $phoneInput = trim($request->phone);
+    $cleanInput = preg_replace('/^(\+959|959|09)/', '', $phoneInput);
+    
+    // Just in case they typed 9xxxx (without the 0)
+    $cleanInput = ltrim($cleanInput, '0'); 
 
-    // 2. Find the user by Email first
+    // Find user by Email
     $user = User::where('email', $email)->first();
 
     if ($user) {
-        // 3. Clean the DATABASE phone the same way to compare
-        $cleanDB = preg_replace('/^(\+95|95|09|0)/', '', $user->phone);
-        $cleanDB = str_replace(' ', '', $cleanDB);
+        // CLEAN THE DATABASE PHONE:
+        // Since your register function saves it as +959 + numbers
+        $cleanDB = preg_replace('/^(\+959|959|09)/', '', $user->phone);
+        $cleanDB = ltrim($cleanDB, '0');
 
-        // 4. Compare Phone Numbers
+        
+
+        // Compare the "Core" numbers (e.g., 450001234)
         if ($cleanInput === $cleanDB) {
             
-            // 5. Compare Names
+            // Compare Names (Ensure we use middle_name to match your RegisterController)
             $dbName = trim("{$user->first_name} {$user->middle_name} {$user->last_name}");
             $dbName = preg_replace('/\s+/', ' ', $dbName);
             
