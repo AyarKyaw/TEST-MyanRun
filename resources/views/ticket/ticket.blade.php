@@ -171,7 +171,7 @@
                 <div class="flex items-center gap-12">
                     <div class="text-right">
                         <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Total to Pay</p>
-                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]">120,000 MMK</div>
+                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]">1,000 MMK</div>
                     </div>
                     <button type="submit" class="bg-[#C3E92D] hover:scale-105 active:scale-95 text-slate-900 px-16 py-6 font-black uppercase tracking-widest text-sm transition-all shadow-xl rounded-full">
                         BUY
