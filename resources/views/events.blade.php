@@ -141,26 +141,51 @@
                 <h2 class="h3 font-weight-bold mb-0 text-dark">COMING RUN</h2>
             </div>
             <div class="row">
-                @forelse($comingEvents as $event)
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <a href="{{ route('events.show', $event->id) }}" class="event-link">
+                @forelse($nowEvents as $event)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        @php
+                            $eventName = trim($event->name);
+                            $isRegistered = auth()->check() && isset($userTickets) && in_array($eventName, array_map('trim', $userTickets));
+                        @endphp
+
                         <div class="card border-0 rounded-lg overflow-hidden thairun-shadow position-relative h-100 event-card">
-                            <div class="ribbon-green status-ribbon">REG OPEN</div>
+                            @if($isRegistered)
+                                <div class="ribbon-grey status-ribbon" style="background: #6366f1;">REGISTERED</div>
+                            @else
+                                <div class="ribbon-red status-ribbon">LIVE EVENT</div>
+                            @endif
+
+                            <button type="button" 
+                                    onclick="openDescModal({{ json_encode($event->name) }}, {{ json_encode($event->description ?? 'No description available.') }})" 
+                                    class="position-absolute border-0 rounded-circle d-flex align-items-center justify-content-center bg-white text-dark shadow-sm hover:scale-110 transition-all" 
+                                    style="top: 12px; right: 12px; width: 35px; height: 35px; z-index: 20; cursor: pointer;">
+                                <i class="fas fa-info-circle text-primary"></i>
+                            </button>
+
                             <img src="{{ asset('storage/' . $event->image_path) }}" class="card-img-top event-card-img">
-                            <div class="card-body p-4">
-                                <span class="badge badge-light text-muted mb-2 uppercase" style="font-size: 10px;">{{ $event->company }}</span>
+                            
+                            <div class="card-body p-4 d-flex flex-column justify-content-between">
                                 <h4 class="h5 font-weight-bold text-dark mb-4">{{ $event->name }}</h4>
+                                
                                 <div class="d-flex justify-content-between align-items-center border-top pt-3">
                                     <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
-                                    <span class="btn btn-success btn-sm font-weight-bold px-3 py-2 text-white" style="background-color: #22c55e; border:none;">VIEW INFO</span>
+
+                                    @if($isRegistered)
+                                        <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
+                                            <i class="fas fa-check-circle mr-1"></i> SECURED
+                                        </button>
+                                    @else
+                                        <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
+                                            ENTER NOW
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
-                    </a>
-                </div>
-                @empty
-                <div class="col-12"><p class="text-muted">Stay tuned for upcoming races!</p></div>
-                @endforelse
+                    </div>
+                    @empty
+                        <div class="col-12"><p>No live events.</p></div>
+                    @endforelse
             </div>
         </div>
 
