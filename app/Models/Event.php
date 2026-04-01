@@ -20,6 +20,13 @@ class Event extends Model
         'description', 
     ];
 
+    public function tickets()
+    {
+        // Second parameter is the foreign key on tickets table
+        // Third parameter is the local key on events table
+        return $this->hasMany(Ticket::class, 'event', 'name'); 
+    }
+
     protected $casts = [
         'date' => 'date',
     ];

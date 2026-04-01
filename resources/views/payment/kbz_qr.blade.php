@@ -8,13 +8,29 @@
         <div style="font-size: 28px; font-weight: bold; color: #f9a01b; margin: 10px 0;">
             {{ number_format($ticket->price) }} MMK
         </div>
-        <p style="color: #666; font-size: 14px;">Please use your <strong>KBZPay App</strong> to scan</p>
+        <h1 style="
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: #333;
+            margin-bottom: 10px;
+        ">
+            MM<span style="color:#f9a01b;">QR</span>
+        </h1>
+        <div style="margin: 15px 0;">
+        <img src="{{ asset('images/MMQR.jpg') }}"
+             style="width: 250px; height: 250px;">
     </div>
 
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #eee;">
+        <p style="color: #666; font-size: 14px;">Please use your <strong>Payment App</strong> to scan</p>
+    </div>
+
+    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #eee; position: relative;">
+        
+        <!-- QR -->
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ $qrString }}" 
-             alt="KBZPay QR" 
-             style="display: block; mix-blend-mode: multiply;">
+            alt="KBZPay QR" 
+            style="display: block;">
     </div>
 
     <div style="margin-top: 25px;">

@@ -24,7 +24,7 @@
     <style>
     /* 1. Hide the sidebar by default on smaller screens */
     .event-sidebar {
-        display: none;
+        display: none !important;
         transition: all 0.3s ease;
     }
 

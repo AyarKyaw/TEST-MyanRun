@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
+use App\Models\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
@@ -40,12 +41,12 @@ class TicketController extends Controller
         return view('ticket.ticket', compact('eventName'));
     }
 
-    public function dashboard(Request $request)
+    public function dashboard($eventName, Request $request)
 {
     $search = $request->query('search');
     $status = $request->query('status', 'pending'); 
 
-    $query = \App\Models\Ticket::query()->with(['athlete.user']);
+    $query = \App\Models\Ticket::where('event', $eventName)->with(['athlete.user']);
 
     // 1. Always filter by status first
     $query->where('status', $status);
@@ -75,13 +76,26 @@ class TicketController extends Controller
                        ->withQueryString();
 
     $counts = [
-        'pending'  => \App\Models\Ticket::where('status', 'pending')->count(),
-        'approved' => \App\Models\Ticket::where('status', 'approved')->count(),
-        'rejected' => \App\Models\Ticket::where('status', 'rejected')->count(),
+        'all'      => Ticket::where('event', $eventName)->count(),
+        'pending'  => \App\Models\Ticket::where('event', $eventName)->where('status', 'pending')->count(),
+        'approved' => \App\Models\Ticket::where('event', $eventName)->where('status', 'approved')->count(),
+        'rejected' => \App\Models\Ticket::where('event', $eventName)->where('status', 'rejected')->count(),
     ];
 
-    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts', 'status'));
+    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts', 'status', 'eventName'));
 }
+
+    public function index()
+    {
+        // Fetch events grouped by their 'status' (1 for live, 0 for past)
+        $events = Event::orderBy('date', 'desc')->get()->groupBy('is_active');
+
+        // Extract them into separate variables so the Blade @forelse works correctly
+        $nowEvents = $events->get(1, collect());  // Status 1 = Live
+        $pastEvents = $events->get(0, collect()); // Status 0 = Past
+
+        return view('dashboard.ticket-sales.index', compact('nowEvents', 'pastEvents'));
+    }
 
     public function approve($id)
 {
@@ -271,6 +285,16 @@ public function reject($id)
                 ->with('error', 'Session expired.');
         }
 
+        $exists = Ticket::where('athlete_id', $order['athlete_id'])
+            ->where('event', $order['event'])
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->exists();
+
+        if ($exists) {
+            return redirect()->route('public.events')
+                ->with('error', 'You already registered for this event.');
+        }
+
         $athlete = \App\Models\Athlete::find($order['athlete_id']);
         $gender = $athlete ? $athlete->gender : 'male';
         $generatedBib = $this->generateBib($gender, $order['category']);
@@ -408,6 +432,7 @@ public function reject($id)
 
         return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
+
 public function getNewBib(Request $request)
 {
     $gender = $request->query('gender');

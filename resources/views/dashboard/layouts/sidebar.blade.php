@@ -21,7 +21,7 @@
                     <span class="nav-text" data-i18n="Ticket Sales">Ticket Sales</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li><a href="/dashboard/events/ticket" data-i18n="Event Tickets">Event Tickets</a></li>
+                    <li><a href="{{ route('dashboard.tickets.index') }}" data-i18n="Event Tickets">Event Tickets</a></li>
                     <li>
                         <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Dinner Tickets</a>
                         <ul aria-expanded="false">

@@ -106,7 +106,12 @@
                                         <input type="text" id="tableSearch" name="search" class="form-control border-primary" placeholder="Search Name or BIB..." value="{{ request('search') }}">
                                         <button class="btn btn-primary px-4" type="submit"><i class="fa fa-search"></i></button>
                                         @if(request('search'))
-                                            <a href="{{ route('dashboard.events.ticket', ['status' => request('status', 'pending')]) }}" class="btn btn-light border-primary d-flex align-items-center"><i class="fa fa-times text-danger"></i></a>
+                                            <a href="{{ route('dashboard.events.ticket', [
+                                                'event' => $eventName,
+                                                'status' => request('status', 'pending')
+                                            ]) }}" class="btn btn-light border-primary d-flex align-items-center">
+                                                <i class="fa fa-times text-danger"></i>
+                                            </a>
                                         @endif
                                     </div>
                                 </form>
@@ -125,7 +130,7 @@
                             @foreach(['pending' => 'Warning', 'approved' => 'Success', 'rejected' => 'Danger'] as $status => $color)
                                 <li class="nav-item">
                                     <a class="nav-link {{ request('status', 'pending') == $status ? 'active' : '' }}" 
-                                       href="{{ route('dashboard.events.ticket', ['status' => $status, 'search' => request('search')]) }}">
+                                       href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
                                          {{ ucfirst($status) }} ({{ $counts[$status] ?? 0 }})
                                     </a>
                                 </li>
