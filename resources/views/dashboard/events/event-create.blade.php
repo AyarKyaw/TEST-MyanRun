@@ -11,7 +11,15 @@
                 </ol>
             </nav>
         </div>
-
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="row">
             <div class="col-xl-8 col-lg-10">
                 <div class="card">

@@ -72,6 +72,7 @@
             <div class="sk-child sk-bounce3"></div>
         </div>
     </div>
+    
 
     <div id="main-wrapper">
         @include('dashboard.layouts.nav')
@@ -79,6 +80,7 @@
         @include('dashboard.layouts.sidebar')
         
         @yield('content')
+
     </div>
 
     <script src="{{ asset('assets/vendor/jquery/dist/jquery.min.js') }}"></script>

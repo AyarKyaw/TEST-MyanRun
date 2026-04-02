@@ -188,8 +188,11 @@
             <p class="text-slate-400 font-bold mt-2 uppercase text-[10px] tracking-[0.4em]">Athlete Registration System</p>
         </div>
 
-        <form action="{{ route('athlete.register.submit') }}" method="POST" enctype="multipart/form-data" id="mainForm">
+        <form action="{{ route('friend.register.submit') }}" method="POST" enctype="multipart/form-data" id="mainForm">
             @csrf
+            @if($friendUser)
+                <input type="hidden" name="existing_user_id" value="{{ $friendUser->id }}">
+            @endif
             <input type="hidden" name="event_name" value="{{ session('event_name') ?? request('event') }}">
             <div class="mb-8 p-6 bg-slate-900 rounded-[32px] text-white flex items-center justify-between shadow-xl border-b-4 border-[#C3E92D]">
                 <div class="flex items-center gap-5">
@@ -221,25 +224,25 @@
                         <label class="label-text">Face ID Setup</label>
                         
                         <input type="file" name="face_image" id="face_image" class="hidden" accept="image/*">
-                        @if($athlete && $athlete->face_image_path)
-                            <input type="hidden" name="existing_face" value="{{ $athlete->face_image_path }}">
+                        @if($friendAthlete && $friendAthlete->face_image_path)
+                            <input type="hidden" name="existing_face" value="{{ $friendAthlete->face_image_path }}">
                         @endif
 
                         <div class="scan-circle group" onclick="openUploadModal()">
-    <div class="scan-line" id="scannerLine" style="{{ $athlete && $athlete->face_image_path ? 'display: none;' : '' }}"></div>
+    <div class="scan-line" id="scannerLine" style="{{ $friendAthlete && $friendAthlete->face_image_path ? 'display: none;' : '' }}"></div>
     
     <img id="facePreview" 
-         class="{{ $athlete && $athlete->face_image_path ? '' : 'hidden' }} w-full h-full object-cover absolute inset-0 z-10" 
-         src="{{ $athlete && $athlete->face_image_path ? asset('storage/' . $athlete->face_image_path) : '' }}">
+         class="{{ $friendAthlete && $friendAthlete->face_image_path ? '' : 'hidden' }} w-full h-full object-cover absolute inset-0 z-10" 
+         src="{{ $friendAthlete && $friendAthlete->face_image_path ? asset('storage/' . $friendAthlete->face_image_path) : '' }}">
     
-    <div id="placeholderUI" class="flex flex-col items-center justify-center z-20 {{ $athlete && $athlete->face_image_path ? 'opacity-0' : '' }}">
+    <div id="placeholderUI" class="flex flex-col items-center justify-center z-20 {{ $friendAthlete && $friendAthlete->face_image_path ? 'opacity-0' : '' }}">
         <i class="fas fa-face-viewfinder text-4xl text-slate-300 group-hover:text-[#C3E92D] transition-colors"></i>
         <span class="text-[9px] font-black text-slate-400 mt-2 uppercase">Tap to Setup</span>
     </div>
 </div>
 
-<p id="uploadStatus" class="text-[9px] {{ $athlete && $athlete->face_image_path ? 'text-lime-500' : 'text-slate-400' }} mt-4 text-center font-bold uppercase tracking-tighter">
-    {{ $athlete && $athlete->face_image_path ? 'CURRENT FACE ID LOADED ✅' : 'Required for AI Photo Matching' }}
+<p id="uploadStatus" class="text-[9px] {{ $friendAthlete && $friendAthlete->face_image_path ? 'text-lime-500' : 'text-slate-400' }} mt-4 text-center font-bold uppercase tracking-tighter">
+    {{ $friendAthlete && $friendAthlete->face_image_path ? 'CURRENT FACE ID LOADED ✅' : 'Required for AI Photo Matching' }}
 </p>
                     </div>
 
@@ -264,21 +267,21 @@
                                 <div>
                                     <label class="label-text">First Name</label>
                                     <input type="text" name="first_name" 
-                                        value="{{ old('first_name', auth()->user()->first_name ?? '') }}"
-                                        placeholder="First Name" required readonly
+                                        value="{{ old('first_name', $friendAthlete->first_name ?? $friendUser->first_name ?? '') }}"
+                                        placeholder="First Name" required 
                                         class="input-field">
                                 </div>
                                 <div>
                                     <label class="label-text">Middle Name (Optional)</label>
-                                    <input type="text" name="middle_name" value="{{ old('middle_name', auth()->user()->middle_name ?? '') }}" placeholder="Middle Name"
-                                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');"readonly
+                                    <input type="text" name="middle_name" value="{{ old('middle_name', $friendAthlete->middle_name ?? $friendUser->middle_name ?? '') }}" placeholder="Middle Name"
+                                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');"
                                         class="input-field">
                                 </div>
                                 <div>
                                     <label class="label-text">Last Name</label>
                                     <input type="text" name="last_name" 
-                                        value="{{ old('last_name', auth()->user()->last_name ?? '') }}" 
-                                        placeholder="Last Name" required readonly
+                                        value="{{ old('last_name', $friendAthlete->last_name ?? $friendUser->last_name ?? '') }}" 
+                                        placeholder="Last Name" required 
                                         class="input-field">
                                 </div>
                             </div>
@@ -347,7 +350,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">Father Name</label>
-                        <input type="text" placeholder="Optional" name="father_name" value="{{ old('father_name', $athlete->father_name ?? '') }}" 
+                        <input type="text" placeholder="Optional" name="father_name" value="{{ old('father_name', $friendAthlete->father_name ?? '') }}" 
                                oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" class="input-field">
                     </div>
                     <div>
@@ -355,7 +358,7 @@
                         <input type="text" 
                             name="dob" 
                             id="dob" 
-                            value="{{ old('dob', $athlete && $athlete->dob ? \Carbon\Carbon::parse($athlete->dob)->format('d/m/Y') : '') }}" 
+                            value="{{ old('dob', $friendAthlete && $friendAthlete->dob ? \Carbon\Carbon::parse($friendAthlete->dob)->format('d/m/Y') : '') }}" 
                             placeholder="DD/MM/YYYY" 
                             required 
                             maxlength="10"
@@ -399,13 +402,13 @@
                             "Vietnam", "Yemen", "Zambia", "Zimbabwe"
                         ];
                         
-                        $isNational = (old('nat_type', $athlete->nat_type ?? $type) == 'national');
-                        $currentNationality = old('nationality', $athlete->nationality ?? ($isNational ? 'Myanmar' : ''));
+                        $isNational = (old('nat_type', $friendAthlete->nat_type ?? $type) == 'national');
+                        $currentNationality = old('nationality', $friendAthlete->nationality ?? ($isNational ? 'Myanmar' : ''));
                     @endphp
 
                     @if($type == 'national')
                         <div class="relative">
-                            <input type="text" value="Myanmar" class="input-field bg-slate-100 cursor-not-allowed opacity-75" readonly>
+                            <input type="text" value="Myanmar" class="input-field bg-slate-100 cursor-not-allowed opacity-75" >
                             <input type="hidden" name="nationality" value="Myanmar">
                             <div class="absolute right-4 top-1/2 -translate-y-1/2">
                                 <i class="fas fa-lock text-slate-400 text-[10px]"></i>
@@ -425,8 +428,8 @@
                     <div>
                         <label class="label-text">Gender</label>
                         <select name="gender" id="gender_select" class="input-field" onchange="updateBib()">
-                            <option value="male" {{ old('gender', $athlete->gender ?? 'male') == 'male' ? 'selected' : '' }}>Male</option>
-                            <option value="female" {{ old('gender', $athlete->gender ?? 'male') == 'female' ? 'selected' : '' }}>Female</option>
+                            <option value="male" {{ old('gender', $friendAthlete->gender ?? 'male') == 'male' ? 'selected' : '' }}>Male</option>
+                            <option value="female" {{ old('gender', $friendAthlete->gender ?? 'male') == 'female' ? 'selected' : '' }}>Female</option>
                         </select>
                     </div>
                     @if($isNational)
@@ -435,29 +438,29 @@
                         <select name="state" class="input-field w-full mt-1">
                             <option value="">Select Division</option>
 
-                            <option value="kachin" {{ (old('state', $athlete->state ?? '') == 'kachin') ? 'selected' : '' }}>Kachin State</option>
-                            <option value="kayah" {{ (old('state', $athlete->state ?? '') == 'kayah') ? 'selected' : '' }}>Kayah State</option>
-                            <option value="kayin" {{ (old('state', $athlete->state ?? '') == 'kayin') ? 'selected' : '' }}>Kayin State (Karen)</option>
-                            <option value="chin" {{ (old('state', $athlete->state ?? '') == 'chin') ? 'selected' : '' }}>Chin State</option>
-                            <option value="mon" {{ (old('state', $athlete->state ?? '') == 'mon') ? 'selected' : '' }}>Mon State</option>
-                            <option value="rakhine" {{ (old('state', $athlete->state ?? '') == 'rakhine') ? 'selected' : '' }}>Rakhine State</option>
-                            <option value="shan" {{ (old('state', $athlete->state ?? '') == 'shan') ? 'selected' : '' }}>Shan State</option>
+                            <option value="kachin" {{ (old('state', $friendAthlete->state ?? '') == 'kachin') ? 'selected' : '' }}>Kachin State</option>
+                            <option value="kayah" {{ (old('state', $friendAthlete->state ?? '') == 'kayah') ? 'selected' : '' }}>Kayah State</option>
+                            <option value="kayin" {{ (old('state', $friendAthlete->state ?? '') == 'kayin') ? 'selected' : '' }}>Kayin State (Karen)</option>
+                            <option value="chin" {{ (old('state', $friendAthlete->state ?? '') == 'chin') ? 'selected' : '' }}>Chin State</option>
+                            <option value="mon" {{ (old('state', $friendAthlete->state ?? '') == 'mon') ? 'selected' : '' }}>Mon State</option>
+                            <option value="rakhine" {{ (old('state', $friendAthlete->state ?? '') == 'rakhine') ? 'selected' : '' }}>Rakhine State</option>
+                            <option value="shan" {{ (old('state', $friendAthlete->state ?? '') == 'shan') ? 'selected' : '' }}>Shan State</option>
 
-                            <option value="sagaing" {{ (old('state', $athlete->state ?? '') == 'sagaing') ? 'selected' : '' }}>Sagaing Region</option>
-                            <option value="tanintharyi" {{ (old('state', $athlete->state ?? '') == 'tanintharyi') ? 'selected' : '' }}>Tanintharyi Region</option>
-                            <option value="bago" {{ (old('state', $athlete->state ?? '') == 'bago') ? 'selected' : '' }}>Bago Region</option>
-                            <option value="magway" {{ (old('state', $athlete->state ?? '') == 'magway') ? 'selected' : '' }}>Magway Region</option>
-                            <option value="mandalay" {{ (old('state', $athlete->state ?? '') == 'mandalay') ? 'selected' : '' }}>Mandalay Region</option>
-                            <option value="yangon" {{ (old('state', $athlete->state ?? '') == 'yangon') ? 'selected' : '' }}>Yangon Region</option>
-                            <option value="ayeyarwady" {{ (old('state', $athlete->state ?? '') == 'ayeyarwady') ? 'selected' : '' }}>Ayeyarwady Region</option>
+                            <option value="sagaing" {{ (old('state', $friendAthlete->state ?? '') == 'sagaing') ? 'selected' : '' }}>Sagaing Region</option>
+                            <option value="tanintharyi" {{ (old('state', $friendAthlete->state ?? '') == 'tanintharyi') ? 'selected' : '' }}>Tanintharyi Region</option>
+                            <option value="bago" {{ (old('state', $friendAthlete->state ?? '') == 'bago') ? 'selected' : '' }}>Bago Region</option>
+                            <option value="magway" {{ (old('state', $friendAthlete->state ?? '') == 'magway') ? 'selected' : '' }}>Magway Region</option>
+                            <option value="mandalay" {{ (old('state', $friendAthlete->state ?? '') == 'mandalay') ? 'selected' : '' }}>Mandalay Region</option>
+                            <option value="yangon" {{ (old('state', $friendAthlete->state ?? '') == 'yangon') ? 'selected' : '' }}>Yangon Region</option>
+                            <option value="ayeyarwady" {{ (old('state', $friendAthlete->state ?? '') == 'ayeyarwady') ? 'selected' : '' }}>Ayeyarwady Region</option>
 
-                            <option value="naypyidaw" {{ (old('state', $athlete->state ?? '') == 'naypyidaw') ? 'selected' : '' }}>Naypyidaw</option>
+                            <option value="naypyidaw" {{ (old('state', $friendAthlete->state ?? '') == 'naypyidaw') ? 'selected' : '' }}>Naypyidaw</option>
                         </select>
                     </div>
                     @endif
                     <div class="md:col-span-2">
                         <label class="label-text">Full Address</label>
-                        <textarea name="address" rows="3" class="input-field resize-none" placeholder="Residential Address">{{ old('address', $athlete->address ?? '') }}</textarea>
+                        <textarea name="address" rows="3" class="input-field resize-none" placeholder="Residential Address">{{ old('address', $friendAthlete->address ?? '') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -470,22 +473,22 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">Email Address</label>
-                        <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" required 
-                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" readonly>
+                        <input type="email" name="email" value="{{ old('email', $friendAthlete->email ?? $friendUser->email ?? '') }}"  required 
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" >
                     </div>
                     <div>
                         <label class="label-text">Viber</label>
-                        <input type="text" placeholder="09 Eng-Num Only" name="viber" value="{{ old('viber', $athlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="9" 
+                        <input type="text" placeholder="09 Eng-Num Only" name="viber" value="{{ old('viber', $friendAthlete->viber ?? '') }}" oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" minlength="9" 
                         maxlength="11">
                     </div>
                     <div>
                         <label class="label-text">Mobile Number</label>
-                        <input type="tel" name="phone_1" value="{{ old('phone', auth()->user()->phone) }}" required 
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" readonly>
+                        <input type="tel" name="phone_1" value="{{ old('phone', $friendUser->phone ?? '') }}"  required 
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" >
                     </div>
                     <div>
                         <label class="label-text">Emergency Contact Number</label>
-                        <input type="tel" placeholder="09 Eng-Num Only" name="contact" value="{{ old('contact', $athlete->contact ?? '') }}" minlength="9" 
+                        <input type="tel" placeholder="09 Eng-Num Only" name="contact" value="{{ old('contact', $friendAthlete->contact ?? '') }}" minlength="9" 
                         maxlength="11"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field">
                     </div>
@@ -500,14 +503,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">BIB Name</label>
-                        <input type="text" placeholder="Max 10 letter Only" name="bib_name" value="{{ old('bib_name', auth()->user()->bib_name) }}" required 
+                        <input type="text" placeholder="Max 10 letter Only" name="bib_name" value="" required 
                                oninput="this.value = this.value.replace(/[^a-zA-Z0-9 ]/g, '');" class="input-field" maxlength="10">
                     </div>
-                    <!-- <div>
-                        <label class="label-text">BIB Number</label>
-                        <input type="text" name="bib_number" id="bib_input" value="{{ $bibNumber }}" class="input-field" readonly>
-                    </div> -->
-                    <input type="hidden" name="bib_number" id="bib_input" value="{{ $bibNumber }}">
                     <div>
                         <label class="label-text">T Shirt Size</label>
                         <select name="t_shirt_size" class="input-field">
@@ -557,7 +555,7 @@
                             <label class="label-text text-[#C3E92D] animate-pulse">Please specify your condition</label>
                             <textarea name="medical_conditions" id="medical_conditions" rows="3" 
                                     class="input-field resize-none border-red-100 focus:border-red-400" 
-                                    placeholder="e.g. Asthma, Heart Disease, Recent Surgery, etc.">{{ old('medical_conditions', $athlete->medical_conditions ?? '') }}</textarea>
+                                    placeholder="e.g. Asthma, Heart Disease, Recent Surgery, etc.">{{ old('medical_conditions', $friendAthlete->medical_conditions ?? '') }}</textarea>
                         </div>
                     </div>
                     <div class="md:col-span-2">
@@ -566,7 +564,7 @@
                             {{-- No Option --}}
                             <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
                                 <input type="radio" name="has_itra" value="no" class="hidden" 
-                                    {{ !old('itra_details', $athlete->itra_details ?? '') ? 'checked' : '' }} 
+                                    {{ !old('itra_details', $friendAthlete->itra_details ?? '') ? 'checked' : '' }} 
                                     onchange="toggleITRA(false)">
                                 <span class="text-xs font-black uppercase text-slate-600">No, I don't</span>
                             </label>
@@ -579,7 +577,7 @@
                         </div>
                         
                         {{-- ITRA Details Input --}}
-                        <div id="itra_details_container" class="{{ old('itra_details', $athlete->itra_details ?? '') ? '' : 'hidden' }}">
+                        <div id="itra_details_container" class="{{ old('itra_details', $friendAthlete->itra_details ?? '') ? '' : 'hidden' }}">
                             <label class="label-text text-[#C3E92D]">ITRA Index or Profile Link</label>
                             <input type="text" name="itra_details" id="itra_details" 
                                 value=""
@@ -589,50 +587,6 @@
                     </div>
                 </div>
             </div>
-            @if(session('ticket_type') === 'relay')
-                <div class="section-card border-2 border-[#C3E92D]/30">
-                    <div class="flex items-center mb-8">
-                        <span class="w-10 h-10 bg-[#C3E92D] text-slate-900 rounded-xl flex items-center justify-center font-black mr-4 shadow-lg shadow-lime-100">05</span>
-                        <h3 class="text-xl font-black text-slate-800 uppercase italic">Relay Partner</h3>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- Partner ID --}}
-                        <div class="space-y-4">
-                            <label class="label-text">Partner's Runner ID (Required)</label>
-                            <div class="relative">
-                                <input type="text" name="friend_runner_id" 
-                                    placeholder="e.g. RUN-12345" 
-                                    oninput="this.value = this.value.toUpperCase()"
-                                    class="input-field !border-[#C3E92D] focus:ring-4 focus:ring-lime-100 uppercase font-bold">
-                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-lime-600 bg-lime-50 px-2 py-1 rounded-md">
-                                    AUTOFILL ENABLED
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Partner Password --}}
-                        <div class="space-y-4">
-                            <label class="label-text">Partner's Account Password</label>
-                            <div class="relative group">
-                                <input type="password" name="friend_password" id="partner_password"
-                                    placeholder="••••••••" 
-                                    class="input-field focus:ring-4 focus:ring-lime-100 pr-12">
-                                <button type="button" onclick="togglePartnerPassword()" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#C3E92D] transition-colors">
-                                    <i class="fas fa-eye" id="passwordIcon"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                * These credentials are required to verify your partner and link their profile to this relay team.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                @endif
             
             <div class="flex flex-col md:flex-row gap-4 pt-6">
                 <button type="submit" class="flex-1 bg-[#C3E92D] hover:bg-slate-800 text-slate-900 hover:text-white font-black py-5 rounded-[2rem] shadow-xl shadow-lime-100 transition-all uppercase tracking-widest">
@@ -641,20 +595,7 @@
             </div>
         </form>
     </div>
-<script>
-function togglePartnerPassword() {
-    const passwordInput = document.getElementById('partner_password');
-    const icon = document.getElementById('passwordIcon');
-    
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        passwordInput.type = 'password';
-        icon.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-</script>
+
 <script>
   const modal = document.getElementById('uploadModal');
 const faceInput = document.getElementById('face_image');
@@ -732,21 +673,15 @@ let modelAI = null;
 // }
 // loadAI();
 function toggleFriend(hasAccount) {
-    const loginDiv = document.getElementById('friend_login');
-    const registerDiv = document.getElementById('friend_register');
-    const idInput = document.querySelector('input[name="friend_runner_id"]');
-    const passInput = document.querySelector('input[name="friend_password"]');
+    const login = document.getElementById('friend_login');
+    const register = document.getElementById('friend_register');
 
     if (hasAccount) {
-        loginDiv.classList.remove('hidden');
-        registerDiv.classList.add('hidden');
-        idInput.setAttribute('required', 'required');
-        passInput.setAttribute('required', 'required');
+        login.classList.remove('hidden');
+        register.classList.add('hidden');
     } else {
-        loginDiv.classList.add('hidden');
-        registerDiv.classList.remove('hidden');
-        idInput.removeAttribute('required');
-        passInput.removeAttribute('required');
+        register.classList.remove('hidden');
+        login.classList.add('hidden');
     }
 }
 function toggleITRA(show) {
@@ -1149,7 +1084,7 @@ window.addEventListener('load', () => {
 
 function syncAthleteType() {
     // Get the type passed from your controller/session
-    const selectedType = "{{ $athlete->nat_type ?? $type }}"; 
+    const selectedType = "{{ $friendAthlete->nat_type ?? $type }}"; 
     
     const radioNat = document.getElementById('radio-national');
     const radioFor = document.getElementById('radio-foreigner');

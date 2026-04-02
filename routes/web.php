@@ -224,11 +224,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
     Route::get('/register-athlete', [AthleteController::class, 'showAthleteForm'])->name('athlete.register');
     Route::post('/register-athlete', [AthleteController::class, 'submit'])->name('athlete.register.submit');
+   Route::post('/register-friend', [AthleteController::class, 'submitFriend'])->name('friend.register.submit');
+   Route::get('/register-friend', [AthleteController::class, 'showFriendRegisterForm'])->name('friend.register');
     Route::get('/checkout/review', [TicketController::class, 'showReviewPage'])->name('checkout.review');
     Route::post('/checkout/process', [TicketController::class, 'processPayment'])->name('tickets.process-payment');
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
+    Route::post('/athlete/verify-friend', [AthleteController::class, 'verifyFriend'])
+    ->name('athlete.verify.friend');
 });
 
 

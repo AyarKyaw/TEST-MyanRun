@@ -55,91 +55,99 @@ class PaymentController extends Controller
     }
 
     public function verifyPayment(Request $request)
-    {
-        // 1. Validation
-        $request->validate([
-            'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'amount'       => 'required|numeric',
-            'bib_name'     => 'required|string|max:255',
-            'category'     => 'required|string|max:255',
-        ]);
+{
+    // 1. Validation
+    $request->validate([
+        'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        'amount'       => 'required|numeric',
+        'bib_name'     => 'required|string|max:255',
+        'category'     => 'required|string|max:255',
+    ]);
 
-        // 2. Get session
-        $order = session('pending_registration');
+    // 2. Get session
+    $order = session('pending_registration');
 
-
-        if (!$order) {
-            return redirect()->route('athlete.register')
-                ->with('error', 'Session expired. Please try again.');
-        }
-
-        // 3. Prevent duplicate registration
-        $exists = Ticket::where('athlete_id', $order['athlete_id'])
-            ->where('event_id', $order['event_id'])
-            ->whereIn('status', ['pending', 'confirmed', 'approved'])
-            ->exists();
-
-        if ($exists) {
-            return redirect()->route('public.events')
-                ->with('error', 'You already registered for this event.');
-        }
-
-        // 4. Get athlete
-        $athlete = \App\Models\Athlete::find($order['athlete_id']);
-        if (!$athlete) {
-            return back()->with('error', 'Athlete not found.');
-        }
-
-        // 5. Generate Bib safely
-        $gender = $athlete->gender ?? 'male';
-        $category = $order['category'] ?? $request->category;
-        $generatedBib = $this->generateBib(
-            $order['event_id'],
-            $order['ticket_type_id'],
-            $athlete->gender
-        );
-        
-        // 6. Upload Slip
-        $saveDir = public_path('uploads/payments');
-
-        if (!\File::exists($saveDir)) {
-            \File::makeDirectory($saveDir, 0755, true);
-        }
-
-        $imageName = 'slip_' . time() . '_' . uniqid() . '.' . $request->payment_slip->extension();
-
-        $request->payment_slip->move($saveDir, $imageName);
-        $event = \App\Models\Event::find($order['event_id']);
-
-        if (!$event) {
-            return back()->with('error', 'Event not found.');
-        }
-
-        // 7. Clean amount
-        $amount = (float) preg_replace('/[^0-9.]/', '', $request->amount);
-        // 8. Create Ticket
-        $ticket = Ticket::create([
-            'athlete_id'       => $order['athlete_id'],
-            'bib_name'         => $request->bib_name,
-            'bib_number'       => $generatedBib,
-            'category'         => $category,
-            'ticket_type_id'   => $order['ticket_type_id'],
-            'price'            => $amount,
-            'event_id'         => $order['event_id'],
-            'event'            => $event->name, 
-            't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
-            'experience_level' => $order['exp_level'] ?? 'Beginner',
-            'transaction_id'   => $imageName, // slip image
-            'status'           => 'pending',
-        ]);
-
-        // 9. Clear session
-        session()->forget('pending_registration');
-
-        // 10. Redirect
-        return redirect()->route('user.dashboard')
-            ->with('success', 'Registration submitted! We will verify your payment slip soon.');
+    if (!$order) {
+        return redirect()->route('athlete.register')->with('error', 'Session expired.');
     }
+
+    // 3. Get athlete (Captain)
+    $athlete = \App\Models\Athlete::find($order['athlete_id']);
+    if (!$athlete) {
+        return back()->with('error', 'Athlete not found.');
+    }
+
+    // 4. Generate ONE Bib for the team
+    $generatedBib = $this->generateBib(
+        $order['event_id'],
+        $order['ticket_type_id'],
+        $athlete->gender
+    );
+    
+    // 5. Upload Slip
+    $saveDir = public_path('uploads/payments');
+    if (!\File::exists($saveDir)) \File::makeDirectory($saveDir, 0755, true);
+
+    $imageName = 'slip_' . time() . '_' . uniqid() . '.' . $request->payment_slip->extension();
+    $request->payment_slip->move($saveDir, $imageName);
+    
+    $event = \App\Models\Event::find($order['event_id']);
+    $amount = (float) preg_replace('/[^0-9.]/', '', $request->amount);
+
+    // --- 6. Create Ticket for CAPTAIN ---
+    $captainTicket = Ticket::create([
+        'athlete_id'       => $order['athlete_id'],
+        'bib_name'         => $request->bib_name, 
+        'bib_number'       => $generatedBib,
+        'category'         => $order['category'],
+        'ticket_type_id'   => $order['ticket_type_id'],
+        'price'            => $amount, 
+        'event_id'         => $order['event_id'],
+        'event'            => $event->name, 
+        't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
+        'experience_level' => $order['exp_level'] ?? 'Beginner',
+        'transaction_id'   => $imageName,
+        'status'           => 'pending',
+    ]);
+
+    // --- 7. Create Ticket for FRIEND (If Relay) ---
+$ticketType = strtolower(session('ticket_type'));
+$friendUserId = session('friend_user_id');
+$friendReg = session('friend_registration'); // Get the specific friend details saved earlier
+
+if ($ticketType === 'relay' && $friendUserId) {
+    $friendUser = \App\Models\User::find($friendUserId);
+
+    if ($friendUser) {
+        $friendAthlete = \App\Models\Athlete::where('runner_id', $friendUser->runner_id)->first();
+        
+        if ($friendAthlete) {
+            Ticket::create([
+                'athlete_id'       => $friendAthlete->id,
+                'bib_name'         => $friendReg['bib_name'] ?? ($friendAthlete->first_name . ' ' . $friendAthlete->last_name),
+                'bib_number'       => $generatedBib, // Same BIB for the relay team
+                'category'         => $order['category'],
+                'ticket_type_id'   => $order['ticket_type_id'],
+                'price'            => $amount, // Friend is covered by Captain's payment
+                'event_id'         => $order['event_id'],
+                'event'            => $event->name, 
+                't_shirt_size'     => $friendReg['t_shirt_size'] ?? 'M', 
+                'experience_level' => $order['exp_level'] ?? 'Beginner',
+                'transaction_id'   => $imageName, 
+                'status'           => 'pending',
+            ]);
+            
+            \Log::info("Friend ticket created for: " . $friendUser->runner_id);
+        }
+    }
+}
+
+    // 8. Clear all registration sessions
+    session()->forget(['pending_registration', 'friend_user_id', 'ticket_type']);
+
+    return redirect()->route('user.dashboard')
+        ->with('success', 'Relay Registration submitted! Both runners are now pending verification.');
+}
 
     private function generateBib($eventId, $ticketTypeId, $gender = 'male')
     {
