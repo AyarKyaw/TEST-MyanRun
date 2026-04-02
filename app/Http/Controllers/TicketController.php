@@ -208,114 +208,112 @@ class TicketController extends Controller
     }
 
     public function downloadPNG($id) 
-    {
-        // 1. Get Ticket Data
-        $data = $this->getTicketData($id);
-        $ticket = $data['ticket']; 
+{
+    // 1. Get Ticket Data
+    $data = $this->getTicketData($id);
+    $ticket = $data['ticket']; 
 
-        // 2. Fetch Athlete and User
-        $athlete = \App\Models\Athlete::find($ticket->athlete_id);
-        $user = $athlete ? \App\Models\User::where('runner_id', $athlete->runner_id)->first() : null;
+    // 2. Fetch Related Models
+    $athlete = \App\Models\Athlete::find($ticket->athlete_id);
+    $user = $athlete ? \App\Models\User::where('runner_id', $athlete->runner_id)->first() : null;
+    $ticketType = \App\Models\EventTicketType::find($ticket->ticket_type_id);
 
-        if (!$athlete || !$user) {
-            return "ERROR: Personal information (Athlete or User) not found.";
-        }
+    if (!$athlete || !$user || !$ticketType) {
+        return "ERROR: Required information not found.";
+    }
 
-        // 3. Map variables
-        $id_doc      = $athlete->id_number ?? 'N/A';
-        $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
-        $bibName     = $ticket->bib_name ?? 'N/A';
-        $bibNumber   = $ticket->bib_number ?? '0000';
-        $category    = $ticket->category ?? 'N/A';
-        $nationality = $athlete->nationality ?? 'N/A';
-        $dob         = $athlete->dob ?? 'N/A';
-        $gender      = $athlete->gender ?? 'N/A';
-        $division    = $athlete->state ?? 'N/A';
-        $email       = $user->email ?? 'N/A';
-        $viber       = $athlete->viber ?? 'N/A';
-        $phone       = $user->phone ?? 'N/A';
-        $contact     = $athlete->contact ?? 'N/A';
-        $tSize       = $ticket->t_shirt_size ?? 'N/A';
-        $blood       = $athlete->blood_type ?? 'N/A';
-        $exp         = $ticket->experience_level ?? 'N/A';
-        $medical     = $athlete->medical_details ?? 'None';
-        $itra        = $athlete->itra_details ?? 'None';
+    // 3. Map variables
+    $id_doc      = $athlete->id_number ?? 'N/A';
+    $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
+    $bibName     = $ticket->bib_name ?? 'N/A';
+    $bibNumber   = $ticket->bib_number ?? '0000';
+    $category    = $ticketType->name ?? 'N/A';
+    $nationality = $athlete->nationality ?? 'N/A';
+    $dob         = $athlete->dob ?? 'N/A';
+    $gender      = $athlete->gender ?? 'N/A';
+    $division    = $athlete->state ?? 'N/A';
+    $email       = $user->email ?? 'N/A';
+    $viber       = $athlete->viber ?? 'N/A';
+    $phone       = $user->phone ?? 'N/A';
+    $contact     = $athlete->contact ?? 'N/A';
+    $tSize       = $ticket->t_shirt_size ?? 'N/A';
+    $blood       = $athlete->blood_type ?? 'N/A';
+    $exp         = $ticket->experience_level ?? 'N/A';
+    $medical     = $athlete->medical_details ?? 'None';
+    $itra        = $athlete->itra_details ?? 'None';
 
-        $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical\nITRA: $itra";
+    $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical\nITRA: $itra";
 
-        // 4. Paths
-        if (str_contains($category, '36')) {
-            $templatePath = public_path('images/ticket2_1.jpg'); 
-        } elseif (str_contains($category, '16')) {
-            $templatePath = public_path('images/ticket2.jpg'); 
-        } else {
-            $templatePath = public_path('images/ticket.jpg'); 
-        }
-        
-        $fontPath = public_path('assets/fonts/arial.ttf');
-        $logoPath = public_path('images/myan_logo.jpg');
+    // 4. PATH LOGIC (Fixed for Windows and public/storage)
+    $dbPath = ltrim($ticketType->ticket_png, '/'); 
+    
+    // If the path in DB already includes 'storage/', we don't want to double it
+    $relativePath = str_starts_with($dbPath, 'storage') ? $dbPath : 'storage/' . $dbPath;
+    
+    // Normalize slashes for Windows
+    $templatePath = public_path(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $relativePath));
 
-        if (!file_exists($logoPath)) {
-            return "Error: Image not found at " . $logoPath;
-        } 
+    $fontPath = public_path('assets/fonts/arial.ttf');
+    $logoPath = public_path('images/myan_logo.jpg');
 
-        if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
+    if (!\Illuminate\Support\Facades\File::exists($templatePath)) {
+        return "ERROR: Template not found at " . $templatePath;
+    }
 
+    // 5. Create Image Resource (Check Extension)
+    $extension = strtolower(pathinfo($templatePath, PATHINFO_EXTENSION));
+    if ($extension === 'png') {
+        $image = @\imagecreatefrompng($templatePath);
+        \imagealphablending($image, true);
+        \imagesavealpha($image, true);
+    } else {
         $image = @\imagecreatefromjpeg($templatePath);
-        if (!$image) return "ERROR: GD Library not enabled.";
+    }
 
-        $white = \imagecolorallocate($image, 255, 255, 255);
+    if (!$image) return "ERROR: Failed to process image. Check GD library.";
+
+    $white = \imagecolorallocate($image, 255, 255, 255);
+    
+    // 6. Drawing & QR Code
+    if (\Illuminate\Support\Facades\File::exists($fontPath)) {
+        \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, str_pad($ticket->id, 5, '0', STR_PAD_LEFT));
+        \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
+        \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
+
+        $qrSize = 150;
+        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
         
-        if (\Illuminate\Support\Facades\File::exists($fontPath)) {
-            \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, str_pad($ticket->id, 5, '0', STR_PAD_LEFT));
-            \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
-            \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
-
-            $qrSize = 150;
-            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
-            
-            $ctx = stream_context_create(['http' => ['timeout' => 5]]);
-            $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
-            
-            if ($qrCodeRaw) {
-                $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
-                
-                if ($qrCodeImage && \Illuminate\Support\Facades\File::exists($logoPath)) {
+        $ctx = stream_context_create(['http' => ['timeout' => 5]]);
+        $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
+        
+        if ($qrCodeRaw) {
+            $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
+            if ($qrCodeImage) {
+                if (\Illuminate\Support\Facades\File::exists($logoPath)) {
                     $logo = @\imagecreatefromjpeg($logoPath);
                     if ($logo) {
-                        $qrWidth = \imagesx($qrCodeImage);
-                        $qrHeight = \imagesy($qrCodeImage);
-                        $logoWidth = \imagesx($logo);
-                        $logoHeight = \imagesy($logo);
-
+                        $qrWidth = \imagesx($qrCodeImage); $qrHeight = \imagesy($qrCodeImage);
+                        $logoWidth = \imagesx($logo); $logoHeight = \imagesy($logo);
                         $logoTargetWidth = $qrWidth * 0.22;
                         $logoTargetHeight = $logoHeight * ($logoTargetWidth / $logoWidth);
-
                         $dstX = ($qrWidth - $logoTargetWidth) / 2;
                         $dstY = ($qrHeight - $logoTargetHeight) / 2;
-
                         \imagefilledrectangle($qrCodeImage, $dstX - 2, $dstY - 2, $dstX + $logoTargetWidth + 2, $dstY + $logoTargetHeight + 2, $white);
-
                         \imagecopyresampled($qrCodeImage, $logo, $dstX, $dstY, 0, 0, $logoTargetWidth, $logoTargetHeight, $logoWidth, $logoHeight);
-                        
                         \imagedestroy($logo);
                     }
                 }
-
-                if ($qrCodeImage) {
-                    \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
-                    \imagedestroy($qrCodeImage);
-                }
+                \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
+                \imagedestroy($qrCodeImage);
             }
         }
-
-        return response()->streamDownload(function () use ($image) {
-            \imagepng($image);
-            \imagedestroy($image);
-        }, "MyanRun_{$bibNumber}.png", [
-            'Content-Type' => 'image/png',
-        ]);
     }
+
+    return response()->streamDownload(function () use ($image) {
+        \imagepng($image);
+        \imagedestroy($image);
+    }, "MyanRun_{$bibNumber}.png", ['Content-Type' => 'image/png']);
+}
 
     public function previewPDF($id) 
     {
@@ -605,18 +603,51 @@ class TicketController extends Controller
     {
         $order = session('pending_registration');
         $user = auth()->user();
-        if (!$order) {
+
+        if (!$order || !isset($order['ticket_type_id'])) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
-        $rawPrice = $order['price'] ?? 0;
-        $subtotal = (float) preg_replace('/[^0-9.]/', '', $rawPrice);
+        // 1. Fetch the actual Ticket Type from the DB
+        $ticketType = \App\Models\EventTicketType::find($order['ticket_type_id']);
+        if (!$ticketType) {
+            return redirect()->route('athlete.register')->with('error', 'Invalid ticket type.');
+        }
 
+        // 2. Parse the Base Price (National vs Foreign)
+        $isNational = (strtolower($user->nationality ?? '') === 'myanmar');
+        $basePrice = $isNational ? (float)$ticketType->national_price : (float)$ticketType->foreign_price;
+
+        // 3. Early Bird Calculation
+        $soldCount = \App\Models\Ticket::where('ticket_type_id', $ticketType->id)
+            ->whereIn('status', ['paid', 'confirmed'])
+            ->count();
+
+        $discountAmount = 0;
+        $isEarlyBirdActive = false;
+
+        if ($ticketType->early_bird_limit > 0 && $soldCount < $ticketType->early_bird_limit) {
+            $discountAmount = (float)$ticketType->early_bird_discount;
+            $isEarlyBirdActive = true;
+        }
+
+        // 4. Final Totals
+        $subtotal = $basePrice;
         $serviceFee = 0.00; 
-        $total = $subtotal + $serviceFee;
+        $total = ($subtotal - $discountAmount) + $serviceFee;
+        
         $fullName = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
 
-        return view('ticket.checkout', compact('order', 'subtotal', 'serviceFee', 'total', 'fullName'));
+        // Add these to the compact list so you can show the discount in the Blade view
+        return view('ticket.checkout', compact(
+            'order', 
+            'subtotal', 
+            'discountAmount', 
+            'isEarlyBirdActive', 
+            'serviceFee', 
+            'total', 
+            'fullName'
+        ));
     }
 
     public function updateId(Request $request)

@@ -150,43 +150,46 @@ if ($ticketType === 'relay' && $friendUserId) {
 }
 
     private function generateBib($eventId, $ticketTypeId, $gender = 'male')
-{
-    $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
+    {
+        $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
 
-    if (!$ticketType) {
-        return 'UNK000';
-    }
-
-    $prefix = strtoupper($ticketType->prefix); 
-    $start = $ticketType->start_number ?? 1;
-
-    // 1. Get all unique bib numbers for this event that start with the prefix
-    $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
-        ->where('ticket_type_id', $ticketTypeId)
-        ->where('bib_number', 'LIKE', $prefix . '%')
-        ->where('status', '!=', 'rejected')
-        ->distinct()
-        ->pluck('bib_number')
-        ->toArray();
-
-    $usedNumbers = [];
-    foreach ($usedBibs as $bib) {
-        // Remove the prefix string to get just the number
-        // Example: 'RUN001' becomes '001'
-        $numericPart = str_replace($prefix, '', $bib);
-        
-        if (is_numeric($numericPart)) {
-            $usedNumbers[] = (int) $numericPart;
+        if (!$ticketType) {
+            return 'UNK000';
         }
-    }
 
-    // 2. Find the first available gap starting from $start
-    $number = $start;
-    while (in_array($number, $usedNumbers)) {
-        $number++;
-    }
+        $basePrefix = strtoupper($ticketType->prefix); 
+        $start = $ticketType->start_number ?? 1;
+        
+        // 1. Gender Prefix First Logic (No Hyphens)
+        // Result: "M10K" or "F10K"
+        $genderCode = (strtolower($gender) === 'female') ? 'F' : 'M';
+        $fullPrefix = $ticketType->has_gender_bib ? $genderCode . $basePrefix : $basePrefix;
 
-    // Returns format: RUN001 (No hyphen)
-    return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
-}
+        // 2. Get existing BIBs starting with this prefix
+        $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
+            ->where('ticket_type_id', $ticketTypeId)
+            ->where('bib_number', 'LIKE', $fullPrefix . '%')
+            ->where('status', '!=', 'rejected')
+            ->pluck('bib_number')
+            ->toArray();
+
+        $usedNumbers = [];
+        foreach ($usedBibs as $bib) {
+            // Strip the prefix string (e.g., 'M10K001' becomes '001')
+            $numericPart = str_replace($fullPrefix, '', $bib);
+            
+            if (is_numeric($numericPart)) {
+                $usedNumbers[] = (int) $numericPart;
+            }
+        }
+
+        // 3. Find the first available gap starting from your start_number
+        $number = $start;
+        while (in_array($number, $usedNumbers)) {
+            $number++;
+        }
+
+        // Returns format: M10K001 or F10K001
+        return $fullPrefix . str_pad($number, 3, '0', STR_PAD_LEFT);
+    }
 }

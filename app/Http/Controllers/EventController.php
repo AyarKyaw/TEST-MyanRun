@@ -220,39 +220,44 @@ class EventController extends Controller
     $event->save();
 
     // 2. Handle Ticket Types
-    // 2. Handle Ticket Types
-if ($request->has('tickets')) {
-    foreach ($request->tickets as $index => $ticketData) { // Added $index here
-        
-        // Check if we are updating an existing ticket or creating a new one
-        $ticketType = isset($ticketData['id']) 
-            ? \App\Models\EventTicketType::find($ticketData['id']) 
-            : new \App\Models\EventTicketType();
+    if ($request->has('tickets')) {
+        foreach ($request->tickets as $index => $ticketData) {
+            
+            $ticketType = isset($ticketData['id']) 
+                ? \App\Models\EventTicketType::find($ticketData['id']) 
+                : new \App\Models\EventTicketType();
 
-        $ticketType->event_id       = $event->id;
-        $ticketType->name           = $ticketData['name'];
-        $ticketType->type           = $ticketData['type'];
-        $ticketType->national_price = $ticketData['national_price'];
-        $ticketType->foreign_price  = $ticketData['foreign_price'];
-        $ticketType->max_slots      = $ticketData['max_slots'] ?? null;
+            $ticketType->event_id            = $event->id;
+            $ticketType->name                = $ticketData['name'];
+            $ticketType->type                = $ticketData['type'];
+            $ticketType->national_price      = $ticketData['national_price'];
+            $ticketType->foreign_price       = $ticketData['foreign_price'];
+            $ticketType->max_slots           = $ticketData['max_slots'] ?? null;
+            $ticketType->prefix              = $ticketData['prefix'] ?? null;
+            $ticketType->start_number        = $ticketData['start_number'] ?? 1;
+            // $ticketType->category            = $ticketData['category'] ?? null;
 
-        // ✅ IMPORTANT: Only uncomment these if you added them to your database
-        $ticketType->prefix       = $ticketData['prefix'] ?? null;
-        $ticketType->start_number = $ticketData['start_number'] ?? 1;
-        // $ticketType->category     = $ticketData['category'] ?? null;
+            // New Logic for Gender and Early Bird
+            $ticketType->has_gender_bib      = $ticketData['has_gender_bib'] ?? 0;
+            $ticketType->early_bird_limit    = $ticketData['early_bird_limit'] ?? null;
+            $ticketType->early_bird_discount = $ticketData['early_bird_discount'] ?? 0;
 
-        // Handle File Uploads using the correct $index
-        if ($request->hasFile("tickets.$index.national_image")) {
-            $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets', 'public');
+            // Handle Display Images
+            if ($request->hasFile("tickets.$index.national_image")) {
+                $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets/display', 'public');
+            }
+            if ($request->hasFile("tickets.$index.foreign_image")) {
+                $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets/display', 'public');
+            }
+
+            // Handle THE TICKET PNG Template
+            if ($request->hasFile("tickets.$index.ticket_png")) {
+                $ticketType->ticket_png = $request->file("tickets.$index.ticket_png")->store('tickets/templates', 'public');
+            }
+
+            $ticketType->save();
         }
-        
-        if ($request->hasFile("tickets.$index.foreign_image")) {
-            $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets', 'public');
-        }
-
-        $ticketType->save();
     }
-}
 
     $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
     $statusKey = $statusMap[$request->is_active] ?? 'now';

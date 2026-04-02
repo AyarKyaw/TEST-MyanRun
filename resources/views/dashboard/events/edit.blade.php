@@ -106,37 +106,24 @@
                                 <div class="card shadow-sm mb-4 p-3 ticket-row border border-light" id="ticket-row-{{ $type->id }}">
                                     <input type="hidden" name="tickets[{{ $index }}][id]" value="{{ $type->id }}">
                                     
-                                    <div class="row g-3 align-items-end">
+                                    <div class="row g-3">
                                         <div class="col-md-3">
                                             <label class="form-label small fw-bold">Name</label>
                                             <input type="text" name="tickets[{{ $index }}][name]" class="form-control" value="{{ $type->name }}">
                                         </div>
                                         <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Type</label>
-                                            <select name="tickets[{{ $index }}][type]" class="form-control">
-                                                <option value="solo" {{ $type->type == 'solo' ? 'selected' : '' }}>Solo</option>
-                                                <option value="relay" {{ $type->type == 'relay' ? 'selected' : '' }}>Relay</option>
+                                            <label class="form-label small fw-bold text-danger">Gender BIB?</label>
+                                            <select name="tickets[{{ $index }}][has_gender_bib]" class="form-control">
+                                                <option value="0" {{ !$type->has_gender_bib ? 'selected' : '' }}>No</option>
+                                                <option value="1" {{ $type->has_gender_bib ? 'selected' : '' }}>Yes (M/F Prefix)</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-bold text-primary">Update National Image</label>
-                                            <input type="file" name="tickets[{{ $index }}][national_image]" class="form-control">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-bold text-primary">Update Foreign Image</label>
-                                            <input type="file" name="tickets[{{ $index }}][foreign_image]" class="form-control">
-                                        </div>
                                         <div class="col-md-2">
-                                            <label class="form-label small fw-bold">National (MMK)</label>
-                                            <input type="number" name="tickets[{{ $index }}][national_price]" class="form-control" value="{{ $type->national_price }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Foreign (MMK)</label>
-                                            <input type="number" name="tickets[{{ $index }}][foreign_price]" class="form-control" value="{{ $type->foreign_price }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Slots</label>
-                                            <input type="number" name="tickets[{{ $index }}][max_slots]" class="form-control" value="{{ $type->max_slots }}">
+                                            <label class="form-label small fw-bold text-primary">Ticket PNG (Template)</label>
+                                            <input type="file" name="tickets[{{ $index }}][ticket_png]" class="form-control">
+                                            @if($type->ticket_png)
+                                                <small class="text-success d-block">✓ Template exists</small>
+                                            @endif
                                         </div>
                                         <div class="col-md-2">
                                             <label class="form-label small fw-bold">Prefix</label>
@@ -146,9 +133,46 @@
                                             <label class="form-label small fw-bold">Start No.</label>
                                             <input type="number" name="tickets[{{ $index }}][start_number]" class="form-control" value="{{ $type->start_number }}">
                                         </div>
+                                        <div class="col-md-1">
+                                            <label class="form-label small fw-bold">Type</label>
+                                            <select name="tickets[{{ $index }}][type]" class="form-control">
+                                                <option value="solo" {{ $type->type == 'solo' ? 'selected' : '' }}>Solo</option>
+                                                <option value="relay" {{ $type->type == 'relay' ? 'selected' : '' }}>Relay</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">National (MMK)</label>
+                                            <input type="number" name="tickets[{{ $index }}][national_price]" class="form-control" value="{{ $type->national_price }}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Foreign (MMK)</label>
+                                            <input type="number" name="tickets[{{ $index }}][foreign_price]" class="form-control" value="{{ $type->foreign_price }}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold text-warning">Early Bird Limit</label>
+                                            <input type="number" name="tickets[{{ $index }}][early_bird_limit]" class="form-control" value="{{ $type->early_bird_limit }}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold text-warning">EB Discount</label>
+                                            <input type="number" name="tickets[{{ $index }}][early_bird_discount]" class="form-control" value="{{ $type->early_bird_discount }}">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Slots</label>
+                                            <input type="number" name="tickets[{{ $index }}][max_slots]" class="form-control" value="{{ $type->max_slots }}">
+                                        </div>
                                         <div class="col-md-2">
                                             <label class="form-label small fw-bold">Category</label>
                                             <input type="text" name="tickets[{{ $index }}][category]" class="form-control" value="{{ $type->category }}">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">National Display Image (Front Page)</label>
+                                            <input type="file" name="tickets[{{ $index }}][national_image]" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Foreign Display Image (Front Page)</label>
+                                            <input type="file" name="tickets[{{ $index }}][foreign_image]" class="form-control">
                                         </div>
                                     </div>
                                 </div>
@@ -170,17 +194,23 @@ function addTicket() {
     const container = document.getElementById('ticket-types');
     const html = `
         <div class="card shadow-sm mb-4 p-3 ticket-row border border-primary bg-light">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3"><label class="form-label small fw-bold">Name</label><input type="text" name="tickets[${ticketIndex}][name]" class="form-control" placeholder="New Ticket Name"></div>
-                <div class="col-md-2"><label class="form-label small fw-bold">Type</label><select name="tickets[${ticketIndex}][type]" class="form-control"><option value="solo">Solo</option><option value="relay">Relay</option></select></div>
-                <div class="col-md-3"><label class="form-label small fw-bold">National Image</label><input type="file" name="tickets[${ticketIndex}][national_image]" class="form-control"></div>
-                <div class="col-md-3"><label class="form-label small fw-bold">Foreign Image</label><input type="file" name="tickets[${ticketIndex}][foreign_image]" class="form-control"></div>
-                <div class="col-md-2"><label class="form-label small fw-bold">National (MMK)</label><input type="number" name="tickets[${ticketIndex}][national_price]" class="form-control"></div>
-                <div class="col-md-2"><label class="form-label small fw-bold">Foreign (MMK)</label><input type="number" name="tickets[${ticketIndex}][foreign_price]" class="form-control"></div>
-                <div class="col-md-2"><label class="form-label small fw-bold">Slots</label><input type="number" name="tickets[${ticketIndex}][max_slots]" class="form-control"></div>
+            <div class="row g-3">
+                <div class="col-md-3"><label class="form-label small fw-bold">Name</label><input type="text" name="tickets[${ticketIndex}][name]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-danger">Gender BIB?</label><select name="tickets[${ticketIndex}][has_gender_bib]" class="form-control"><option value="0">No</option><option value="1">Yes</option></select></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Ticket PNG</label><input type="file" name="tickets[${ticketIndex}][ticket_png]" class="form-control"></div>
                 <div class="col-md-2"><label class="form-label small fw-bold">Prefix</label><input type="text" name="tickets[${ticketIndex}][prefix]" class="form-control"></div>
-                <div class="col-md-2"><label class="form-label small fw-bold">Start Number</label><input type="number" name="tickets[${ticketIndex}][start_number]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Start No.</label><input type="number" name="tickets[${ticketIndex}][start_number]" class="form-control" value="1"></div>
+                <div class="col-md-1"><label class="form-label small fw-bold">Type</label><select name="tickets[${ticketIndex}][type]" class="form-control"><option value="solo">Solo</option><option value="relay">Relay</option></select></div>
+                
+                <div class="col-md-2"><label class="form-label small fw-bold">National MMK</label><input type="number" name="tickets[${ticketIndex}][national_price]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Foreign MMK</label><input type="number" name="tickets[${ticketIndex}][foreign_price]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-warning">EB Limit</label><input type="number" name="tickets[${ticketIndex}][early_bird_limit]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold text-warning">EB Discount</label><input type="number" name="tickets[${ticketIndex}][early_bird_discount]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Slots</label><input type="number" name="tickets[${ticketIndex}][max_slots]" class="form-control"></div>
                 <div class="col-md-2"><label class="form-label small fw-bold">Category</label><input type="text" name="tickets[${ticketIndex}][category]" class="form-control"></div>
+                
+                <div class="col-md-6"><label class="form-label small fw-bold">National Display Image</label><input type="file" name="tickets[${ticketIndex}][national_image]" class="form-control"></div>
+                <div class="col-md-6"><label class="form-label small fw-bold">Foreign Display Image</label><input type="file" name="tickets[${ticketIndex}][foreign_image]" class="form-control"></div>
             </div>
         </div>`;
     container.insertAdjacentHTML('beforeend', html);

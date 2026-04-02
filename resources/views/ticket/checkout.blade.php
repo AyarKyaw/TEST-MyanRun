@@ -82,64 +82,84 @@
 
                 <div class="col-lg-5">
     <div class="checkout-cart" style="background: #f9f9f9; padding: 30px; border-radius: 12px; border: 1px solid #eee;">
-        <h4 class="mb-4">Review Order</h4>
-        
-        <div class="checkout-product-wrap">
-            <div class="checkout-product-item d-flex align-items-center mb-3" style="gap: 15px;">
-                <div class="image" style="width: 70px; height: 70px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden;">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M15 5C15 6.10457 14.1046 7 13 7C11.8954 7 11 6.10457 11 5C11 3.89543 11.8954 3 13 3C14.1046 3 15 3.89543 15 5Z" fill="#CEF531"/>
-                        <path d="M13.5 19L9.5 13L11 11L13.5 15L18 14L17 12L14.5 12.5L12 8H8L4 13L5.5 14.5L8 11.5L9 14.5L6 21H8.5L10.5 17.5L13.5 19Z" fill="#CEF531"/>
-                    </svg>
-                    <div style="position: absolute; width: 40px; height: 40px; background: #CEF531; filter: blur(25px); opacity: 0.2;"></div>
-                </div>
-                
-                <div class="content flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <span class="text-title d-block" style="font-weight: 700; line-height: 1.2;">
-                                {{ $order['event'] ?? 'Race Registration' }}
-                            </span>
-                            <small class="text-muted">{{ $order['category'] ?? 'General' }}</small>
+    <h4 class="mb-4">Review Order</h4>
+    
+    <div class="checkout-product-wrap">
+        <div class="checkout-product-item d-flex align-items-center mb-3" style="gap: 15px;">
+            <div class="image" style="width: 70px; height: 70px; background: #000; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; overflow: hidden;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M15 5C15 6.10457 14.1046 7 13 7C11.8954 7 11 6.10457 11 5C11 3.89543 11.8954 3 13 3C14.1046 3 15 3.89543 15 5Z" fill="#CEF531"/>
+                    <path d="M13.5 19L9.5 13L11 11L13.5 15L18 14L17 12L14.5 12.5L12 8H8L4 13L5.5 14.5L8 11.5L9 14.5L6 21H8.5L10.5 17.5L13.5 19Z" fill="#CEF531"/>
+                </svg>
+                <div style="position: absolute; width: 40px; height: 40px; background: #CEF531; filter: blur(25px); opacity: 0.2;"></div>
+            </div>
+            
+            <div class="content flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="text-title d-block" style="font-weight: 700; line-height: 1.2;">
+                            {{ $order['event'] ?? 'Race Registration' }}
+                        </span>
+                        <small class="text-muted">{{ $order['category'] ?? 'General' }}</small>
+                        
+                        {{-- Early Bird Badge --}}
+                        @if($isEarlyBirdActive)
                             <div class="mt-1">
-                                <small class="d-block" style="font-size: 11px; color: #888;">Runner: {{ $order['runner_name'] ?? 'Guest' }}</small>
+                                <span style="font-size: 10px; background: #CEF531; color: #000; padding: 2px 8px; border-radius: 20px; font-weight: 700; text-transform: uppercase;">Early Bird Applied</span>
                             </div>
+                        @endif
+
+                        <div class="mt-1">
+                            <small class="d-block" style="font-size: 11px; color: #888;">Runner: {{ $order['runner_name'] ?? 'Guest' }}</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="line my-3" style="border-top: 1px dashed #ddd;"></div>
-
-        <div claass="checkout-cart-by">
-            <div class="d-flex justify-content-between mb-2">
-                <div class="text-title text-muted">Subtotal</div>
-                <div class="text-title">{{ number_format($subtotal, 2) }}</div>
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-                <div class="text-title text-muted">Service Fee</div>
-                <div class="text-title">{{ number_format($serviceFee, 2) }}</div>
-            </div>
-            
-            <div class="d-flex justify-content-between mt-3 mb-4">
-                <h4 style="font-weight: 800; margin: 0;">Total</h4>
-                <h4 style="font-weight: 800; color: #000; margin: 0;">{{ number_format($total, 2) }}</h4>
-            </div>
-
-            <form action="{{ route('initiatePayment_s', ['id' => Auth::user()->runner_id]) }}" method="POST">
-                @csrf
-                <button type="submit" class="tf-btn w-100 justify-content-center" 
-                    style="background-color: #CEF531; color: #000; border: none; padding: 20px; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 4px; box-shadow: 0 4px 14px rgba(206, 245, 49, 0.4); transition: transform 0.2s;">
-                    PROCEED TO PAYMENT
-                </button>
-            </form>
-            
-            <p class="text-center mt-3" style="font-size: 11px; text-transform: uppercase; color: #999; letter-spacing: 1px;">
-                Final step before secure checkout
-            </p>
-        </div>
     </div>
+
+    <div class="line my-3" style="border-top: 1px dashed #ddd;"></div>
+
+    <div class="checkout-cart-by">
+        {{-- Subtotal --}}
+        <div class="d-flex justify-content-between mb-2">
+            <div class="text-title text-muted">Registration Fee</div>
+            <div class="text-title">{{ number_format($subtotal, 2) }}</div>
+        </div>
+
+        {{-- Early Bird Discount Row --}}
+        @if($isEarlyBirdActive)
+        <div class="d-flex justify-content-between mb-2">
+            <div class="text-title" style="color: #28a745;">Early Bird Discount</div>
+            <div class="text-title" style="color: #28a745;">-{{ number_format($discountAmount, 2) }}</div>
+        </div>
+        @endif
+
+        {{-- Service Fee --}}
+        <div class="d-flex justify-content-between mb-2">
+            <div class="text-title text-muted">Service Fee</div>
+            <div class="text-title">{{ number_format($serviceFee, 2) }}</div>
+        </div>
+        
+        {{-- Final Total --}}
+        <div class="d-flex justify-content-between mt-3 mb-4">
+            <h4 style="font-weight: 800; margin: 0;">Total</h4>
+            <h4 style="font-weight: 800; color: #000; margin: 0;">{{ number_format($total, 2) }} MMK</h4>
+        </div>
+
+        <form action="{{ route('initiatePayment_s', ['id' => Auth::user()->runner_id]) }}" method="POST">
+            @csrf
+            <button type="submit" class="tf-btn w-100 justify-content-center" 
+                style="background-color: #CEF531; color: #000; border: none; padding: 20px; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 4px; box-shadow: 0 4px 14px rgba(206, 245, 49, 0.4); transition: transform 0.2s;">
+                PROCEED TO PAYMENT
+            </button>
+        </form>
+        
+        <p class="text-center mt-3" style="font-size: 11px; text-transform: uppercase; color: #999; letter-spacing: 1px;">
+            Secure Payment via KBZPay
+        </p>
+    </div>
+</div>
 </div> </div> </div> </section>
 @if(session('error'))
     <div style="color:red;">
