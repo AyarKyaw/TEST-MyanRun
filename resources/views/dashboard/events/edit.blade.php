@@ -22,172 +22,182 @@
             </div>
         @endif
 
-        <div class="row">
-            <div class="col-xl-12 col-lg-12">
-                <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    @method('PUT')
-                    
-                    <div class="row">
-                        <div class="col-xl-8">
-                            <div class="card">
-                                <div class="card-header"><h4 class="card-title">Event Details</h4></div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="mb-3 col-md-12">
-                                            <label class="form-label text-black fw-bold">Event Name</label>
-                                            <input type="text" name="name" class="form-control" value="{{ old('name', $event->name) }}" required>
-                                        </div>
-
-                                        <div class="mb-3 col-md-6">
-                                            <label class="form-label text-black fw-bold">Company / Organizer</label>
-                                            <input type="text" name="company" class="form-control" value="{{ old('company', $event->company) }}" required>
-                                        </div>
-
-                                        <div class="mb-3 col-md-6">
-                                            <label class="form-label text-black fw-bold">Location</label>
-                                            <input type="text" name="location" class="form-control" value="{{ old('location', $event->location) }}">
-                                        </div>
-
-                                        <div class="mb-3 col-md-6">
-                                            <label class="form-label text-black fw-bold">Event Date</label>
-                                            <input type="date" name="date" class="form-control" value="{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '' }}" required>
-                                        </div>
-
-                                        <div class="mb-3 col-md-6">
-                                            <label class="form-label text-black fw-bold">YouTube Video ID</label>
-                                            <input type="text" name="video_url" class="form-control" value="{{ old('video_url', $event->video_url) }}">
-                                        </div>
-
-                                        <div class="mb-3 col-md-12">
-                                            <label class="form-label text-black fw-bold">Event Description</label>
-                                            <textarea name="description" class="form-control" rows="5">{{ old('description', $event->description) }}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-xl-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <div class="mb-4">
-                                        <label class="form-label text-black fw-bold">Display Status</label>
-                                        <select name="is_active" class="form-control default-select">
-                                            <option value="2" {{ $event->is_active == 2 ? 'selected' : '' }}>Coming Event</option>
-                                            <option value="1" {{ $event->is_active == 1 ? 'selected' : '' }}>Now Event (Live)</option>
-                                            <option value="0" {{ $event->is_active == 0 ? 'selected' : '' }}>Past Event (Archived)</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-4">
-                                        <label class="form-label text-black fw-bold">Event Banner</label>
-                                        @if($event->image_path)
-                                            <img src="{{ asset('storage/' . $event->image_path) }}" class="img-fluid rounded mb-2 shadow-sm" style="max-height: 150px; width: 100%; object-fit: cover;">
-                                        @endif
-                                        <input type="file" name="image" class="form-control">
-                                    </div>
-
-                                    <button type="submit" class="btn btn-primary w-100 mb-2">Update Event</button>
-                                    <a href="{{ route('events.index', 'coming') }}" class="btn btn-light w-100">Cancel</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card mt-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="card-title">Ticket Types</h4>
-                            <button type="button" onclick="addTicket()" class="btn btn-sm btn-dark">+ Add New Ticket Type</button>
-                        </div>
+        <form action="{{ route('events.update', $event->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+            
+            <div class="row">
+                <div class="col-xl-8">
+                    <div class="card">
+                        <div class="card-header"><h4 class="card-title">Event Details</h4></div>
                         <div class="card-body">
-                            <div id="ticket-types">
-                                @foreach($event->ticketTypes as $index => $type)
-                                <div class="card shadow-sm mb-4 p-3 ticket-row border border-light" id="ticket-row-{{ $type->id }}">
-                                    <input type="hidden" name="tickets[{{ $index }}][id]" value="{{ $type->id }}">
-                                    
-                                    <div class="row g-3">
-                                        <div class="col-md-3">
-                                            <label class="form-label small fw-bold">Name</label>
-                                            <input type="text" name="tickets[{{ $index }}][name]" class="form-control" value="{{ $type->name }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold text-danger">Gender BIB?</label>
-                                            <select name="tickets[{{ $index }}][has_gender_bib]" class="form-control">
-                                                <option value="0" {{ !$type->has_gender_bib ? 'selected' : '' }}>No</option>
-                                                <option value="1" {{ $type->has_gender_bib ? 'selected' : '' }}>Yes (M/F Prefix)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold text-primary">Ticket PNG (Template)</label>
-                                            <input type="file" name="tickets[{{ $index }}][ticket_png]" class="form-control">
-                                            @if($type->ticket_png)
-                                                <small class="text-success d-block">✓ Template exists</small>
-                                            @endif
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Prefix</label>
-                                            <input type="text" name="tickets[{{ $index }}][prefix]" class="form-control" value="{{ $type->prefix }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Start No.</label>
-                                            <input type="number" name="tickets[{{ $index }}][start_number]" class="form-control" value="{{ $type->start_number }}">
-                                        </div>
-                                        <div class="col-md-1">
-                                            <label class="form-label small fw-bold">Type</label>
-                                            <select name="tickets[{{ $index }}][type]" class="form-control">
-                                                <option value="solo" {{ $type->type == 'solo' ? 'selected' : '' }}>Solo</option>
-                                                <option value="relay" {{ $type->type == 'relay' ? 'selected' : '' }}>Relay</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">National (MMK)</label>
-                                            <input type="number" name="tickets[{{ $index }}][national_price]" class="form-control" value="{{ $type->national_price }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Foreign (MMK)</label>
-                                            <input type="number" name="tickets[{{ $index }}][foreign_price]" class="form-control" value="{{ $type->foreign_price }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold text-warning">Early Bird Limit</label>
-                                            <input type="number" name="tickets[{{ $index }}][early_bird_limit]" class="form-control" value="{{ $type->early_bird_limit }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold text-warning">EB Discount</label>
-                                            <input type="number" name="tickets[{{ $index }}][early_bird_discount]" class="form-control" value="{{ $type->early_bird_discount }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Slots</label>
-                                            <input type="number" name="tickets[{{ $index }}][max_slots]" class="form-control" value="{{ $type->max_slots }}">
-                                        </div>
-                                        <div class="col-md-2">
-                                            <label class="form-label small fw-bold">Category</label>
-                                            <input type="text" name="tickets[{{ $index }}][category]" class="form-control" value="{{ $type->category }}">
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">National Display Image (Front Page)</label>
-                                            <input type="file" name="tickets[{{ $index }}][national_image]" class="form-control">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label small fw-bold">Foreign Display Image (Front Page)</label>
-                                            <input type="file" name="tickets[{{ $index }}][foreign_image]" class="form-control">
-                                        </div>
-                                    </div>
+                            <div class="row">
+                                <div class="mb-3 col-md-12">
+                                    <label class="form-label text-black fw-bold">Event Name</label>
+                                    <input type="text" name="name" class="form-control" value="{{ old('name', $event->name) }}" required>
                                 </div>
-                                @endforeach
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">Company / Organizer</label>
+                                    <input type="text" name="company" class="form-control" value="{{ old('company', $event->company) }}" required>
+                                </div>
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">Location</label>
+                                    <input type="text" name="location" class="form-control" value="{{ old('location', $event->location) }}">
+                                </div>
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">Event Date</label>
+                                    <input type="date" name="date" class="form-control" value="{{ $event->date ? \Carbon\Carbon::parse($event->date)->format('Y-m-d') : '' }}" required>
+                                </div>
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">YouTube Video ID</label>
+                                    <input type="text" name="video_url" class="form-control" value="{{ old('video_url', $event->video_url) }}">
+                                </div>
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">Registration Limit</label>
+                                    <select name="ticket_limit_type" id="ticket_limit_type" class="form-control default-select" onchange="toggleLimitInput()">
+                                        <option value="unlimited" {{ is_null($event->total_max_slots) ? 'selected' : '' }}>Unlimited Tickets</option>
+                                        <option value="limited" {{ !is_null($event->total_max_slots) ? 'selected' : '' }}>Limited Tickets</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 col-md-6" id="limit_input_container" style="{{ is_null($event->total_max_slots) ? 'display: none;' : '' }}">
+                                    <label class="form-label text-black fw-bold">Total Event Capacity</label>
+                                    <input type="number" name="total_max_slots" class="form-control" 
+                                        value="{{ old('total_max_slots', $event->total_max_slots) }}" 
+                                        placeholder="Enter total slots (e.g. 500)">
+                                </div>
+
+                                <div class="mb-3 col-md-12">
+                                    <label class="form-label text-black fw-bold">Event Description</label>
+                                    <textarea name="description" class="form-control" rows="5">{{ old('description', $event->description) }}</textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </form>
+                </div>
+
+                <div class="col-xl-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <label class="form-label text-black fw-bold">Display Status</label>
+                                <select name="is_active" class="form-control default-select">
+                                    <option value="2" {{ $event->is_active == 2 ? 'selected' : '' }}>Coming Event</option>
+                                    <option value="1" {{ $event->is_active == 1 ? 'selected' : '' }}>Now Event (Live)</option>
+                                    <option value="0" {{ $event->is_active == 0 ? 'selected' : '' }}>Past Event (Archived)</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label text-black fw-bold">Event Banner</label>
+                                @if($event->image_path)
+                                    <img src="{{ asset('storage/' . $event->image_path) }}" class="img-fluid rounded mb-2 shadow-sm" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                @endif
+                                <input type="file" name="image" class="form-control">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 mb-2">Update Event</button>
+                            <a href="{{ route('events.index', 'coming') }}" class="btn btn-light w-100">Cancel</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            <div class="card mt-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title">Ticket Types</h4>
+                    <button type="button" onclick="addTicket()" class="btn btn-sm btn-dark">+ Add New Ticket Type</button>
+                </div>
+                <div class="card-body">
+                    <div id="ticket-types">
+                        @foreach($event->ticketTypes as $index => $type)
+                        <div class="card shadow-sm mb-4 p-3 ticket-row border border-light" id="ticket-row-{{ $type->id }}">
+                            <input type="hidden" name="tickets[{{ $index }}][id]" value="{{ $type->id }}">
+                            
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Name</label>
+                                    <input type="text" name="tickets[{{ $index }}][name]" class="form-control" value="{{ $type->name }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-danger">Gender BIB?</label>
+                                    <select name="tickets[{{ $index }}][has_gender_bib]" class="form-control">
+                                        <option value="0" {{ !$type->has_gender_bib ? 'selected' : '' }}>No</option>
+                                        <option value="1" {{ $type->has_gender_bib ? 'selected' : '' }}>Yes (M/F Prefix)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-primary">Ticket PNG (Template)</label>
+                                    <input type="file" name="tickets[{{ $index }}][ticket_png]" class="form-control">
+                                    @if($type->ticket_png)
+                                        <small class="text-success d-block">✓ Template exists</small>
+                                    @endif
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Prefix</label>
+                                    <input type="text" name="tickets[{{ $index }}][prefix]" class="form-control" value="{{ $type->prefix }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Start No.</label>
+                                    <input type="number" name="tickets[{{ $index }}][start_number]" class="form-control" value="{{ $type->start_number }}">
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label small fw-bold">Type</label>
+                                    <select name="tickets[{{ $index }}][type]" class="form-control">
+                                        <option value="solo" {{ $type->type == 'solo' ? 'selected' : '' }}>Solo</option>
+                                        <option value="relay" {{ $type->type == 'relay' ? 'selected' : '' }}>Relay</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">National (MMK)</label>
+                                    <input type="number" name="tickets[{{ $index }}][national_price]" class="form-control" value="{{ $type->national_price }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Foreign (MMK)</label>
+                                    <input type="number" name="tickets[{{ $index }}][foreign_price]" class="form-control" value="{{ $type->foreign_price }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-warning">Early Bird Limit</label>
+                                    <input type="number" name="tickets[{{ $index }}][early_bird_limit]" class="form-control" value="{{ $type->early_bird_limit }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-warning">EB Discount</label>
+                                    <input type="number" name="tickets[{{ $index }}][early_bird_discount]" class="form-control" value="{{ $type->early_bird_discount }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Slots</label>
+                                    <input type="number" name="tickets[{{ $index }}][max_slots]" class="form-control" value="{{ $type->max_slots }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold">Category</label>
+                                    <input type="text" name="tickets[{{ $index }}][category]" class="form-control" value="{{ $type->category }}">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">National Display Image (Front Page)</label>
+                                    <input type="file" name="tickets[{{ $index }}][national_image]" class="form-control">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Foreign Display Image (Front Page)</label>
+                                    <input type="file" name="tickets[{{ $index }}][foreign_image]" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-// Start index from the count of existing tickets
 let ticketIndex = {{ $event->ticketTypes->count() }};
 
 function addTicket() {
@@ -215,6 +225,19 @@ function addTicket() {
         </div>`;
     container.insertAdjacentHTML('beforeend', html);
     ticketIndex++;
+}
+
+function toggleLimitInput() {
+    const type = document.getElementById('ticket_limit_type').value;
+    const container = document.getElementById('limit_input_container');
+    
+    if (type === 'limited') {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+        const input = container.querySelector('input');
+        if(input) input.value = '';
+    }
 }
 </script>
 @endsection

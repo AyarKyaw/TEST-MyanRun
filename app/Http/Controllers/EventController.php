@@ -212,6 +212,11 @@ class EventController extends Controller
     $event->location    = $request->location;
     $event->video_url   = $request->video_url;
     $event->description = $request->description;
+    if ($request->ticket_limit_type === 'unlimited') {
+        $event->total_max_slots = null;
+    } else {
+        $event->total_max_slots = $request->total_max_slots;
+    }
 
     if ($request->hasFile('image')) {
         $event->image_path = $request->file('image')->store('events', 'public');
