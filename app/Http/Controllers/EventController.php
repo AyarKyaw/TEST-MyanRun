@@ -192,39 +192,73 @@ class EventController extends Controller
 {
     $event = \App\Models\Event::findOrFail($id);
 
-    // 1. Validate - REMOVED 'price' because it's not in your form anymore
     $request->validate([
         'name'        => 'required|string|max:255',
         'date'        => 'nullable|date',
         'is_active'   => 'required',
+        'company'     => 'nullable|string', // Added company
         'location'    => 'nullable|string',
         'video_url'   => 'nullable|string',
         'description' => 'nullable|string',
-        'image'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
+        'image'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'tickets'     => 'nullable|array', // Validate tickets array
     ]);
 
-    // 2. Assign values from your form
+    // 1. Update Event Details
     $event->name        = $request->name;
+    $event->company     = $request->company;
     $event->date        = $request->date;
     $event->is_active   = $request->is_active;
     $event->location    = $request->location;
     $event->video_url   = $request->video_url;
     $event->description = $request->description;
 
-    // 3. Handle Image Upload
     if ($request->hasFile('image')) {
-        $path = $request->file('image')->store('events', 'public');
-        $event->image_path = $path;
+        $event->image_path = $request->file('image')->store('events', 'public');
     }
 
     $event->save();
 
-    // 4. Redirect back to the list
+    // 2. Handle Ticket Types
+    // 2. Handle Ticket Types
+if ($request->has('tickets')) {
+    foreach ($request->tickets as $index => $ticketData) { // Added $index here
+        
+        // Check if we are updating an existing ticket or creating a new one
+        $ticketType = isset($ticketData['id']) 
+            ? \App\Models\EventTicketType::find($ticketData['id']) 
+            : new \App\Models\EventTicketType();
+
+        $ticketType->event_id       = $event->id;
+        $ticketType->name           = $ticketData['name'];
+        $ticketType->type           = $ticketData['type'];
+        $ticketType->national_price = $ticketData['national_price'];
+        $ticketType->foreign_price  = $ticketData['foreign_price'];
+        $ticketType->max_slots      = $ticketData['max_slots'] ?? null;
+
+        // ✅ IMPORTANT: Only uncomment these if you added them to your database
+        $ticketType->prefix       = $ticketData['prefix'] ?? null;
+        $ticketType->start_number = $ticketData['start_number'] ?? 1;
+        // $ticketType->category     = $ticketData['category'] ?? null;
+
+        // Handle File Uploads using the correct $index
+        if ($request->hasFile("tickets.$index.national_image")) {
+            $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets', 'public');
+        }
+        
+        if ($request->hasFile("tickets.$index.foreign_image")) {
+            $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets', 'public');
+        }
+
+        $ticketType->save();
+    }
+}
+
     $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
     $statusKey = $statusMap[$request->is_active] ?? 'now';
 
     return redirect()->route('events.index', $statusKey)
-                     ->with('success', 'Event updated successfully!');
+                     ->with('success', 'Event and Ticket Types updated successfully!');
 }
 
     /**
