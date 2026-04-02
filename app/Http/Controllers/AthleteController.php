@@ -76,12 +76,12 @@ class AthleteController extends Controller
 
     public function handleSelection(Request $request) 
     {
-        // MATCH THESE TO YOUR HTML 'NAME' ATTRIBUTES
         session([
-            'ticket_category' => $request->selected_category, // Changed
-            'ticket_price'    => $request->selected_price,    // Changed
-            'nat_type'        => $request->nationality,       // Changed
-            'event_name'      => $request->event_name ?? 'Official Race',
+            'ticket_type_id' => $request->ticket_type_id, // ✅ real ID
+            'ticket_category' => $request->ticket_name,   // ✅ human name (e.g. 25KM)
+            'ticket_price'    => $request->price,
+            'nat_type'        => $request->nationality,
+            'event_id'        => $request->event_id,
         ]);
 
         return redirect()->route('athlete.register');
@@ -158,8 +158,9 @@ class AthleteController extends Controller
                 'bib_number'   => $finalBib,
                 't_shirt_size' => $request->t_shirt_size,
                 'category'     => session('ticket_category'),
+                'ticket_type_id' => session('ticket_type_id'), // ✅ REQUIRED
                 'price'        => session('ticket_price'),
-                'event'        => session('event_name', 'Official Race'),
+                'event_id'     => session('event_id'), 
                 'exp_level'    => $request->exp,
                 'status'       => 'pending'
             ]

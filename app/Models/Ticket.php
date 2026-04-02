@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Ticket extends Model
 {
     protected $fillable = [
+    'event_id',
+    'ticket_type_id',
     'athlete_id',
     'bib_name',
     'bib_number',
@@ -29,5 +31,15 @@ class Ticket extends Model
     public function athlete(): BelongsTo
     {
         return $this->belongsTo(Athlete::class, 'athlete_id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function ticketType()
+    {
+        return $this->belongsTo(EventTicketType::class);
     }
 }

@@ -33,7 +33,7 @@ class EventController extends Controller
         
         // Sidebar: Always show the 'Coming' (is_active = 2) events
         $sidebarEvents = \App\Models\Event::where('is_active', 2)->take(5)->get();
-        $customers = \App\Models\User::all(); 
+        $customers = \App\Models\User::all();
 
         return view('dashboard.events.event', compact('events', 'sidebarEvents', 'title', 'status', 'customers'));
     }
@@ -43,25 +43,25 @@ class EventController extends Controller
         return view('dashboard.events.event-create');
     }
     public function showPublicEvents()
-{
-    $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
+    {
+        $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
 
-    $nowEvents = $allEvents->where('is_active', 1);
-    $comingEvents = $allEvents->where('is_active', 2);
-    $pastEvents = $allEvents->where('is_active', 0);
+        $nowEvents = $allEvents->where('is_active', 1);
+        $comingEvents = $allEvents->where('is_active', 2);
+        $pastEvents = $allEvents->where('is_active', 0);
 
-    // In your Controller
-    $userTickets = [];
-    if (auth()->check()) {
-        $userTickets = auth()->user()->tickets()
-            ->whereIn('status', ['pending', 'confirmed', 'approved']) // Ensure 'confirmed' is here!
-            ->pluck('event') 
-            ->map(fn($item) => trim($item)) // Remove any hidden spaces
-            ->toArray();
+        // In your Controller
+        $userTickets = [];
+        if (auth()->check()) {
+            $userTickets = auth()->user()->tickets()
+                ->whereIn('status', ['pending', 'confirmed', 'approved']) // Ensure 'confirmed' is here!
+                ->pluck('event') 
+                ->map(fn($item) => trim($item)) // Remove any hidden spaces
+                ->toArray();
+        }
+
+        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
     }
-
-    return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
-}
     // Save the event
     public function store(Request $request)
     {
@@ -73,16 +73,26 @@ class EventController extends Controller
             'image'       => 'required|image',
             'location'    => 'nullable|string',
             'video_url'   => 'nullable|string',
-            'description' => 'nullable|string', // Add validation for description
+            'description' => 'nullable|string',
+
+            // ✅ validate ticket types
+            'tickets.*.name' => 'required|string',
+            'tickets.*.type' => 'required|in:solo,relay',
+            'tickets.*.national_price' => 'required|numeric',
+            'tickets.*.foreign_price' => 'required|numeric',
+            'tickets.*.max_slots' => 'nullable|integer',
+            'tickets.*.prefix' => 'nullable|string|max:10',
+            'tickets.*.start_number' => 'nullable|integer|min:1',
         ]);
 
+        // Create event
         $event = new \App\Models\Event();
         $event->name        = $request->name;
         $event->company     = $request->company;
         $event->date        = $request->date;
         $event->location    = $request->location;
         $event->video_url   = $request->video_url;
-        $event->description = $request->description; // Save the description!
+        $event->description = $request->description;
         $event->is_active   = $request->is_active;
 
         if ($request->hasFile('image')) {
@@ -91,7 +101,40 @@ class EventController extends Controller
 
         $event->save();
 
+        // ✅ Save ticket types
+        if ($request->has('tickets')) {
+            foreach ($request->tickets as $ticket) {
+
+                if (empty($ticket['name'])) continue;
+
+                // Handle image upload
+                $nationalImage = null;
+                $foreignImage = null;
+
+                if (isset($ticket['national_image']) && $ticket['national_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nationalImage = $ticket['national_image']->store('tickets', 'public');
+                }
+
+                if (isset($ticket['foreign_image']) && $ticket['foreign_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $foreignImage = $ticket['foreign_image']->store('tickets', 'public');
+                }
+
+                $event->ticketTypes()->create([
+                    'name' => $ticket['name'],
+                    'type' => $ticket['type'],
+                    'national_price' => $ticket['national_price'],
+                    'foreign_price' => $ticket['foreign_price'],
+                    'national_image' => $nationalImage,
+                    'foreign_image' => $foreignImage,
+                    'max_slots' => $ticket['max_slots'] ?? null,
+                    'prefix'         => $ticket['prefix'],     
+                    'start_number'   => $ticket['start_number']
+                ]);
+            }
+        }
+
         $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
+
         return redirect()->route('events.index', $statusMap[$request->is_active]);
     }
     /**

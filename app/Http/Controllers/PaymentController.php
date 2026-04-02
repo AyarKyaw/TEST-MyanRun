@@ -59,78 +59,126 @@ class PaymentController extends Controller
         // 1. Validation
         $request->validate([
             'payment_slip' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'amount'       => 'required',
-            'bib_name'     => 'required',
-            'category'     => 'required',
+            'amount'       => 'required|numeric',
+            'bib_name'     => 'required|string|max:255',
+            'category'     => 'required|string|max:255',
         ]);
 
-        // 2. Retrieve session data
+        // 2. Get session
         $order = session('pending_registration');
 
+
         if (!$order) {
-            return redirect()->route('athlete.register')->with('error', 'Session expired. Please try again.');
+            return redirect()->route('athlete.register')
+                ->with('error', 'Session expired. Please try again.');
         }
 
-        // 3. Handle File Upload
-        $saveDir = public_path('uploads/payments');
-        if (!\File::exists($saveDir)) {
-            \File::makeDirectory($saveDir, 0777, true);
+        // 3. Prevent duplicate registration
+        $exists = Ticket::where('athlete_id', $order['athlete_id'])
+            ->where('event_id', $order['event_id'])
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->exists();
+
+        if ($exists) {
+            return redirect()->route('public.events')
+                ->with('error', 'You already registered for this event.');
         }
+
+        // 4. Get athlete
         $athlete = \App\Models\Athlete::find($order['athlete_id']);
-        $gender = $athlete ? $athlete->gender : 'male';
-        $generatedBib = $this->generateBib($gender, $order['category'] ?? $request->category);
-        $imageName = 'slip_race_' . time() . '.' . $request->payment_slip->extension();
-        $request->payment_slip->move($saveDir, $imageName);
+        if (!$athlete) {
+            return back()->with('error', 'Athlete not found.');
+        }
 
-        // 4. Create the Ticket (REMOVED payment_slip to match your DB)
-        Ticket::create([
-            'athlete_id'       => $order['athlete_id'], 
+        // 5. Generate Bib safely
+        $gender = $athlete->gender ?? 'male';
+        $category = $order['category'] ?? $request->category;
+        $generatedBib = $this->generateBib(
+            $order['event_id'],
+            $order['ticket_type_id'],
+            $athlete->gender
+        );
+        
+        // 6. Upload Slip
+        $saveDir = public_path('uploads/payments');
+
+        if (!\File::exists($saveDir)) {
+            \File::makeDirectory($saveDir, 0755, true);
+        }
+
+        $imageName = 'slip_' . time() . '_' . uniqid() . '.' . $request->payment_slip->extension();
+
+        $request->payment_slip->move($saveDir, $imageName);
+        $event = \App\Models\Event::find($order['event_id']);
+
+        if (!$event) {
+            return back()->with('error', 'Event not found.');
+        }
+
+        // 7. Clean amount
+        $amount = (float) preg_replace('/[^0-9.]/', '', $request->amount);
+        // 8. Create Ticket
+        $ticket = Ticket::create([
+            'athlete_id'       => $order['athlete_id'],
             'bib_name'         => $request->bib_name,
-            'bib_number'       => $generatedBib, 
-            'category'         => $order['category'] ?? $request->category,
-            'price'            => (int)str_replace(',', '', $request->amount),
-            'event'            => $order['event'], 
+            'bib_number'       => $generatedBib,
+            'category'         => $category,
+            'ticket_type_id'   => $order['ticket_type_id'],
+            'price'            => $amount,
+            'event_id'         => $order['event_id'],
+            'event'            => $event->name, 
             't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
-            'experience_level' => $order['exp_level'] ?? 'Beginner', // Added this as it's in your DB
-            'transaction_id'   => $imageName, // The image name goes here!
-            'status'           => 'pending', 
+            'experience_level' => $order['exp_level'] ?? 'Beginner',
+            'transaction_id'   => $imageName, // slip image
+            'status'           => 'pending',
         ]);
 
-        // 5. Clear session
+        // 9. Clear session
         session()->forget('pending_registration');
 
-        // 6. Redirect
-        return redirect()->route('user.dashboard')->with('success', 'Registration submitted! We will verify your payment slip soon.');
+        // 10. Redirect
+        return redirect()->route('user.dashboard')
+            ->with('success', 'Registration submitted! We will verify your payment slip soon.');
     }
 
-    private function generateBib($gender, $category)
-{
-    $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
-    
-    preg_match('/\d+/', $category, $matches);
-    $distance = $matches[0] ?? '00';
-    $searchPattern = $prefix . $distance;
+    private function generateBib($eventId, $ticketTypeId, $gender = 'male')
+    {
+        $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
 
-    // Get ALL used bib numbers except rejected
-    $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
-        ->where('status', '!=', 'rejected')
-        ->pluck('bib_number')
-        ->toArray();
+        if (!$ticketType) {
+            return 'UNK-000';
+        }
 
-    // Extract numbers only (last 4 digits)
-    $usedNumbers = [];
-    foreach ($usedBibs as $bib) {
-        $usedNumbers[] = (int) substr($bib, -4);
+        // Optional gender prefix
+        $genderPrefix = (strtolower($gender) === 'female') ? 'F' : 'M';
+
+        $prefix = strtoupper($ticketType->prefix); // RUN / SPN
+        $start  = $ticketType->start_number ?? 1;
+
+        $fullPrefix = $prefix; // e.g. MRUN / FSPN
+
+        // ✅ Only check this event + ticket type
+        $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
+            ->where('ticket_type_id', $ticketTypeId)
+            ->where('status', '!=', 'rejected')
+            ->pluck('bib_number')
+            ->toArray();
+
+        $usedNumbers = [];
+
+        foreach ($usedBibs as $bib) {
+            if (strpos($bib, $fullPrefix . '-') === 0) {
+                $usedNumbers[] = (int) substr($bib, strlen($fullPrefix) + 1);
+            }
+        }
+
+        // ✅ Start from DB value
+        $number = $start;
+
+        while (in_array($number, $usedNumbers)) {
+            $number++;
+        }
+
+        return $fullPrefix . str_pad($number, 3, '0', STR_PAD_LEFT);
     }
-
-    // Start from 11
-    $number = 11;
-
-    // Find first missing number
-    while (in_array($number, $usedNumbers)) {
-        $number++;
-    }
-
-    return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
-}
 }

@@ -99,10 +99,11 @@
     <form action="{{ url('/select-race') }}" method="POST">
         @csrf
         {{-- Default values updated to 16 Kilometer --}}
-        <input type="hidden" name="selected_category" id="input-category" value="16 Kilometer Run">
-        <input type="hidden" name="selected_price" id="input-price" value="120,000">
+        <input type="hidden" name="ticket_type_id" id="input-category">
+        <input type="hidden" name="ticket_name" id="input-name">
+        <input type="hidden" name="price" id="input-price">
         <input type="hidden" name="nationality" id="input-nat" value="national">
-        <input type="hidden" name="event_name" value="{{ request('event', 'KBZ Community Run') }}">
+        <input type="hidden" name="event_id" value="{{ $event->id }}">
 
         <div class="max-w-5xl mx-auto"> {{-- Reduced max-width for better 2-card centering --}}
             <header class="flex flex-col items-center justify-center mb-16 text-center">
@@ -131,32 +132,24 @@
 
             {{-- Grid changed to 2 columns on medium screens --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-    {{-- Card 16KM --}}
-    <div class="ticket-card active" id="card-16Kilometer"
-        style="background-image: url('{{ asset('images/local16.jpg') }}');" 
-        data-name="16 Kilometer Run" 
-        data-local="1,000" 
-        data-foreign="200,000"
-        data-img-local="{{ asset('images/local16.jpg') }}" {{-- FIXED: Added brackets --}}
-        data-img-foreign="{{ asset('images/f16.jpg') }}"
-        onclick="selectTicket(this)">
-        <span class="category-badge">16 Kilometer</span>
-        <div class="price-display price-tag">1,000 <span class="text-lg opacity-60">MMK</span></div>
-    </div>
+                @foreach($event->ticketTypes as $ticket)
+                    <div class="ticket-card"
+                        style="background-image: url('{{ asset('storage/' . $ticket->national_image) }}');"
+                        data-id="{{ $ticket->id }}"
+                        data-name="{{ $ticket->name }}"
+                        data-national="{{ $ticket->national_price }}"
+                        data-foreign="{{ $ticket->foreign_price }}"
+                        data-national-image="{{ $ticket->national_image }}"
+                        data-foreign-image="{{ $ticket->foreign_image }}"
+                        onclick="selectTicket(this)">
+                        <span class="category-badge">{{ $ticket->name }}</span>
 
-    {{-- Card 36KM --}}
-    <div class="ticket-card" id="card-36Kilometer"
-        style="background-image: url('{{ asset('images/local36.jpg') }}');" 
-        data-name="36 Kilometer Run" 
-        data-local="160,000" 
-        data-foreign="250,000"
-        data-img-local="{{ asset('images/local36.jpg') }}"
-        data-img-foreign="{{ asset('images/f36.jpg') }}"
-        onclick="selectTicket(this)">
-        <span class="category-badge">36 Kilometer</span>
-        <div class="price-display price-tag">160,000 <span class="text-lg opacity-60">MMK</span></div>
-    </div>
-</div>
+                        <div class="price-display price-tag">
+                        {{ $ticket->national_price }} <span class="text-lg opacity-60">MMK</span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
 
             <div class="mt-16 bg-slate-900 p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl rounded-[40px]">
                 <div class="flex items-center gap-6">
@@ -171,9 +164,9 @@
                 <div class="flex items-center gap-12">
                     <div class="text-right">
                         <p class="text-slate-400 font-black uppercase text-[10px] tracking-widest">Total to Pay</p>
-                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]">1,000 MMK</div>
+                        <div id="summary-price" class="text-4xl font-black tracking-tighter text-[#C3E92D]"> 0 MMK</div>
                     </div>
-                    <button type="submit" class="bg-[#C3E92D] hover:scale-105 active:scale-95 text-slate-900 px-16 py-6 font-black uppercase tracking-widest text-sm transition-all shadow-xl rounded-full">
+                    <button type="submit" onclick="return validateSelection()" class="bg-[#C3E92D] hover:scale-105 active:scale-95 text-slate-900 px-16 py-6 font-black uppercase tracking-widest text-sm transition-all shadow-xl rounded-full">
                         BUY
                     </button>
                 </div>
@@ -185,6 +178,12 @@
 
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstCard = document.querySelector('.ticket-card');
+        if (firstCard) {
+            selectTicket(firstCard);
+        }
+    });
     let currentType = 'local';
     document.addEventListener('DOMContentLoaded', function() {
         const natType = document.getElementById('hidden_nat_type').value;
@@ -211,6 +210,18 @@
             document.getElementById('label-national').classList.add('border-[#C3E92D]', 'bg-lime-50');
         }
     });
+
+    function validateSelection() {
+        const category = document.getElementById('input-category').value;
+        const price = document.getElementById('input-price').value;
+
+        if (!category || !price) {
+            alert("Please select a ticket first");
+            return false;
+        }
+        return true;
+    }
+
     function updatePricing(type) {
         currentType = type;
         const backendValue = (type === 'local') ? 'national' : 'foreigner';
@@ -232,9 +243,15 @@
         }
 
         document.querySelectorAll('.ticket-card').forEach(card => {
-            const price = card.getAttribute(`data-${type}`);
+            const price = (type === 'local')
+                ? card.getAttribute('data-national')
+                : card.getAttribute('data-foreign');
             card.querySelector('.price-display').innerHTML = `${price} <span class="text-lg opacity-60">MMK</span>`;
-            card.style.backgroundImage = `url('${card.getAttribute('data-img-' + type)}')`;
+            const image = (type === 'local')
+                ? card.getAttribute('data-national-image')
+                : card.getAttribute('data-foreign-image');
+
+            card.style.backgroundImage = `url('/storage/${image}')`;
             
             if(card.classList.contains('active')) {
                 document.getElementById('summary-price').innerText = price + ' MMK';
@@ -247,10 +264,13 @@
         document.querySelectorAll('.ticket-card').forEach(c => c.classList.remove('active'));
         card.classList.add('active');
         const name = card.getAttribute('data-name');
-        const price = card.getAttribute(`data-${currentType}`);
+        const price = (currentType === 'local')
+        ? card.getAttribute('data-national')
+        : card.getAttribute('data-foreign');
         document.getElementById('summary-name').innerText = name;
         document.getElementById('summary-price').innerText = price + ' MMK';
-        document.getElementById('input-category').value = name;
+        document.getElementById('input-category').value = card.getAttribute('data-id'); // ✅ ID
+        document.getElementById('input-name').value = name;
         document.getElementById('input-price').value = price;
     }
 </script>

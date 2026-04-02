@@ -27,6 +27,11 @@ class Event extends Model
         return $this->hasMany(Ticket::class, 'event', 'name'); 
     }
 
+    public function ticketTypes()
+    {
+        return $this->hasMany(EventTicketType::class);
+    }
+
     protected $casts = [
         'date' => 'date',
     ];

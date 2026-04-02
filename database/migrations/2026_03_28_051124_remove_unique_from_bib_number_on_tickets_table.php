@@ -6,12 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
-        Schema::table('tickets', function (Blueprint $table) {
-            // This drops the unique constraint
-            $table->dropUnique(['bib_number']); 
-        });
+        
     }
 
     public function down(): void

@@ -18,27 +18,33 @@ class TicketController extends Controller
 {
     public function showTicket(Request $request)
     {
-        // 1. Get the event name from the URL (?event=Cherry+Trail+Run+2026)
         $eventName = $request->query('event');
 
-        // 2. Security Check: Only logged-in users
+        if (!$eventName) {
+            return redirect()->route('public.events')
+                ->with('error', 'Event not found.');
+        }
+
+        $event = \App\Models\Event::where('name', $eventName)->first();
+
+        if (!$event) {
+            dd("Event not found", $eventName);
+        }
+
         if (auth()->check()) {
-            
-            // 3. Check if they have an active ticket for THIS specific event
+
             $hasActiveTicket = auth()->user()->tickets()
-                ->where('event', $eventName)
+                ->where('event_id', $event->id)
                 ->whereIn('status', ['pending', 'confirmed', 'approved'])
                 ->exists();
 
-            // 4. If they have one, kick them out!
             if ($hasActiveTicket) {
-                return redirect()->route('public.events') // Change to your events list route name
-                    ->with('error', "You already have a registration (Pending/Accepted) for $eventName.");
+                return redirect()->route('public.events')
+                    ->with('error', "You already have a registration for {$event->name}.");
             }
         }
 
-        // 5. If they are clear, show the registration form
-        return view('ticket.ticket', compact('eventName'));
+        return view('ticket.ticket', compact('event'));
     }
 
     public function dashboard($eventName, Request $request)
