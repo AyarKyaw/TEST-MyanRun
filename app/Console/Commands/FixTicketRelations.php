@@ -28,7 +28,6 @@ class FixTicketRelations extends Command
         $tickets = \App\Models\Ticket::all();
 
         foreach ($tickets as $ticket) {
-
             $event = \App\Models\Event::where('name', $ticket->event)->first();
 
             if (!$event) {
@@ -36,12 +35,14 @@ class FixTicketRelations extends Command
                 continue;
             }
 
+            // ✅ Updated to use national_price since 'price' doesn't exist
             $type = \App\Models\EventTicketType::firstOrCreate([
                 'event_id' => $event->id,
-                'name' => $ticket->category,
+                'name'     => $ticket->category,
             ], [
-                'type' => 'solo',
-                'price' => $ticket->price,
+                'type'           => 'solo',
+                'national_price' => $ticket->price, // Map ticket price to national_price
+                'foreign_price'  => $ticket->price,  // Optional: Set same for foreign if unknown
             ]);
 
             $ticket->event_id = $event->id;
