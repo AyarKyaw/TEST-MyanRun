@@ -150,43 +150,43 @@ if ($ticketType === 'relay' && $friendUserId) {
 }
 
     private function generateBib($eventId, $ticketTypeId, $gender = 'male')
-    {
-        $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
+{
+    $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
 
-        if (!$ticketType) {
-            return 'UNK-000';
-        }
-
-        // Optional gender prefix
-        $genderPrefix = (strtolower($gender) === 'female') ? 'F' : 'M';
-
-        $prefix = strtoupper($ticketType->prefix); // RUN / SPN
-        $start  = $ticketType->start_number ?? 1;
-
-        $fullPrefix = $prefix; // e.g. MRUN / FSPN
-
-        // ✅ Only check this event + ticket type
-        $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
-            ->where('ticket_type_id', $ticketTypeId)
-            ->where('status', '!=', 'rejected')
-            ->pluck('bib_number')
-            ->toArray();
-
-        $usedNumbers = [];
-
-        foreach ($usedBibs as $bib) {
-            if (strpos($bib, $fullPrefix . '-') === 0) {
-                $usedNumbers[] = (int) substr($bib, strlen($fullPrefix) + 1);
-            }
-        }
-
-        // ✅ Start from DB value
-        $number = $start;
-
-        while (in_array($number, $usedNumbers)) {
-            $number++;
-        }
-
-        return $fullPrefix . str_pad($number, 3, '0', STR_PAD_LEFT);
+    if (!$ticketType) {
+        return 'UNK000';
     }
+
+    $prefix = strtoupper($ticketType->prefix); 
+    $start = $ticketType->start_number ?? 1;
+
+    // 1. Get all unique bib numbers for this event that start with the prefix
+    $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
+        ->where('ticket_type_id', $ticketTypeId)
+        ->where('bib_number', 'LIKE', $prefix . '%')
+        ->where('status', '!=', 'rejected')
+        ->distinct()
+        ->pluck('bib_number')
+        ->toArray();
+
+    $usedNumbers = [];
+    foreach ($usedBibs as $bib) {
+        // Remove the prefix string to get just the number
+        // Example: 'RUN001' becomes '001'
+        $numericPart = str_replace($prefix, '', $bib);
+        
+        if (is_numeric($numericPart)) {
+            $usedNumbers[] = (int) $numericPart;
+        }
+    }
+
+    // 2. Find the first available gap starting from $start
+    $number = $start;
+    while (in_array($number, $usedNumbers)) {
+        $number++;
+    }
+
+    // Returns format: RUN001 (No hyphen)
+    return $prefix . str_pad($number, 3, '0', STR_PAD_LEFT);
+}
 }

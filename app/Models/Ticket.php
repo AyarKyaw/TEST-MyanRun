@@ -23,6 +23,7 @@ class Ticket extends Model
     'payment_slip',
     'status',
     'ticket_no',
+    'relay_team_id',
 ];
 
     /**

@@ -31,6 +31,20 @@ class TicketController extends Controller
             dd("Event not found", $eventName);
         }
 
+        // --- Calculate Availability from Database ---
+        $totalLimit = $event->total_max_slots; 
+
+        // Fix 1: Use distinct bib_number for counting sold slots
+        $soldTickets = Ticket::where('event', $eventName)
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->distinct('bib_number')
+            ->count('bib_number');
+
+        $remaining = is_null($totalLimit) 
+            ? null 
+            : max(0, $totalLimit - $soldTickets);
+        // ------------------------------
+
         if (auth()->check()) {
 
             $hasActiveTicket = auth()->user()->tickets()
@@ -44,52 +58,84 @@ class TicketController extends Controller
             }
         }
 
-        return view('ticket.ticket', compact('event'));
+        return view('ticket.ticket', compact('event', 'remaining'));
     }
 
     public function dashboard($eventName, Request $request)
-{
-    $search = $request->query('search');
-    $status = $request->query('status', 'pending'); 
+    {
+        $search = $request->query('search');
+        $status = $request->query('status', 'pending'); 
 
-    $query = \App\Models\Ticket::where('event', $eventName)->with(['athlete.user']);
+        $query = \App\Models\Ticket::where('event', $eventName)->with(['athlete.user']);
 
-    // 1. Always filter by status first
-    $query->where('status', $status);
+        // 1. Filter by status
+        $query->where('status', $status);
 
-    // 2. Filter by Search (Nested to protect the status filter)
-    if (!empty($search)) {
-        $request->merge(['page' => 1]);
-        $searchTerm = trim($search);
+        // 2. Filter by Search
+        if (!empty($search)) {
+            $request->merge(['page' => 1]);
+            $searchTerm = trim($search);
 
-        $query->where(function($q) use ($searchTerm) {
-            $q->where('bib_number', 'LIKE', "%{$searchTerm}%")
-            ->orWhere('bib_name', 'LIKE', "%{$searchTerm}%")
-            ->orWhereHas('athlete.user', function($userQuery) use ($searchTerm) {
-                // CONCAT_WS is better because it ignores NULL middle names
-                $userQuery->where(\DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
-                            ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
-                            // Also search by combining just First and Last
-                            ->orWhere(\DB::raw("CONCAT_WS(' ', first_name, last_name)"), 'LIKE', "%{$searchTerm}%");
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('bib_number', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('bib_name', 'LIKE', "%{$searchTerm}%")
+                ->orWhereHas('athlete.user', function($userQuery) use ($searchTerm) {
+                    $userQuery->where(\DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'LIKE', "%{$searchTerm}%")
+                                ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
+                                ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                                ->orWhere(\DB::raw("CONCAT_WS(' ', first_name, last_name)"), 'LIKE', "%{$searchTerm}%");
+                });
             });
-        });
+        }
+
+        // 3. Final Execution
+        $customers = $query->orderBy('created_at', 'desc')
+                           ->paginate(10) 
+                           ->withQueryString();
+
+        // Fetch event to get max slots
+        $event = \App\Models\Event::where('name', $eventName)->first();
+
+        // Define the variable so compact() can find it
+        $eventLimit = $event?->total_max_slots;
+
+        // ✅ Updated to count UNIQUE bib_numbers
+        $counts = [
+            'all' => \App\Models\Ticket::where('event', $eventName)
+                ->whereNotNull('bib_number')
+                ->distinct()
+                ->count('bib_number'),
+
+            'pending' => \App\Models\Ticket::where('event', $eventName)
+                ->where('status', 'pending')
+                ->whereNotNull('bib_number')
+                ->distinct()
+                ->count('bib_number'),
+
+            'approved' => \App\Models\Ticket::where('event', $eventName)
+                ->where('status', 'approved')
+                ->whereNotNull('bib_number')
+                ->distinct()
+                ->count('bib_number'),
+
+            'rejected' => \App\Models\Ticket::where('event', $eventName)
+                ->where('status', 'rejected')
+                ->whereNotNull('bib_number')
+                ->distinct()
+                ->count('bib_number'),
+
+            'max_slots' => $eventLimit,
+        ];
+
+        // Now 'max_slots' is a defined variable and won't throw an ErrorException
+        return view('dashboard.ticket-sales.ticket', compact(
+            'customers',
+            'counts',
+            'status',
+            'eventName',
+            'eventLimit' // ✅ changed
+        ));
     }
-
-    // 3. Final Execution
-    $customers = $query->orderBy('created_at', 'desc')
-                       ->paginate(10) // Changed from 1 to 10 for better usability
-                       ->withQueryString();
-
-    $counts = [
-        'all'      => Ticket::where('event', $eventName)->count(),
-        'pending'  => \App\Models\Ticket::where('event', $eventName)->where('status', 'pending')->count(),
-        'approved' => \App\Models\Ticket::where('event', $eventName)->where('status', 'approved')->count(),
-        'rejected' => \App\Models\Ticket::where('event', $eventName)->where('status', 'rejected')->count(),
-    ];
-
-    return view('dashboard.ticket-sales.ticket', compact('customers', 'counts', 'status', 'eventName'));
-}
 
     public function index()
     {
@@ -104,22 +150,36 @@ class TicketController extends Controller
     }
 
     public function approve($id)
-{
-    $ticket = \App\Models\Ticket::findOrFail($id);
-    $ticket->status = 'approved';
-    $ticket->save();
+    {
+        $ticket = \App\Models\Ticket::findOrFail($id);
 
-    return back()->with('success', 'Ticket approved successfully!');
-}
+        $event = Event::where('name', $ticket->event)->first();
+        $totalLimit = $event?->total_max_slots;
 
-public function reject($id)
-{
-    $ticket = \App\Models\Ticket::findOrFail($id);
-    $ticket->status = 'rejected';
-    $ticket->save();
+        // Fix 2: Use distinct bib_number for counting approved slots
+        $approvedCount = Ticket::where('event', $ticket->event)
+            ->where('status', 'approved')
+            ->distinct('bib_number')
+            ->count('bib_number');
 
-    return back()->with('error', 'Ticket has been rejected.');
-}
+        if (!is_null($totalLimit) && $approvedCount >= $totalLimit) {
+            return back()->with('error', 'Event is already full.');
+        }
+
+        $ticket->status = 'approved';
+        $ticket->save();
+
+        return back()->with('success', 'Ticket approved successfully!');
+    }
+
+    public function reject($id)
+    {
+        $ticket = \App\Models\Ticket::findOrFail($id);
+        $ticket->status = 'rejected';
+        $ticket->save();
+
+        return back()->with('error', 'Ticket has been rejected.');
+    }
 
     // Helper method to avoid repeating code
     private function getTicketData($id) {
@@ -148,124 +208,118 @@ public function reject($id)
     }
 
     public function downloadPNG($id) 
-{
-    // 1. Get Ticket Data
-    $data = $this->getTicketData($id);
-    $ticket = $data['ticket']; 
+    {
+        // 1. Get Ticket Data
+        $data = $this->getTicketData($id);
+        $ticket = $data['ticket']; 
 
-    // 2. Fetch Athlete and User
-    $athlete = \App\Models\Athlete::find($ticket->athlete_id);
-    $user = $athlete ? \App\Models\User::where('runner_id', $athlete->runner_id)->first() : null;
+        // 2. Fetch Athlete and User
+        $athlete = \App\Models\Athlete::find($ticket->athlete_id);
+        $user = $athlete ? \App\Models\User::where('runner_id', $athlete->runner_id)->first() : null;
 
-    if (!$athlete || !$user) {
-        return "ERROR: Personal information (Athlete or User) not found.";
-    }
+        if (!$athlete || !$user) {
+            return "ERROR: Personal information (Athlete or User) not found.";
+        }
 
-    // 3. Map variables
-    $id_doc      = $athlete->id_number ?? 'N/A';
-    $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
-    $bibName     = $ticket->bib_name ?? 'N/A';
-    $bibNumber   = $ticket->bib_number ?? '0000';
-    $category    = $ticket->category ?? 'N/A';
-    $nationality = $athlete->nationality ?? 'N/A';
-    $dob         = $athlete->dob ?? 'N/A';
-    $gender      = $athlete->gender ?? 'N/A';
-    $division    = $athlete->state ?? 'N/A';
-    $email       = $user->email ?? 'N/A';
-    $viber       = $athlete->viber ?? 'N/A';
-    $phone       = $user->phone ?? 'N/A';
-    $contact     = $athlete->contact ?? 'N/A';
-    $tSize       = $ticket->t_shirt_size ?? 'N/A';
-    $blood       = $athlete->blood_type ?? 'N/A';
-    $exp         = $ticket->experience_level ?? 'N/A';
-    $medical     = $athlete->medical_details ?? 'None';
-    $itra        = $athlete->itra_details ?? 'None';
+        // 3. Map variables
+        $id_doc      = $athlete->id_number ?? 'N/A';
+        $fullName    = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
+        $bibName     = $ticket->bib_name ?? 'N/A';
+        $bibNumber   = $ticket->bib_number ?? '0000';
+        $category    = $ticket->category ?? 'N/A';
+        $nationality = $athlete->nationality ?? 'N/A';
+        $dob         = $athlete->dob ?? 'N/A';
+        $gender      = $athlete->gender ?? 'N/A';
+        $division    = $athlete->state ?? 'N/A';
+        $email       = $user->email ?? 'N/A';
+        $viber       = $athlete->viber ?? 'N/A';
+        $phone       = $user->phone ?? 'N/A';
+        $contact     = $athlete->contact ?? 'N/A';
+        $tSize       = $ticket->t_shirt_size ?? 'N/A';
+        $blood       = $athlete->blood_type ?? 'N/A';
+        $exp         = $ticket->experience_level ?? 'N/A';
+        $medical     = $athlete->medical_details ?? 'None';
+        $itra        = $athlete->itra_details ?? 'None';
 
-    $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical\nITRA: $itra";
+        $qrContent = "ID: $id_doc\nName: $fullName\nBIB Name: $bibName\nBIB: $bibNumber\nCategory: $category\nNationality: $nationality\nDOB: $dob\nGender: $gender\nDivision: $division\nEmail: $email\nViber: $viber\nPhone: $phone\nContact: $contact\nSize: $tSize\nBlood: $blood\nExp: $exp\nMedical: $medical\nITRA: $itra";
 
-    // 4. Paths
-    if (str_contains($category, '36')) {
-        $templatePath = public_path('images/ticket2_1.jpg'); 
-    } elseif (str_contains($category, '16')) {
-        $templatePath = public_path('images/ticket2.jpg'); 
-    } else {
-        $templatePath = public_path('images/ticket.jpg'); 
-    }
-    
-    $fontPath = public_path('assets/fonts/arial.ttf');
-    $logoPath = public_path('images/myan_logo.jpg');
-
-    if (!file_exists($logoPath)) {
-        return "Error: Image not found at " . $logoPath;
-    } // Your Logo Path
-
-    if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
-
-    $image = @\imagecreatefromjpeg($templatePath);
-    if (!$image) return "ERROR: GD Library not enabled.";
-
-    $white = \imagecolorallocate($image, 255, 255, 255);
-    
-    if (\Illuminate\Support\Facades\File::exists($fontPath)) {
-        // --- DRAW TEXT ON TICKET ---
-        \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, str_pad($ticket->id, 5, '0', STR_PAD_LEFT));
-        \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
-        \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
-
-        // --- ADD QR CODE WITH LOGO ---
-        $qrSize = 150;
-        // Tip: Use ecc=H (High error correction) so the QR stays scannable even with a logo in the middle
-        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
+        // 4. Paths
+        if (str_contains($category, '36')) {
+            $templatePath = public_path('images/ticket2_1.jpg'); 
+        } elseif (str_contains($category, '16')) {
+            $templatePath = public_path('images/ticket2.jpg'); 
+        } else {
+            $templatePath = public_path('images/ticket.jpg'); 
+        }
         
-        $ctx = stream_context_create(['http' => ['timeout' => 5]]);
-        $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
+        $fontPath = public_path('assets/fonts/arial.ttf');
+        $logoPath = public_path('images/myan_logo.jpg');
+
+        if (!file_exists($logoPath)) {
+            return "Error: Image not found at " . $logoPath;
+        } 
+
+        if (!\Illuminate\Support\Facades\File::exists($templatePath)) return "ERROR: Template image not found.";
+
+        $image = @\imagecreatefromjpeg($templatePath);
+        if (!$image) return "ERROR: GD Library not enabled.";
+
+        $white = \imagecolorallocate($image, 255, 255, 255);
         
-        if ($qrCodeRaw) {
-            $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
+        if (\Illuminate\Support\Facades\File::exists($fontPath)) {
+            \imagettftext($image, 20, 0, 980, 45, $white, $fontPath, str_pad($ticket->id, 5, '0', STR_PAD_LEFT));
+            \imagettftext($image, 22, 0, 980, 90, $white, $fontPath, strtoupper($bibName));
+            \imagettftext($image, 22, 0, 1020, 155, $white, $fontPath, $bibNumber);
+
+            $qrSize = 150;
+            $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size={$qrSize}x{$qrSize}&ecc=H&data=" . urlencode($qrContent);
             
-            if ($qrCodeImage && \Illuminate\Support\Facades\File::exists($logoPath)) {
-                $logo = @\imagecreatefromjpeg($logoPath);
-                if ($logo) {
-                    $qrWidth = \imagesx($qrCodeImage);
-                    $qrHeight = \imagesy($qrCodeImage);
-                    $logoWidth = \imagesx($logo);
-                    $logoHeight = \imagesy($logo);
+            $ctx = stream_context_create(['http' => ['timeout' => 5]]);
+            $qrCodeRaw = @file_get_contents($qrUrl, false, $ctx);
+            
+            if ($qrCodeRaw) {
+                $qrCodeImage = \imagecreatefromstring($qrCodeRaw);
+                
+                if ($qrCodeImage && \Illuminate\Support\Facades\File::exists($logoPath)) {
+                    $logo = @\imagecreatefromjpeg($logoPath);
+                    if ($logo) {
+                        $qrWidth = \imagesx($qrCodeImage);
+                        $qrHeight = \imagesy($qrCodeImage);
+                        $logoWidth = \imagesx($logo);
+                        $logoHeight = \imagesy($logo);
 
-                    // Scale logo to be ~22% of the QR code width
-                    $logoTargetWidth = $qrWidth * 0.22;
-                    $logoTargetHeight = $logoHeight * ($logoTargetWidth / $logoWidth);
+                        $logoTargetWidth = $qrWidth * 0.22;
+                        $logoTargetHeight = $logoHeight * ($logoTargetWidth / $logoWidth);
 
-                    // Find Center
-                    $dstX = ($qrWidth - $logoTargetWidth) / 2;
-                    $dstY = ($qrHeight - $logoTargetHeight) / 2;
+                        $dstX = ($qrWidth - $logoTargetWidth) / 2;
+                        $dstY = ($qrHeight - $logoTargetHeight) / 2;
 
-                    // OPTIONAL: Draw a small white background behind the logo for better scanning
-                    \imagefilledrectangle($qrCodeImage, $dstX - 2, $dstY - 2, $dstX + $logoTargetWidth + 2, $dstY + $logoTargetHeight + 2, $white);
+                        \imagefilledrectangle($qrCodeImage, $dstX - 2, $dstY - 2, $dstX + $logoTargetWidth + 2, $dstY + $logoTargetHeight + 2, $white);
 
-                    // Merge Logo
-                    \imagecopyresampled($qrCodeImage, $logo, $dstX, $dstY, 0, 0, $logoTargetWidth, $logoTargetHeight, $logoWidth, $logoHeight);
-                    
-                    \imagedestroy($logo);
+                        \imagecopyresampled($qrCodeImage, $logo, $dstX, $dstY, 0, 0, $logoTargetWidth, $logoTargetHeight, $logoWidth, $logoHeight);
+                        
+                        \imagedestroy($logo);
+                    }
+                }
+
+                if ($qrCodeImage) {
+                    \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
+                    \imagedestroy($qrCodeImage);
                 }
             }
-
-            if ($qrCodeImage) {
-                \imagecopy($image, $qrCodeImage, 950, 200, 0, 0, $qrSize, $qrSize);
-                \imagedestroy($qrCodeImage);
-            }
         }
+
+        return response()->streamDownload(function () use ($image) {
+            \imagepng($image);
+            \imagedestroy($image);
+        }, "MyanRun_{$bibNumber}.png", [
+            'Content-Type' => 'image/png',
+        ]);
     }
 
-    return response()->streamDownload(function () use ($image) {
-        \imagepng($image);
-        \imagedestroy($image);
-    }, "MyanRun_{$bibNumber}.png", [
-        'Content-Type' => 'image/png',
-    ]);
-}
     public function previewPDF($id) 
     {
-        $data = $this->getTicketData($id); // Now it has the logo!
+        $data = $this->getTicketData($id);
         $pdf = Pdf::loadView('pdf', $data);
 
         return $pdf->stream('ticket-' . $id . '.pdf');
@@ -274,12 +328,10 @@ public function reject($id)
     public function exportExcel(Request $request) 
     {
         $category = $request->get('category', 'all');
-        // Get the status from the URL (e.g., ?status=approved), default to 'all'
         $status = $request->get('status', 'all'); 
         
         $fileName = 'Tickets_' . $status . '_' . $category . '_' . date('d-m-Y') . '.xlsx';
         
-        // Pass both category AND status to the Export class
         return Excel::download(new TicketExport($category, $status), $fileName);
     }
 
@@ -290,6 +342,21 @@ public function reject($id)
             return redirect()->route('athlete.register')
                 ->with('error', 'Session expired.');
         }
+
+        // --- ENFORCE LIMIT FROM DATABASE ---
+        $eventModel = Event::where('name', $order['event'])->first();
+        $totalLimit = $eventModel?->total_max_slots;
+
+        // Fix 3: Use distinct bib_number for counting sold slots during payment initiation
+        $soldCount = Ticket::where('event', $order['event'])
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->distinct('bib_number')
+            ->count('bib_number');
+
+        if (!is_null($totalLimit) && $soldCount >= $totalLimit) {
+            return redirect()->route('public.events')->with('error', "Sorry, this event has reached its maximum limit of {$totalLimit} participants.");
+        }
+        // -------------------------
 
         $exists = Ticket::where('athlete_id', $order['athlete_id'])
             ->where('event', $order['event'])
@@ -313,18 +380,16 @@ public function reject($id)
             'price'            => (int)str_replace(',', '', $order['price']),
             'event'            => $order['event'], 
             't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
-            'experience_level' => $order['exp_level'] ?? 'Beginner', // Added this as it's in your DB
-            'transaction_id'   => null, // The image name goes here!
+            'experience_level' => $order['exp_level'] ?? 'Beginner',
+            'transaction_id'   => null, 
             'status'           => 'pending', 
         ]);
 
-        // ✅ Clean price
         $price = (string) $ticket->price;
         $timestamp = (string) time();
         $nonce     = Str::random(32);
         $orderId   = $ticket->id . '_' . $timestamp;
 
-        // ✅ STEP 1: Build SIGNATURE DATA (VERY IMPORTANT)
         $signParams = [
             'appid'          => env('KBZ_PAY_APP_ID'),
             'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
@@ -339,10 +404,8 @@ public function reject($id)
             'version'        => '1.0',
         ];
 
-        // ✅ STEP 2: SORT
         ksort($signParams);
 
-        // ✅ STEP 3: BUILD STRING A
         $stringA = '';
         foreach ($signParams as $key => $value) {
             if ($value !== "" && $value !== null) {
@@ -351,14 +414,11 @@ public function reject($id)
         }
         $stringA = rtrim($stringA, "&");
 
-        // ✅ STEP 4: SIGN
         $stringToSign = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
         $sign = strtoupper(hash('sha256', $stringToSign));
 
-        // 🔍 DEBUG (remove later)
         Log::info('KBZ STRING TO SIGN: ' . $stringToSign);
 
-        // ✅ STEP 5: FINAL PAYLOAD
         $payload = [
             'Request' => [
                 'timestamp'   => $timestamp,
@@ -380,7 +440,6 @@ public function reject($id)
         ];
 
         try {
-            // ✅ STEP 6: SEND REQUEST (JSON BODY — VERY IMPORTANT)
             $response = Http::withBody(
                 json_encode($payload, JSON_UNESCAPED_SLASHES),
                 'application/json'
@@ -390,7 +449,6 @@ public function reject($id)
 
             Log::info('KBZ RESPONSE:', $result);
 
-            // ✅ SUCCESS
             if (isset($result['Response']['result']) 
                 && $result['Response']['result'] === 'SUCCESS') {
 
@@ -399,7 +457,6 @@ public function reject($id)
                 return view('payment.kbz_qr', compact('qrString', 'ticket'));
             }
 
-            // ❌ FAIL
             return back()->with('error', 
                 'KBZ Error: ' . ($result['Response']['msg'] ?? 'Unknown error')
             );
@@ -417,21 +474,17 @@ public function reject($id)
         $distance = $matches[0] ?? '00';
         $searchPattern = $prefix . $distance;
 
-        // Get ALL used bib numbers (including rejected) for this category
         $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
             ->pluck('bib_number')
             ->toArray();
 
-        // Extract numbers only (last 4 digits)
         $usedNumbers = [];
         foreach ($usedBibs as $bib) {
             $usedNumbers[] = (int) substr($bib, -4);
         }
 
-        // Start from 11
         $number = 11;
 
-        // Find first missing number
         while (in_array($number, $usedNumbers)) {
             $number++;
         }
@@ -439,51 +492,48 @@ public function reject($id)
         return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
-public function getNewBib(Request $request)
-{
-    $gender = $request->query('gender');
-    $category = $request->query('category');
+    public function getNewBib(Request $request)
+    {
+        $gender = $request->query('gender');
+        $category = $request->query('category');
 
-    // Use the private function we built earlier
-    $newBib = $this->generateBib($gender, $category);
+        $newBib = $this->generateBib($gender, $category);
 
-    return response()->json(['bib_number' => $newBib]);
-}
-private function generateKbzSignature($params) {
-    // 1. Flatten the structure for signing (KBZ standard for Precreate)
-    $biz = $params['biz_content'];
-    
-    $all = [
-        'appid'           => $params['appid'],
-        'merch_code'      => $params['merch_code'],
-        'merch_order_id'  => $biz['merch_order_id'],
-        'method'          => $params['method'],
-        'nonce_str'       => $params['nonce_str'],
-        'notify_url'      => $params['notify_url'],
-        'timestamp'       => $params['timestamp'],
-        'title'           => $biz['title'],
-        'total_amount'    => $biz['total_amount'],
-        'trade_type'      => $biz['trade_type'],
-        'trans_currency'  => $biz['trans_currency'],
-        'version'         => $params['version'],
-    ];
-
-    // 2. Sort alphabetically
-    ksort($all);
-
-    // 3. Build string: key1=value1&key2=value2
-    $queries = [];
-    foreach ($all as $k => $v) {
-        $queries[] = $k . "=" . $v;
+        return response()->json(['bib_number' => $newBib]);
     }
 
-    $stringA = implode('&', $queries);
-    $stringSignTemp = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
-    
-    Log::debug("[KBZ_FINAL_STRING]: " . $stringSignTemp);
-    
-    return strtoupper(hash('sha256', $stringSignTemp));
-}
+    private function generateKbzSignature($params) {
+        $biz = $params['biz_content'];
+        
+        $all = [
+            'appid'           => $params['appid'],
+            'merch_code'      => $params['merch_code'],
+            'merch_order_id'  => $biz['merch_order_id'],
+            'method'          => $params['method'],
+            'nonce_str'       => $params['nonce_str'],
+            'notify_url'      => $params['notify_url'],
+            'timestamp'       => $params['timestamp'],
+            'title'           => $biz['title'],
+            'total_amount'    => $biz['total_amount'],
+            'trade_type'      => $biz['trade_type'],
+            'trans_currency'  => $biz['trans_currency'],
+            'version'         => $params['version'],
+        ];
+
+        ksort($all);
+
+        $queries = [];
+        foreach ($all as $k => $v) {
+            $queries[] = $k . "=" . $v;
+        }
+
+        $stringA = implode('&', $queries);
+        $stringSignTemp = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
+        
+        Log::debug("[KBZ_FINAL_STRING]: " . $stringSignTemp);
+        
+        return strtoupper(hash('sha256', $stringSignTemp));
+    }
 
     public function kbzCallback(Request $request)
     {
@@ -497,7 +547,6 @@ private function generateKbzSignature($params) {
 
         Log::info('KBZ Callback received:', $payload);
 
-        // ✅ Check trade_status instead of result
         if (($payload['trade_status'] ?? null) === 'PAY_SUCCESS') {
             $fullOrderId = $payload['merch_order_id'];
             $parts = explode('_', $fullOrderId);
@@ -526,22 +575,18 @@ private function generateKbzSignature($params) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
-        // Prepare data for the QR page
         $paymentData = [
-            'amount' => $request->total_amount, // Pass this from a hidden input or recalculate
+            'amount' => $request->total_amount,
             'transaction_id' => 'MR-' . strtoupper(uniqid()),
             'account_name' => 'Runderful Myanmar Co., Ltd',
-            'kbz_pay_qr' => asset('images/payments/kbzpay-qr.png'), // Path to your QR image
+            'kbz_pay_qr' => asset('images/payments/kbzpay-qr.png'),
         ];
 
         session(['payment_data' => $paymentData]);
 
         return view('ticket.qr', compact('order', 'paymentData'));
     }
-    /**
-     * New Method: Use this for your Static Site (myanrun.com) 
-     * to check if payment is done.
-     */
+
     public function checkStatus($id)
     {
         $ticket = Ticket::find($id);
@@ -564,11 +609,9 @@ private function generateKbzSignature($params) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
-        // 1. Clean the price (removes $ and commas)
         $rawPrice = $order['price'] ?? 0;
         $subtotal = (float) preg_replace('/[^0-9.]/', '', $rawPrice);
 
-        // 2. Perform the math
         $serviceFee = 0.00; 
         $total = $subtotal + $serviceFee;
         $fullName = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
@@ -576,35 +619,31 @@ private function generateKbzSignature($params) {
         return view('ticket.checkout', compact('order', 'subtotal', 'serviceFee', 'total', 'fullName'));
     }
 
- public function updateId(Request $request)
-{
-    // 1. Fetch the ticket with its related athlete
-    $ticket = Ticket::with('athlete')->find($request->id);
-    
-    if (!$ticket || !$ticket->athlete) {
-        return redirect()->back()->with('error', 'Athlete not found');
+    public function updateId(Request $request)
+    {
+        $ticket = Ticket::with('athlete')->find($request->id);
+        
+        if (!$ticket || !$ticket->athlete) {
+            return redirect()->back()->with('error', 'Athlete not found');
+        }
+
+        $ticket->update([
+            'bib_name'     => $request->bib_name,
+            't_shirt_size' => $request->t_shirt_size,
+        ]);
+
+        $idNumber = '';
+
+        if ($request->has(['nrc_state', 'nrc_district', 'nrc_type', 'nrc_number'])) {
+            $idNumber = "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_type}){$request->nrc_number}";
+        } else {
+            $idNumber = $request->id_number;
+        }
+
+        $ticket->athlete->update([
+            'id_number' => $idNumber
+        ]);
+
+        return redirect()->back()->with('success', 'Information Updated Successfully');
     }
-
-    // 2. Update Ticket specific fields (BIB and T-Shirt)
-    $ticket->update([
-        'bib_name'     => $request->bib_name,
-        't_shirt_size' => $request->t_shirt_size,
-    ]);
-
-    // 3. Handle the ID reconstruction logic
-    $idNumber = '';
-
-    if ($request->has(['nrc_state', 'nrc_district', 'nrc_type', 'nrc_number'])) {
-        $idNumber = "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_type}){$request->nrc_number}";
-    } else {
-        $idNumber = $request->id_number;
-    }
-
-    // 4. Update the Athlete's ID
-    $ticket->athlete->update([
-        'id_number' => $idNumber
-    ]);
-
-    return redirect()->back()->with('success', 'Information Updated Successfully');
-}
 }

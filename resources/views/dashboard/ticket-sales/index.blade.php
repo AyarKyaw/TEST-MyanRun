@@ -7,7 +7,7 @@
     .event-card:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
     .section-header {
         display: flex; align-items: center; padding: 15px 25px; background: #fff;
-        border-radius: 15px; margin-bottom: 25px; border-left: 5px solid #ef4444; /* Changed to Red for MyanRun */
+        border-radius: 15px; margin-bottom: 25px; border-left: 5px solid #ef4444; 
         box-shadow: 0 2px 10px rgba(0,0,0,0.03);
     }
     .section-header.past { border-left: 5px solid #94a3b8; background: #f8fafc; }
@@ -16,6 +16,14 @@
     .bricks-divider { display: flex; gap: 10px; margin: 50px 0; justify-content: center; opacity: 0.3; }
     .brick { height: 8px; width: 40px; background: #cbd5e1; border-radius: 4px; }
     .past-container { background: rgba(241, 245, 249, 0.5); padding: 30px; border-radius: 20px; border: 2px dashed #e2e8f0; }
+    
+    /* New Style for Capacity Badge */
+    .capacity-info {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+    }
 </style>
 @endpush
 
@@ -37,15 +45,27 @@
         </div>
 
         <div class="row">
-            {{-- Check if we have Active Events --}}
             @forelse($nowEvents as $event)
                 <div class="col-xl-4 col-md-6 mb-4">
                     <div class="card event-card h-100">
                         <img src="{{ asset('storage/' . $event->image_path) }}" class="event-card-img" alt="event">
                         <div class="card-body">
-                            <h5 class="font-weight-bold">{{ $event->name }}</h5>
-                            <p class="text-muted small mb-3"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d, Y') }}</p>
+                            <h5 class="font-weight-bold mb-1">{{ $event->name }}</h5>
+                            <p class="text-muted small mb-3"><i class="far fa-calendar-alt"></i> {{ \Carbon\Carbon::parse($event->date)->format('M d, Y') }}</p>
                             
+                            <div class="capacity-info mb-3">
+                                <span class="stat-label text-muted d-block mb-1">Event Capacity</span>
+                                @if($event->total_max_slots)
+                                    <span class="font-weight-bold text-dark">
+                                        <i class="fas fa-ticket-alt mr-1 text-danger"></i> {{ number_format($event->total_max_slots) }} Tickets
+                                    </span>
+                                @else
+                                    <span class="font-weight-bold text-success">
+                                        <i class="fas fa-infinity mr-1"></i> Unlimited
+                                    </span>
+                                @endif
+                            </div>
+
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <a href="{{ route('dashboard.events.ticket', ['event' => $event->name]) }}" class="btn btn-dark btn-sm rounded-pill px-4">
                                     Manage Tickets
@@ -78,6 +98,9 @@
                             <img src="{{ asset('storage/' . $event->image_path) }}" class="event-card-img" alt="event">
                             <div class="card-body">
                                 <h5 class="font-weight-bold text-muted">{{ $event->name }}</h5>
+                                <div class="mb-2">
+                                    <small class="text-muted">Total Capacity: {{ $event->total_max_slots ?? 'Unlimited' }}</small>
+                                </div>
                                 <p class="text-muted small mb-0">Event Completed</p>
                             </div>
                         </div>

@@ -19,7 +19,7 @@
     }
 
     /* Tab Styling */
-    .nav-tabs { border-bottom: 2px solid #f1f1f1; margin-bottom: 20px; }
+    .nav-tabs { border-bottom: 2px solid #f1f1f1; margin-bottom: 20px; border-top: 0; }
     .nav-tabs .nav-link { border: none; color: #6e6e6e; font-weight: 600; padding: 1rem 1.5rem; }
     .nav-tabs .nav-link.active {
         color: #C3E92D !important; 
@@ -28,89 +28,114 @@
     }
 
     /* Table Content Styling */
-    .table td { font-size: 17px !important; padding: 18px 15px !important; }
-    .table th { font-size: 16px !important; text-transform: uppercase; letter-spacing: 0.5px; }
-    .table td .fw-bold { font-size: 19px !important; display: inline-block; margin-bottom: 3px; }
+    .table td { font-size: 16px !important; padding: 15px 15px !important; color: #333; }
+    .table th { font-size: 13px !important; text-transform: uppercase; letter-spacing: 0.5px; color: #888; background: #fcfcfc; }
     
-    #tableSearch { font-size: 18px !important; height: 55px !important; }
-    .table td small.text-muted { font-size: 14px !important; }
+    #tableSearch { font-size: 16px !important; height: 50px !important; border-radius: 10px 0 0 10px !important; }
+    .table td small.text-muted { font-size: 13px !important; }
 
     /* Modal Styling Enhancements */
-    .modal-content { border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .modal-header { background: #f8f9fa; border-bottom: 1px solid #eee; border-radius: 15px 15px 0 0; }
-    .info-section { background: #fdfdfd; border: 1px solid #f1f1f1; border-radius: 10px; padding: 15px; height: 100%; }
-    .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 15px; display: block; font-weight: 700; }
+    .modal-content { border-radius: 20px; border: none; overflow: hidden; }
+    .modal-header { background: #fff; border-bottom: 1px solid #f1f1f1; padding: 25px 30px; }
+    .info-section { background: #f8f9fa; border-radius: 15px; padding: 20px; height: 100%; border: 1px solid #eee; }
+    .section-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px; color: #999; margin-bottom: 15px; display: block; font-weight: 800; }
     
-    .custom-table tr td { border: none; padding: 8px 0; font-size: 15px; }
-    .custom-table tr td:first-child { color: #666; width: 40%; }
+    .custom-table tr td { border: none; padding: 6px 0; font-size: 14px; }
+    .custom-table tr td:first-child { color: #777; width: 45%; }
     
     .nrc-group .form-control { 
         border: 1px solid #e2e2e2; 
-        font-size: 14px; 
-        padding: 5px 8px;
+        font-size: 13px; 
+        padding: 6px 8px;
         background-color: #fff;
+        border-radius: 6px;
     }
-    .nrc-group select { cursor: pointer; }
     
     #modal-transaction-img {
-        transition: transform 0.3s ease;
-        border: 4px solid #fff;
+        transition: all 0.3s ease;
+        border: 5px solid #fff;
+        border-radius: 12px;
     }
-    #modal-transaction-img:hover { transform: scale(1.02); }
+    #modal-transaction-img:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+    /* Stats Card Styling */
+    .stat-widget { background: #fff; padding: 20px; border-radius: 15px; height: 100%; }
+    .progress-thin { height: 6px; border-radius: 10px; background: #eee; }
 </style>       
 
 <main class="content-body">
     <div class="container-fluid">
-        <div class="page-title">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li><h1>Event Tickets</h1></li>
-                    <li class="breadcrumb-item"><a href="">Home</a></li>
-                    <li class="breadcrumb-item active">Event Tickets</li>
-                </ol>
-            </nav>
+        <div class="page-title d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1>Event Tickets</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="">Home</a></li>
+                        <li class="breadcrumb-item active">Event Tickets</li>
+                    </ol>
+                </nav>
+            </div>
         </div>
 
-        <div class="row mb-5 align-items-center">
-            <div class="col-xl-3 mb-4 mb-xl-0 d-flex flex-column gap-3">
-                <a href="#" class="btn btn-primary light btn-lg d-block rounded fs-18">
-                    <i class="fa fa-plus me-2"></i>New Customer
-                </a>
+        <div class="row mb-4">
+            <div class="col-xl-4 col-md-5 mb-3">
+                <div class="d-flex flex-column gap-2">
+                    <a href="#" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center rounded-3 shadow-sm py-3">
+                        <i class="fa fa-plus-circle me-2 fs-20"></i> <span class="fw-bold">New Customer Registration</span>
+                    </a>
 
-                <div class="dropdown">
-                    <button type="button" class="btn btn-outline-success btn-lg d-block w-100 rounded fs-18 dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fa fa-file-excel me-2"></i>Export {{ ucfirst(request('status', 'all')) }} List
-                    </button>
-                    <ul class="dropdown-menu w-100">
-                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => 'all', 'status' => request('status', 'all')]) }}">
-                            All Categories ({{ ucfirst(request('status', 'all')) }})
-                        </a></li>
-                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">16KM ({{ ucfirst(request('status', 'all')) }})</a></li>
-                        <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">36KM ({{ ucfirst(request('status', 'all')) }})</a></li>
-                    </ul>
+                    <div class="dropdown">
+                        <button type="button" class="btn btn-light border btn-lg w-100 rounded-3 dropdown-toggle d-flex align-items-center justify-content-between" data-bs-toggle="dropdown">
+                            <span><i class="fa fa-file-excel me-2 text-success"></i>Export {{ ucfirst(request('status', 'all')) }}</span>
+                        </button>
+                        <ul class="dropdown-menu w-100 shadow-lg border-0 mt-2">
+                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => 'all', 'status' => request('status', 'all')]) }}">All Categories</a></li>
+                            <div class="dropdown-divider"></div>
+                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">16KM Category</a></li>
+                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">36KM Category</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
-            <div class="col-xl-9">
-                <div class="card m-0">
-                    <div class="card-body py-3">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                            <div>
-                                <p class="mb-0 fs-14 text-muted">Total Approved</p>
-                                <h3 class="mb-0 text-black fw-bold fs-18">{{ $counts['approved'] ?? 0 }} Persons</h3>
+            
+            <div class="col-xl-8 col-md-7">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <div class="d-flex align-items-center gap-4 mb-3">
+                                    <div>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
+                                        <h2 class="mb-0 text-black fw-bold">{{ number_format($counts['approved'] ?? 0) }}</h2>
+                                    </div>
+                                    <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+                                    <div>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Remaining</p>
+                                        @if(!is_null($eventLimit))
+                                            <h2 class="mb-0 text-danger fw-bold">{{ number_format(max(0, $eventLimit - ($counts['approved'] ?? 0))) }}</h2>
+                                        @else
+                                            <h2 class="mb-0 text-success fw-bold">Unlimited</h2>
+                                        @endif
+                                    </div>
+                                </div>
+                                @if(!is_null($eventLimit))
+                                    <div class="progress progress-thin">
+                                        @php $percent = (($counts['approved'] ?? 0) / $eventLimit) * 100; @endphp
+                                        <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
+                                    </div>
+                                    <p class="fs-12 text-muted mt-2 mb-0">Event Capacity: {{ number_format($eventLimit) }} total spots</p>
+                                @endif
                             </div>
                             
-                            <div style="min-width: 400px; max-width: 500px;" class="ms-auto">
+                            <div class="col-md-5 mt-3 mt-md-0">
                                 <form action="{{ URL::current() }}" method="GET">
                                     <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
-                                    <div class="input-group">
-                                        <input type="text" id="tableSearch" name="search" class="form-control border-primary" placeholder="Search Name or BIB..." value="{{ request('search') }}">
-                                        <button class="btn btn-primary px-4" type="submit"><i class="fa fa-search"></i></button>
+                                    <div class="input-group shadow-sm">
+                                        <input type="text" id="tableSearch" name="search" class="form-control border-0" placeholder="Name or BIB..." value="{{ request('search') }}">
+                                        <button class="btn btn-primary px-3" type="submit"><i class="fa fa-search"></i></button>
                                         @if(request('search'))
-                                            <a href="{{ route('dashboard.events.ticket', [
-                                                'event' => $eventName,
-                                                'status' => request('status', 'pending')
-                                            ]) }}" class="btn btn-light border-primary d-flex align-items-center">
-                                                <i class="fa fa-times text-danger"></i>
+                                            <a href="{{ route('dashboard.events.ticket', ['event' => $eventName, 'status' => request('status', 'pending')]) }}" class="btn btn-dark d-flex align-items-center">
+                                                <i class="fa fa-times"></i>
                                             </a>
                                         @endif
                                     </div>
@@ -124,14 +149,15 @@
 
         <div class="row">
             <div class="col-lg-12">
-                <div class="card">
-                    <div class="card-header d-block pb-0 border-0">
-                        <ul class="nav nav-tabs">
-                            @foreach(['pending' => 'Warning', 'approved' => 'Success', 'rejected' => 'Danger'] as $status => $color)
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-white pt-4 px-4 border-0">
+                        <ul class="nav nav-tabs" role="tablist">
+                            @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $status => $color)
                                 <li class="nav-item">
                                     <a class="nav-link {{ request('status', 'pending') == $status ? 'active' : '' }}" 
                                        href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
-                                         {{ ucfirst($status) }} ({{ $counts[$status] ?? 0 }})
+                                         {{ ucfirst($status) }} 
+                                         <span class="badge rounded-pill bg-{{ $color }} ms-2 fs-10" style="vertical-align: middle;">{{ $counts[$status] ?? 0 }}</span>
                                     </a>
                                 </li>
                             @endforeach
@@ -140,62 +166,75 @@
                     
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-borderless table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
+                            <table class="table table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">Action</th>
-                                        <th>User Name</th>
-                                        <th>BIB Name</th>
+                                        <th class="text-center" width="80">View</th>
+                                        <th>Athlete Details</th>
                                         <th>BIB Number</th>
                                         <th>Status</th>
-                                        <th>Price</th>
-                                        <th>Event & Category</th>
-                                        <th>Reg. Date</th>
+                                        <th>Payment</th>
+                                        <th>Event / Category</th>
+                                        <th>Registration Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($customers as $customer)
                                     <tr>
                                         <td class="text-center">
-                                            <button type="button" class="btn btn-primary shadow btn-xs btn-square view-details" 
+                                            <button type="button" class="btn btn-light btn-sm border view-details" 
                                                 data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" 
                                                 data-info="{{ json_encode($customer) }}" 
                                                 data-image="{{ $customer->transaction_id ? asset('uploads/payments/' . $customer->transaction_id) : asset('images/no-image.png') }}">
-                                                <i class="fa fa-eye"></i>
+                                                <i class="fa fa-eye text-primary"></i>
                                             </button>
                                         </td>
-                                        <td><strong>{{ $customer->athlete?->user?->full_name ?? 'Guest Runner' }}</strong></td>
-                                        <td><strong>{{ $customer->bib_name }}</strong></td>
-                                        <td><strong>{{ $customer->bib_number }}</strong></td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-black">{{ $customer->athlete?->user?->full_name ?? 'Guest Runner' }}</span>
+                                                <small class="text-muted">BIB: {{ $customer->bib_name }}</small>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge badge-outline-dark fs-14">#{{ $customer->bib_number }}</span></td>
                                         <td>
                                             @php $badgeClass = match($customer->status) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
-                                            <span class="badge light badge-{{ $badgeClass }}">{{ ucfirst($customer->status) }}</span>
+                                            <span class="badge badge-{{ $badgeClass }} badge-sm">{{ ucfirst($customer->status) }}</span>
                                         </td>
-                                        <td>{{ number_format($customer->price) }} MMK</td>
+                                        <td><span class="fw-bold text-dark">{{ number_format($customer->price) }} <small>MMK</small></span></td>
                                         <td>
-                                            <span class="text-black fw-bold">{{ $customer->event }}</span><br>
-                                            <small class="text-muted">{{ $customer->category }}</small>
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 rounded-circle bg-light d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
+                                                    <i class="fa fa-running text-primary fs-12"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="d-block fw-bold fs-14">{{ $customer->event }}</span>
+                                                    <small class="text-muted">{{ $customer->category }}</small>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td>{{ $customer->created_at->format('d/m/Y H:i') }}</td>
+                                        <td>{{ $customer->created_at->format('M d, Y') }}<br><small class="text-muted">{{ $customer->created_at->format('h:i A') }}</small></td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="8" class="text-center p-5">
-                                            <img src="{{ asset('images/no-data.png') }}" alt="" style="width: 80px; opacity: 0.5;"><br>
-                                            <p class="mt-3 text-muted">No {{ request('status', 'pending') }} tickets found.</p>
+                                        <td colspan="7" class="text-center py-5">
+                                            <div class="py-4">
+                                                <img src="{{ asset('images/no-data.png') }}" alt="" style="width: 60px; opacity: 0.3;">
+                                                <p class="mt-3 text-muted">No {{ request('status', 'pending') }} tickets found.</p>
+                                            </div>
                                         </td>
                                     </tr>
                                     @endforelse
                                 </tbody>
                             </table>
-                            
-                            <div class="card-footer d-flex justify-content-between align-items-center bg-white border-top-0 pt-0 pb-4">
-                                <div class="text-muted fs-14">
-                                    Showing <strong>{{ $customers->firstItem() }}</strong> to <strong>{{ $customers->lastItem() }}</strong> of <strong>{{ $customers->total() }}</strong> entries
-                                </div>
-                                <div class="pagination-container">
-                                    {{ $customers->links('pagination::bootstrap-5') }}
-                                </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-0 px-4 py-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted fs-13">
+                                Showing {{ $customers->firstItem() }} to {{ $customers->lastItem() }} of <strong>{{ $customers->total() }}</strong>
+                            </div>
+                            <div>
+                                {{ $customers->links('pagination::bootstrap-5') }}
                             </div>
                         </div>
                     </div>
@@ -208,95 +247,85 @@
 {{-- Ticket Details Modal --}}
 <div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header px-4">
-                <h5 class="modal-title fw-bold text-black">Runner Registration Details</h5>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0">
+                <h4 class="modal-title fw-bold">Runner Details</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/dashboard/update-ticket-info" method="POST" id="update-ticket-form">
                 @csrf
                 <input type="hidden" name="id" id="modal-ticket-id-input">
-                <div class="modal-body p-4">
-                    <div class="row g-4">
-                        {{-- Personal Info Card --}}
+                <div class="modal-body px-4 pt-0">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="info-section">
-                                <span class="section-title">Personal Information</span>
+                                <span class="section-title"><i class="fa fa-user-circle me-1"></i> Identity Info</span>
                                 <table class="table table-sm custom-table mb-0">
-                                    <tr><td>Name</td> <td id="modal-name" class="fw-bold text-black"></td></tr>
-                                    <tr>
-                                        <td>Bib Name</td> 
-                                        <td id="modal-bib-container"></td>
-                                    </tr>
+                                    <tr><td>Full Name</td> <td id="modal-name" class="fw-bold text-black"></td></tr>
+                                    <tr><td>Bib Name</td> <td id="modal-bib-container"></td></tr>
                                     <tr><td>BIB Number</td> <td id="modal-bib-number" class="text-primary fw-bold"></td></tr>
-                                    <tr>
-                                        <td>T-Shirt Size</td> 
-                                        <td id="modal-tshirt-container"></td>
-                                    </tr>
-                                    <tr><td>Blood Type</td> <td id="modal-blood" class="text-danger fw-bold"></td></tr>
-                                    <tr><td>National Type</td> <td id="modal-nat" class="text-capitalize"></td></tr>
-                                    <tr>
-                                        <td>ID Number</td> 
-                                        <td><div id="modal-id-container" class="nrc-group"></div></td>
-                                    </tr>
+                                    <tr><td>T-Shirt</td> <td id="modal-tshirt-container"></td></tr>
+                                    <tr><td>ID Type</td> <td id="modal-nat" class="text-capitalize"></td></tr>
+                                    <tr><td>ID / NRC</td> <td><div id="modal-id-container" class="nrc-group"></div></td></tr>
                                 </table>
                             </div>
                         </div>
 
-                        {{-- Event Info Card --}}
                         <div class="col-md-6">
                             <div class="info-section">
-                                <span class="section-title">Event Details</span>
+                                <span class="section-title"><i class="fa fa-flag me-1"></i> Participation Details</span>
                                 <table class="table table-sm custom-table mb-0">
                                     <tr><td>Event</td> <td id="modal-event" class="fw-bold text-black"></td></tr>
                                     <tr><td>Category</td> <td id="modal-category"></td></tr>
-                                    <tr><td>Exp. Level</td> <td id="modal-exp"></td></tr>
+                                    <tr><td>Level</td> <td id="modal-exp"></td></tr>
                                     <tr><td>Price</td> <td id="modal-price" class="fw-bold text-success"></td></tr>
-                                    <tr><td>State</td> <td id="modal-state" class="text-capitalize"></td></tr>
+                                    <tr><td>Blood Type</td> <td id="modal-blood" class="text-danger fw-bold"></td></tr>
+                                    <tr><td>Region</td> <td id="modal-state" class="text-capitalize"></td></tr>
                                 </table>
-                                
-                                <div class="mt-4 pt-2">
-                                    <div class="alert alert-light border-0 small p-2 mb-2">
-                                        <i class="fa fa-notes-medical me-1 text-info"></i> <strong>Medical:</strong> 
-                                        <span id="modal-medical" class="text-muted"></span>
-                                    </div>
-                                    <div class="alert alert-light border-0 small p-2">
-                                        <i class="fa fa-running me-1 text-info"></i> <strong>ITRA:</strong> 
-                                        <span id="modal-itra" class="text-muted"></span>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Transaction Image --}}
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="text-center p-3 bg-light rounded-3">
-                                <h6 class="fw-bold mb-3"><i class="fa fa-receipt me-1 text-success"></i> Transaction Proof</h6>
-                                <img id="modal-transaction-img" src="" alt="Transaction Proof" class="img-fluid rounded shadow-sm" style="max-height: 400px; cursor: zoom-in;" onclick="window.open(this.src)">
-                                <p class="text-muted small mt-2 mb-0">Click image to view full size</p>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold fs-10">Medical Information</small>
+                                <div id="modal-medical" class="text-dark small"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 h-100">
+                                <small class="text-muted d-block mb-1 text-uppercase fw-bold fs-10">ITRA Details</small>
+                                <div id="modal-itra" class="text-dark small"></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row mt-3 d-none" id="modal-save-button-container">
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary w-100 py-2 fs-16"><i class="fa fa-save me-2"></i>Update Runner Information</button>
+                    <div class="mt-4">
+                        <div class="text-center p-4 bg-light rounded-4 border-dashed border-2">
+                            <h6 class="fw-bold mb-3"><i class="fa fa-receipt me-1 text-success"></i> Payment Receipt</h6>
+                            <img id="modal-transaction-img" src="" alt="Proof" class="img-fluid shadow-sm" style="max-height: 350px; cursor: zoom-in;" onclick="window.open(this.src)">
+                            <p class="text-muted small mt-3 mb-0">Click the image to expand to full size</p>
                         </div>
+                    </div>
+
+                    <div class="mt-4 d-none" id="modal-save-button-container">
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 shadow-sm fw-bold">
+                            <i class="fa fa-save me-2"></i>SAVE UPDATED INFORMATION
+                        </button>
                     </div>
                 </div>
             </form>
-            <div class="modal-footer bg-light px-4 py-3">
-                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
-                <div class="d-flex align-items-center" id="modal-action-buttons">
-                    <form id="reject-form" action="" method="POST" class="me-2">
+            <div class="modal-footer border-0 bg-light p-4">
+                <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">Close</button>
+                <div class="ms-auto d-flex gap-2" id="modal-action-buttons">
+                    <form id="reject-form" action="" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-danger px-4"><i class="fa fa-times me-1"></i> Reject</button>
+                        <button type="submit" class="btn btn-danger px-4 py-2 rounded-2"><i class="fa fa-times me-1"></i> Reject</button>
                     </form>
                     <form id="approve-form" action="" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success px-4"><i class="fa fa-check me-1"></i> Approve</button>
+                        <button type="submit" class="btn btn-success px-4 py-2 rounded-2"><i class="fa fa-check me-1"></i> Approve Payment</button>
                     </form>
                 </div>
             </div>
@@ -305,6 +334,7 @@
 </div>
 
 <script>
+// All existing JavaScript logic preserved exactly as requested
 const districtOptions = {
     "1": ["ကပတ", "ကမတ", "ခပန", "ခလဖ", "ဆဒန", "ဆပရ", "ဆဘန", "တဆလ", "တနန", "ဒဖယ", "နမန", "ပတအ", "ပနဒ", "ပဝန", "ဖကန", "ဗမန", "မကတ", "မကန", "မခဘ", "မစန", "မညန", "မမန", "မလန", "ရှကန", "ရှဗယ", "လဂျန", "ဟပန", "အဂျယ", "၀မန"],
     "2": ["ဒမဆ", "ဖဆန", "ဖရဆ", "ဘလခ", "မစန", "ရတန", "ရသန", "လကန"],
@@ -326,7 +356,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('tableSearch');
     const ticketTable = document.getElementById('ticketTable');
 
-    // 1. Search Logic
     if (searchInput) {
         searchInput.addEventListener('input', function () {
             const searchTerm = this.value.toLowerCase().trim();
@@ -344,14 +373,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!noResRow) {
                     const tr = document.createElement('tr');
                     tr.className = 'no-results';
-                    tr.innerHTML = `<td colspan="8" class="text-center p-5"><div class="text-muted">No results found</div></td>`;
+                    tr.innerHTML = `<td colspan="8" class="text-center p-5"><div class="text-muted">No results found for "${searchTerm}"</div></td>`;
                     ticketTable.querySelector('tbody').appendChild(tr);
                 }
             } else if (noResRow) noResRow.remove();
         });
     }
 
-    // 2. Open Modal Logic
     const detailButtons = document.querySelectorAll('.view-details');
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -360,7 +388,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const athlete = data.athlete || {};
             
             document.getElementById('modal-ticket-id-input').value = data.id;
-
             document.getElementById('modal-name').innerText = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
             document.getElementById('modal-itra').innerText = athlete.itra_details || 'None';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
@@ -389,11 +416,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isEditable) {
                 saveBtnContainer.classList.remove('d-none');
-                
                 document.getElementById('modal-bib-container').innerHTML = `
                     <input type="text" name="bib_name" class="form-control form-control-sm border-primary" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
                 `;
-
                 const sizes = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "5XL"];
                 let sizeOptions = sizes.map(s => `<option value="${s}" ${data.t_shirt_size === s ? 'selected' : ''}>${s}</option>`).join('');
                 document.getElementById('modal-tshirt-container').innerHTML = `
@@ -404,12 +429,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const idContainer = document.getElementById('modal-id-container');
                 const currentId = athlete.id_number || '';
-
                 if (athlete.nat_type === 'national') {
                     let state = '', district = '', type = 'နိုင်', num = '';
                     const match = currentId.match(/^(\d+)\/([^\(]+)\(([^)]+)\)(\d+)$/);
                     if(match) { state = match[1]; district = match[2]; type = match[3]; num = match[4]; }
-
                     idContainer.innerHTML = `
                         <div class="d-flex gap-1 flex-wrap">
                             <select name="nrc_state" id="edit_nrc_state" class="form-control" style="width: 55px;" required>
@@ -430,11 +453,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm border-primary" value="${currentId}" placeholder="Passport Number" required>
                     `;
                 }
-                
                 if(athlete.nat_type === 'national' && state) {
                     setTimeout(() => document.getElementById('edit_nrc_state').dispatchEvent(new Event('change')), 50);
                 }
-
             } else {
                 saveBtnContainer.classList.add('d-none');
                 document.getElementById('modal-bib-container').innerHTML = `<span class="fw-bold text-black">${data.bib_name || 'N/A'}</span>`;
@@ -450,7 +471,6 @@ document.addEventListener('change', function(e) {
         const state = e.target.value;
         const districtSelect = document.getElementById('edit_nrc_district');
         if (!districtSelect) return;
-
         const currentVal = districtSelect.value;
         districtSelect.innerHTML = '<option value="">District</option>';
         if (districtOptions[state]) {

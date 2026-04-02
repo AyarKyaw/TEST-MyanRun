@@ -48,18 +48,27 @@
 
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label text-black fw-bold">Event Date</label>
-                                    <input type="date" 
-                                        name="date" 
-                                        class="form-control native-datepicker" 
-                                        style="position: relative; z-index: 5;" 
-                                        required>
+                                    <input type="date" name="date" class="form-control native-datepicker" style="position: relative; z-index: 5;" required>
                                     <small class="text-muted">Today is: {{ date('d M, Y') }}</small>
                                 </div>
 
                                 <div class="mb-3 col-md-6">
                                     <label class="form-label text-black fw-bold">YouTube Video ID</label>
                                     <input type="text" name="video_url" class="form-control" placeholder="e.g. K_FvDL_anrs">
-                                    <small class="text-muted">The ID after <strong>v=</strong> in the URL</small>
+                                </div>
+
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-black fw-bold">Registration Limit</label>
+                                    <select name="ticket_limit_type" id="ticket_limit_type" class="form-control default-select" onchange="toggleLimitInput()">
+                                        <option value="unlimited">Unlimited Tickets</option>
+                                        <option value="limited">Limited Tickets</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 col-md-6" id="total_limit_container" style="display: none;">
+                                    <label class="form-label text-black fw-bold">Total Event Capacity</label>
+                                    <input type="number" name="total_max_slots" class="form-control" placeholder="Total tickets for whole event">
+                                    <small class="text-muted">Max participants across all ticket types</small>
                                 </div>
 
                                 <div class="mb-4 col-md-12">
@@ -67,7 +76,6 @@
                                     <div class="form-file">
                                         <input type="file" name="image" class="form-file-input form-control" required>
                                     </div>
-                                    <small class="text-danger">Recommended size: 800x400px (JPG, PNG)</small>
                                 </div>
                             </div>
                             
@@ -84,87 +92,66 @@
 
                             <div class="mb-3 col-md-12">
                                 <label class="form-label text-black fw-bold">Event Description</label>
-                                <textarea name="description" class="form-control" rows="5" placeholder="Describe the event details, rules, or prizes..."></textarea>
+                                <textarea name="description" class="form-control" rows="5" placeholder="Describe the event..."></textarea>
                             </div>
+                            
                             <hr class="mt-4 mb-4">
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h5 class="text-black fw-bold mb-0">Ticket Types</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="text-black fw-bold mb-0">Ticket Types</h5>
+                                <button type="button" onclick="addTicket()" class="btn btn-sm btn-dark">+ Add Ticket</button>
+                            </div>
 
-    <button type="button" onclick="addTicket()" class="btn btn-sm btn-dark">
-        + Add Ticket
-    </button>
-</div>
+                            <div id="ticket-types">
+                                <div class="card shadow-sm mb-3 p-3 ticket-row border-0">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Name</label>
+                                            <input type="text" name="tickets[0][name]" class="form-control" placeholder="10KM Solo">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Type</label>
+                                            <select name="tickets[0][type]" class="form-control">
+                                                <option value="solo">Solo</option>
+                                                <option value="relay">Relay</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">National Image</label>
+                                            <input type="file" name="tickets[0][national_image]" class="form-control">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Foreign Image</label>
+                                            <input type="file" name="tickets[0][foreign_image]" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">National (MMK)</label>
+                                            <input type="number" name="tickets[0][national_price]" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Foreign (MMK)</label>
+                                            <input type="number" name="tickets[0][foreign_price]" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Slots (Optional)</label>
+                                            <input type="number" name="tickets[0][max_slots]" class="form-control" placeholder="Type Limit">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Prefix</label>
+                                            <input type="text" name="tickets[0][prefix]" class="form-control" placeholder="RUN">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Start Number</label>
+                                            <input type="number" name="tickets[0][start_number]" class="form-control">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <label class="form-label small fw-bold">Category</label>
+                                            <input type="text" name="tickets[0][category]" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-<div id="ticket-types">
-
-    <div class="card shadow-sm mb-3 p-3 ticket-row border-0">
-        <div class="row g-3 align-items-end">
-
-            <!-- Name -->
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">Name</label>
-                <input type="text" name="tickets[0][name]" class="form-control" placeholder="10KM Solo">
-            </div>
-
-            <!-- Type -->
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Type</label>
-                <select name="tickets[0][type]" class="form-control">
-                    <option value="solo">Solo</option>
-                    <option value="relay">Relay</option>
-                </select>
-            </div>
-
-            <!-- National Image -->
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">National Image</label>
-                <input type="file" name="tickets[0][national_image]" class="form-control">
-            </div>
-
-            <!-- Foreign Image -->
-            <div class="col-md-3">
-                <label class="form-label small fw-bold">Foreign Image</label>
-                <input type="file" name="tickets[0][foreign_image]" class="form-control">
-            </div>
-
-            <!-- National Price -->
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">National (MMK)</label>
-                <input type="number" name="tickets[0][national_price]" class="form-control" placeholder="120000">
-            </div>
-
-            <!-- Foreign Price -->
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Foreign (MMK)</label>
-                <input type="number" name="tickets[0][foreign_price]" class="form-control" placeholder="150000">
-            </div>
-
-            <!-- Slots -->
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Slots</label>
-                <input type="number" name="tickets[0][max_slots]" class="form-control" placeholder="100">
-            </div>
-
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Prefix</label>
-                <input type="text" name="tickets[0][prefix]" class="form-control" placeholder="RUN">
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Start Number</label>
-                <input type="number" name="tickets[0][start_number]" class="form-control" placeholder="11">
-            </div>
-
-            <!-- Category -->
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Category</label>
-                <input type="text" name="tickets[0][category]" class="form-control" placeholder="10KM">
-            </div>
-
-        </div>
-    </div>
-
-</div>
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-primary px-5">Save Event</button>
                                 <a href="{{ route('events.index', 'coming') }}" class="btn btn-light ms-2">Cancel</a>
@@ -180,68 +167,33 @@
 <script>
 let ticketIndex = 1;
 
+function toggleLimitInput() {
+    const type = document.getElementById('ticket_limit_type').value;
+    const container = document.getElementById('total_limit_container');
+    if(type === 'limited') {
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
+}
+
 function addTicket() {
     const container = document.getElementById('ticket-types');
-
     const html = `
         <div class="card shadow-sm mb-3 p-3 ticket-row border-0">
             <div class="row g-3 align-items-end">
-
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Name</label>
-                    <input type="text" name="tickets[${ticketIndex}][name]" class="form-control">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Type</label>
-                    <select name="tickets[${ticketIndex}][type]" class="form-control">
-                        <option value="solo">Solo</option>
-                        <option value="relay">Relay</option>
-                    </select>
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">National Image</label>
-                    <input type="file" name="tickets[${ticketIndex}][national_image]" class="form-control">
-                </div>
-
-                <div class="col-md-3">
-                    <label class="form-label small fw-bold">Foreign Image</label>
-                    <input type="file" name="tickets[${ticketIndex}][foreign_image]" class="form-control">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">National (MMK)</label>
-                    <input type="number" name="tickets[${ticketIndex}][national_price]" class="form-control">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Foreign (MMK)</label>
-                    <input type="number" name="tickets[${ticketIndex}][foreign_price]" class="form-control">
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Slots</label>
-                    <input type="number" name="tickets[${ticketIndex}][max_slots]" class="form-control">
-                </div>
-                <div class="col-md-2">
-                <label class="form-label small fw-bold">Prefix</label>
-                <input type="text" name="tickets[${ticketIndex}][prefix]" class="form-control">
+                <div class="col-md-3"><label class="form-label small fw-bold">Name</label><input type="text" name="tickets[${ticketIndex}][name]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Type</label><select name="tickets[${ticketIndex}][type]" class="form-control"><option value="solo">Solo</option><option value="relay">Relay</option></select></div>
+                <div class="col-md-3"><label class="form-label small fw-bold">National Image</label><input type="file" name="tickets[${ticketIndex}][national_image]" class="form-control"></div>
+                <div class="col-md-3"><label class="form-label small fw-bold">Foreign Image</label><input type="file" name="tickets[${ticketIndex}][foreign_image]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">National (MMK)</label><input type="number" name="tickets[${ticketIndex}][national_price]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Foreign (MMK)</label><input type="number" name="tickets[${ticketIndex}][foreign_price]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Slots (Optional)</label><input type="number" name="tickets[${ticketIndex}][max_slots]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Prefix</label><input type="text" name="tickets[${ticketIndex}][prefix]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Start Number</label><input type="number" name="tickets[${ticketIndex}][start_number]" class="form-control"></div>
+                <div class="col-md-2"><label class="form-label small fw-bold">Category</label><input type="text" name="tickets[${ticketIndex}][category]" class="form-control"></div>
             </div>
-
-            <div class="col-md-2">
-                <label class="form-label small fw-bold">Start Number</label>
-                <input type="number" name="tickets[${ticketIndex}][start_number]" class="form-control">
-            </div>
-                <div class="col-md-2">
-                    <label class="form-label small fw-bold">Category</label>
-                    <input type="text" name="tickets[${ticketIndex}][category]" class="form-control">
-                </div>
-
-            </div>
-        </div>
-    `;
-
+        </div>`;
     container.insertAdjacentHTML('beforeend', html);
     ticketIndex++;
 }

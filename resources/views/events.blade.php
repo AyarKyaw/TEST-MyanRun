@@ -115,6 +115,10 @@
                     <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
                         <i class="fas fa-check-circle mr-1"></i> SECURED
                     </button>
+                @elseif($event->is_full)
+                    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
+                        <i class="fas fa-check-circle mr-1"></i> SECURED
+                    </button>
                 @else
                     <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
                         ENTER NOW

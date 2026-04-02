@@ -216,128 +216,129 @@
                     <h3 class="text-xl font-black text-slate-800 uppercase italic">Required Information</h3>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
-                    <div class="md:col-span-4 flex flex-col items-center">
-                        <label class="label-text">Face ID Setup</label>
-                        
-                        <input type="file" name="face_image" id="face_image" class="hidden" accept="image/*">
-                        @if($athlete && $athlete->face_image_path)
-                            <input type="hidden" name="existing_face" value="{{ $athlete->face_image_path }}">
-                        @endif
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+    <div class="md:col-span-4 flex flex-col items-center hidden">
+        <label class="label-text">Face ID Setup</label>
+        
+        <input type="file" name="face_image" id="face_image" class="hidden" accept="image/*">
+        @if($athlete && $athlete->face_image_path)
+            <input type="hidden" name="existing_face" value="{{ $athlete->face_image_path }}">
+        @endif
 
-                        <div class="scan-circle group" onclick="openUploadModal()">
-    <div class="scan-line" id="scannerLine" style="{{ $athlete && $athlete->face_image_path ? 'display: none;' : '' }}"></div>
-    
-    <img id="facePreview" 
-         class="{{ $athlete && $athlete->face_image_path ? '' : 'hidden' }} w-full h-full object-cover absolute inset-0 z-10" 
-         src="{{ $athlete && $athlete->face_image_path ? asset('storage/' . $athlete->face_image_path) : '' }}">
-    
-    <div id="placeholderUI" class="flex flex-col items-center justify-center z-20 {{ $athlete && $athlete->face_image_path ? 'opacity-0' : '' }}">
-        <i class="fas fa-face-viewfinder text-4xl text-slate-300 group-hover:text-[#C3E92D] transition-colors"></i>
-        <span class="text-[9px] font-black text-slate-400 mt-2 uppercase">Tap to Setup</span>
+        <div class="scan-circle group" onclick="openUploadModal()">
+            <div class="scan-line" id="scannerLine" style="{{ $athlete && $athlete->face_image_path ? 'display: none;' : '' }}"></div>
+            
+            <img id="facePreview" 
+                 class="{{ $athlete && $athlete->face_image_path ? '' : 'hidden' }} w-full h-full object-cover absolute inset-0 z-10" 
+                 src="{{ $athlete && $athlete->face_image_path ? asset('storage/' . $athlete->face_image_path) : '' }}">
+            
+            <div id="placeholderUI" class="flex flex-col items-center justify-center z-20 {{ $athlete && $athlete->face_image_path ? 'opacity-0' : '' }}">
+                <i class="fas fa-face-viewfinder text-4xl text-slate-300 group-hover:text-[#C3E92D] transition-colors"></i>
+                <span class="text-[9px] font-black text-slate-400 mt-2 uppercase">Tap to Setup</span>
+            </div>
+        </div>
+
+        <p id="uploadStatus" class="text-[9px] {{ $athlete && $athlete->face_image_path ? 'text-lime-500' : 'text-slate-400' }} mt-4 text-center font-bold uppercase tracking-tighter">
+            {{ $athlete && $athlete->face_image_path ? 'CURRENT FACE ID LOADED ✅' : 'Required for AI Photo Matching' }}
+        </p>
     </div>
-</div>
 
-<p id="uploadStatus" class="text-[9px] {{ $athlete && $athlete->face_image_path ? 'text-lime-500' : 'text-slate-400' }} mt-4 text-center font-bold uppercase tracking-tighter">
-    {{ $athlete && $athlete->face_image_path ? 'CURRENT FACE ID LOADED ✅' : 'Required for AI Photo Matching' }}
-</p>
-                    </div>
+    <div class="md:col-span-12 space-y-6">
+        <div class="grid grid-cols-2 gap-4">
+            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'national' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
+                <input type="radio" name="nat_type_display" value="national" class="mr-2 pointer-events-none" 
+                    {{ $type == 'national' ? 'checked' : '' }} disabled>
+                <span class="text-xs font-black uppercase {{ $type == 'national' ? 'text-slate-900' : 'text-slate-400' }}">National</span>
+            </label>
 
-                    <div class="md:col-span-8 space-y-6">
-                        <div class="grid grid-cols-2 gap-4">
-                            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'national' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
-                                <input type="radio" name="nat_type_display" value="national" class="mr-2 pointer-events-none" 
-                                    {{ $type == 'national' ? 'checked' : '' }} disabled>
-                                <span class="text-xs font-black uppercase {{ $type == 'national' ? 'text-slate-900' : 'text-slate-400' }}">National</span>
-                            </label>
+            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'foreigner' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
+                <input type="radio" name="nat_type_display" value="foreigner" class="mr-2 pointer-events-none" 
+                    {{ $type == 'foreigner' ? 'checked' : '' }} disabled>
+                <span class="text-xs font-black uppercase {{ $type == 'foreigner' ? 'text-slate-900' : 'text-slate-400' }}">Foreigner</span>
+            </label>
+        </div>
 
-                            <label class="flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl transition-all opacity-80 {{ $type == 'foreigner' ? 'border-[#C3E92D] bg-lime-50' : 'bg-slate-50 cursor-not-allowed' }}">
-                                <input type="radio" name="nat_type_display" value="foreigner" class="mr-2 pointer-events-none" 
-                                    {{ $type == 'foreigner' ? 'checked' : '' }} disabled>
-                                <span class="text-xs font-black uppercase {{ $type == 'foreigner' ? 'text-slate-900' : 'text-slate-400' }}">Foreigner</span>
-                            </label>
-                        </div>
-
-                        <input type="hidden" name="nat_type" value="{{ $type }}">
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="label-text">First Name</label>
-                                    <input type="text" name="first_name" 
-                                        value="{{ old('first_name', auth()->user()->first_name ?? '') }}"
-                                        placeholder="First Name" required readonly
-                                        class="input-field">
-                                </div>
-                                <div>
-                                    <label class="label-text">Middle Name (Optional)</label>
-                                    <input type="text" name="middle_name" value="{{ old('middle_name', auth()->user()->middle_name ?? '') }}" placeholder="Middle Name"
-                                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');"readonly
-                                        class="input-field">
-                                </div>
-                                <div>
-                                    <label class="label-text">Last Name</label>
-                                    <input type="text" name="last_name" 
-                                        value="{{ old('last_name', auth()->user()->last_name ?? '') }}" 
-                                        placeholder="Last Name" required readonly
-                                        class="input-field">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-    <label class="label-text" id="id_label">Identity Information</label>
-    @if($type == 'national')
-    <div id="nrc_container" class="grid grid-cols-1 md:grid-cols-4 gap-2">
-        <select name="nrc_state" id="nrc_state" class="input-field !py-3 !text-sm" required>
-            <option value="">State</option>
-            <option value="1">၁/</option> <option value="2">၂/</option>
-            <option value="3">၃/</option> <option value="4">၄/</option>
-            <option value="5">၅/</option> <option value="6">၆/</option>
-            <option value="7">၇/</option> <option value="8">၈/</option>
-            <option value="9">၉/</option> <option value="10">၁၀/</option>
-            <option value="11">၁၁/</option> <option value="12">၁၂/</option>
-            <option value="13">၁၃/</option> <option value="14">၁၄/</option>
-        </select>
-
-        <select name="nrc_district" id="nrc_district" class="input-field !py-3 !text-sm" required>
-            <option value="">District</option>
-        </select>
-
-        <select name="nrc_naing" class="input-field !py-3 !text-sm" required>
-            <option value="နိုင်">နိုင်</option>
-            <option value="ဧည့်">ဧည့်</option>
-            <option value="စ">စ</option>
-            <option value="ပြု">ပြု</option>
-            <option value="သ">သ</option>
-            <option value="သီ">သီ</option>
-        </select>
-
-        <input name="nrc_number" 
-       type="text" 
-       inputmode="numeric" 
-       placeholder="123456" 
-       maxlength="6"
-       pattern="\d{6}"
-       value="{{ old('nrc_number', $nrcParts['number'] ?? '') }}"
-       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" 
-       required
-       class="input-field !py-3 !text-sm">
-    </div>
-    @else
-    <div id="passport_container" class="">
-        <input type="text" 
-           id="passport_input" 
-           name="passport_id" 
-           placeholder="Passport Number" 
-           maxlength="15"
-           value=""
-           oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()"
-           class="input-field">
-    </div>
-    @endif
-</div>
-                    </div>
+        <input type="hidden" name="nat_type" value="{{ $type }}">
+        
+        <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="label-text">First Name</label>
+                    <input type="text" name="first_name" 
+                        value="{{ old('first_name', auth()->user()->first_name ?? '') }}"
+                        placeholder="First Name" required readonly
+                        class="input-field">
+                </div>
+                <div>
+                    <label class="label-text">Middle Name (Optional)</label>
+                    <input type="text" name="middle_name" value="{{ old('middle_name', auth()->user()->middle_name ?? '') }}" placeholder="Middle Name"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" readonly
+                        class="input-field">
+                </div>
+                <div>
+                    <label class="label-text">Last Name</label>
+                    <input type="text" name="last_name" 
+                        value="{{ old('last_name', auth()->user()->last_name ?? '') }}" 
+                        placeholder="Last Name" required readonly
+                        class="input-field">
                 </div>
             </div>
+        </div>
+
+        <div class="space-y-4">
+            <label class="label-text" id="id_label">Identity Information</label>
+            @if($type == 'national')
+            <div id="nrc_container" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <select name="nrc_state" id="nrc_state" class="input-field !py-3 !text-sm" required>
+                    <option value="">State</option>
+                    <option value="1">၁/</option> <option value="2">၂/</option>
+                    <option value="3">၃/</option> <option value="4">၄/</option>
+                    <option value="5">၅/</option> <option value="6">၆/</option>
+                    <option value="7">၇/</option> <option value="8">၈/</option>
+                    <option value="9">၉/</option> <option value="10">၁၀/</option>
+                    <option value="11">၁၁/</option> <option value="12">၁၂/</option>
+                    <option value="13">၁၃/</option> <option value="14">၁၄/</option>
+                </select>
+
+                <select name="nrc_district" id="nrc_district" class="input-field !py-3 !text-sm" required>
+                    <option value="">District</option>
+                </select>
+
+                <select name="nrc_naing" class="input-field !py-3 !text-sm" required>
+                    <option value="နိုင်">နိုင်</option>
+                    <option value="ဧည့်">ဧည့်</option>
+                    <option value="စ">စ</option>
+                    <option value="ပြု">ပြု</option>
+                    <option value="သ">သ</option>
+                    <option value="သီ">သီ</option>
+                </select>
+
+                <input name="nrc_number" 
+                    type="text" 
+                    inputmode="numeric" 
+                    placeholder="123456" 
+                    maxlength="6"
+                    pattern="\d{6}"
+                    value="{{ old('nrc_number', $nrcParts['number'] ?? '') }}"
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6)" 
+                    required
+                    class="input-field !py-3 !text-sm">
+            </div>
+            @else
+            <div id="passport_container" class="">
+                <input type="text" 
+                    id="passport_input" 
+                    name="passport_id" 
+                    placeholder="Passport Number" 
+                    maxlength="15"
+                    value=""
+                    oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()"
+                    class="input-field">
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
 
             <div class="section-card">
                 <div class="flex items-center mb-8">
@@ -589,50 +590,65 @@
                     </div>
                 </div>
             </div>
-            @if(session('ticket_type') === 'relay')
-                <div class="section-card border-2 border-[#C3E92D]/30">
-                    <div class="flex items-center mb-8">
-                        <span class="w-10 h-10 bg-[#C3E92D] text-slate-900 rounded-xl flex items-center justify-center font-black mr-4 shadow-lg shadow-lime-100">05</span>
-                        <h3 class="text-xl font-black text-slate-800 uppercase italic">Relay Partner</h3>
-                    </div>
+           @if(session('ticket_type') === 'relay')
+    <div class="section-card border-2 border-[#C3E92D]/30">
+        <div class="flex items-center mb-8">
+            <span class="w-10 h-10 bg-[#C3E92D] text-slate-900 rounded-xl flex items-center justify-center font-black mr-4 shadow-lg shadow-lime-100">05</span>
+            <h3 class="text-xl font-black text-slate-800 uppercase italic">Relay Partner</h3>
+        </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- Partner ID --}}
-                        <div class="space-y-4">
-                            <label class="label-text">Partner's Runner ID (Required)</label>
-                            <div class="relative">
-                                <input type="text" name="friend_runner_id" 
-                                    placeholder="e.g. RUN-12345" 
-                                    oninput="this.value = this.value.toUpperCase()"
-                                    class="input-field !border-[#C3E92D] focus:ring-4 focus:ring-lime-100 uppercase font-bold">
-                                <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black text-lime-600 bg-lime-50 px-2 py-1 rounded-md">
-                                    AUTOFILL ENABLED
-                                </div>
-                            </div>
-                        </div>
+        <div class="mb-8">
+            <label class="label-text mb-3 block text-center">Does your partner already have a MyanRun account?</label>
+            <div class="flex gap-4">
+                <label class="flex-1 flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                    <input type="radio" name="partner_has_account" value="yes" class="hidden" checked onchange="togglePartnerMode('login')">
+                    <span class="text-xs font-black uppercase text-slate-600">Yes, Link Account</span>
+                </label>
+                <label class="flex-1 flex items-center justify-center p-4 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
+                    <input type="radio" name="partner_has_account" value="no" class="hidden" onchange="togglePartnerMode('register')">
+                    <span class="text-xs font-black uppercase text-slate-600">No, Create Account</span>
+                </label>
+            </div>
+        </div>
 
-                        {{-- Partner Password --}}
-                        <div class="space-y-4">
-                            <label class="label-text">Partner's Account Password</label>
-                            <div class="relative group">
-                                <input type="password" name="friend_password" id="partner_password"
-                                    placeholder="••••••••" 
-                                    class="input-field focus:ring-4 focus:ring-lime-100 pr-12">
-                                <button type="button" onclick="togglePartnerPassword()" 
-                                    class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#C3E92D] transition-colors">
-                                    <i class="fas fa-eye" id="passwordIcon"></i>
-                                </button>
-                            </div>
-                        </div>
+        {{-- MODE A: Partner Login (Existing User) --}}
+        <div id="partner_login_fields" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <label class="label-text">Partner's Runner ID</label>
+                <input type="text" name="friend_runner_id" placeholder="e.g. RUN-12345" class="input-field uppercase font-bold border-[#C3E92D]">
+            </div>
+            <div class="space-y-4">
+                <label class="label-text">Partner's Password</label>
+                <input type="password" name="friend_password" placeholder="••••••••" class="input-field">
+            </div>
+        </div>
 
-                        <div class="md:col-span-2">
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-                                * These credentials are required to verify your partner and link their profile to this relay team.
-                            </p>
-                        </div>
-                    </div>
+        {{-- MODE B: Partner Registration (New User) --}}
+        <div id="partner_register_fields" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="label-text">Partner's First Name</label>
+                    <input type="text" name="friend_first_name" class="input-field" placeholder="Enter First Name">
                 </div>
-                @endif
+                <div>
+                    <label class="label-text">Partner's Last Name</label>
+                    <input type="text" name="friend_last_name" class="input-field" placeholder="Enter Last Name">
+                </div>
+                <div>
+                    <label class="label-text">Partner's Email</label>
+                    <input type="email" name="friend_email" class="input-field" placeholder="email@example.com">
+                </div>
+                <div>
+                    <label class="label-text">Partner's Phone (Mobile)</label>
+                    <input type="tel" name="friend_phone" class="input-field" placeholder="09xxxxxxxxx">
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase text-center bg-slate-50 p-3 rounded-xl">
+                Note: A new account will be created for your partner using their phone number as the initial password.
+            </p>
+        </div>
+    </div>
+@endif
             
             <div class="flex flex-col md:flex-row gap-4 pt-6">
                 <button type="submit" class="flex-1 bg-[#C3E92D] hover:bg-slate-800 text-slate-900 hover:text-white font-black py-5 rounded-[2rem] shadow-xl shadow-lime-100 transition-all uppercase tracking-widest">
@@ -1181,6 +1197,30 @@ function syncAthleteType() {
     hiddenInput.value = selectedType;
 }
 
+function togglePartnerMode(mode) {
+    const loginFields = document.getElementById('partner_login_fields');
+    const registerFields = document.getElementById('partner_register_fields');
+    
+    // Inputs
+    const loginInputs = loginFields.querySelectorAll('input');
+    const registerInputs = registerFields.querySelectorAll('input');
+
+    if (mode === 'login') {
+        loginFields.classList.remove('hidden');
+        registerFields.classList.add('hidden');
+        
+        // Toggle Required
+        loginInputs.forEach(i => i.required = true);
+        registerInputs.forEach(i => i.required = false);
+    } else {
+        loginFields.classList.add('hidden');
+        registerFields.classList.remove('hidden');
+        
+        // Toggle Required
+        loginInputs.forEach(i => i.required = false);
+        registerInputs.forEach(i => i.required = true);
+    }
+}
 // Run the sync when the page loads
 window.addEventListener('DOMContentLoaded', syncAthleteType);
 </script>

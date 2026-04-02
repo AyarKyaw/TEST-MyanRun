@@ -43,100 +43,119 @@ class EventController extends Controller
         return view('dashboard.events.event-create');
     }
     public function showPublicEvents()
-    {
-        $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
+{
+    $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
 
-        $nowEvents = $allEvents->where('is_active', 1);
-        $comingEvents = $allEvents->where('is_active', 2);
-        $pastEvents = $allEvents->where('is_active', 0);
+    // Attach "is_full" status to each event
+    $allEvents->each(function ($event) {
+        $soldSlots = \App\Models\Ticket::where('event_id', $event->id)
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->whereNotNull('bib_number')
+            ->distinct()
+            ->count('bib_number');
 
-        // In your Controller
-        $userTickets = [];
-        if (auth()->check()) {
-            $userTickets = auth()->user()->tickets()
-                ->whereIn('status', ['pending', 'confirmed', 'approved']) // Ensure 'confirmed' is here!
-                ->pluck('event') 
-                ->map(fn($item) => trim($item)) // Remove any hidden spaces
-                ->toArray();
-        }
+        // If total_max_slots is null, assume unlimited. Otherwise compare.
+        $event->is_full = !is_null($event->total_max_slots) && ($soldSlots >= $event->total_max_slots);
+    });
 
-        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
+    $nowEvents = $allEvents->where('is_active', 1);
+    $comingEvents = $allEvents->where('is_active', 2);
+    $pastEvents = $allEvents->where('is_active', 0);
+
+    $userTickets = [];
+    if (auth()->check()) {
+        $userTickets = auth()->user()->tickets()
+            ->whereIn('status', ['pending', 'confirmed', 'approved'])
+            ->pluck('event') 
+            ->map(fn($item) => trim($item))
+            ->toArray();
     }
+
+    return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
+}
     // Save the event
     public function store(Request $request)
-    {
-        $request->validate([
-            'name'        => 'required',
-            'company'     => 'required',
-            'date'        => 'required|date',
-            'is_active'   => 'required|integer',
-            'image'       => 'required|image',
-            'location'    => 'nullable|string',
-            'video_url'   => 'nullable|string',
-            'description' => 'nullable|string',
+{
+    $request->validate([
+        'name'            => 'required',
+        'company'         => 'required',
+        'date'            => 'required|date',
+        'is_active'       => 'required|integer',
+        'image'           => 'required|image',
+        'location'        => 'nullable|string',
+        'video_url'       => 'nullable|string',
+        'description'     => 'nullable|string',
+        
+        // New Validation for Global Limit
+        'ticket_limit_type' => 'required|in:unlimited,limited',
+        'total_max_slots'   => 'nullable|required_if:ticket_limit_type,limited|integer|min:1',
 
-            // ✅ validate ticket types
-            'tickets.*.name' => 'required|string',
-            'tickets.*.type' => 'required|in:solo,relay',
-            'tickets.*.national_price' => 'required|numeric',
-            'tickets.*.foreign_price' => 'required|numeric',
-            'tickets.*.max_slots' => 'nullable|integer',
-            'tickets.*.prefix' => 'nullable|string|max:10',
-            'tickets.*.start_number' => 'nullable|integer|min:1',
-        ]);
+        // Ticket types validation
+        'tickets.*.name' => 'required|string',
+        'tickets.*.type' => 'required|in:solo,relay',
+        'tickets.*.national_price' => 'required|numeric',
+        'tickets.*.foreign_price' => 'required|numeric',
+        'tickets.*.max_slots' => 'nullable|integer',
+        'tickets.*.prefix' => 'nullable|string|max:10',
+        'tickets.*.start_number' => 'nullable|integer|min:1',
+    ]);
 
-        // Create event
-        $event = new \App\Models\Event();
-        $event->name        = $request->name;
-        $event->company     = $request->company;
-        $event->date        = $request->date;
-        $event->location    = $request->location;
-        $event->video_url   = $request->video_url;
-        $event->description = $request->description;
-        $event->is_active   = $request->is_active;
+    // Create event
+    $event = new \App\Models\Event();
+    $event->name        = $request->name;
+    $event->company     = $request->company;
+    $event->date        = $request->date;
+    $event->location    = $request->location;
+    $event->video_url   = $request->video_url;
+    $event->description = $request->description;
+    $event->is_active   = $request->is_active;
 
-        if ($request->hasFile('image')) {
-            $event->image_path = $request->file('image')->store('events', 'public');
-        }
-
-        $event->save();
-
-        // ✅ Save ticket types
-        if ($request->has('tickets')) {
-            foreach ($request->tickets as $ticket) {
-
-                if (empty($ticket['name'])) continue;
-
-                // Handle image upload
-                $nationalImage = null;
-                $foreignImage = null;
-
-                if (isset($ticket['national_image']) && $ticket['national_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $nationalImage = $ticket['national_image']->store('tickets', 'public');
-                }
-
-                if (isset($ticket['foreign_image']) && $ticket['foreign_image'] instanceof \Illuminate\Http\UploadedFile) {
-                    $foreignImage = $ticket['foreign_image']->store('tickets', 'public');
-                }
-
-                $event->ticketTypes()->create([
-                    'name' => $ticket['name'],
-                    'type' => $ticket['type'],
-                    'national_price' => $ticket['national_price'],
-                    'foreign_price' => $ticket['foreign_price'],
-                    'national_image' => $nationalImage,
-                    'foreign_image' => $foreignImage,
-                    'max_slots' => $ticket['max_slots'] ?? null,
-                    'prefix'         => $ticket['prefix'],     
-                    'start_number'   => $ticket['start_number']
-                ]);
-            }
-        }
-
-        $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
-
-        return redirect()->route('events.index', $statusMap[$request->is_active]);
+    // Handle Global Ticket Limit Logic
+    if ($request->ticket_limit_type === 'limited') {
+        $event->total_max_slots = $request->total_max_slots;
+    } else {
+        $event->total_max_slots = null; // Unlimited
     }
+
+    if ($request->hasFile('image')) {
+        $event->image_path = $request->file('image')->store('events', 'public');
+    }
+
+    $event->save();
+
+    // Save ticket types
+    if ($request->has('tickets')) {
+        foreach ($request->tickets as $ticket) {
+            if (empty($ticket['name'])) continue;
+
+            $nationalImage = null;
+            $foreignImage = null;
+
+            if (isset($ticket['national_image']) && $ticket['national_image'] instanceof \Illuminate\Http\UploadedFile) {
+                $nationalImage = $ticket['national_image']->store('tickets', 'public');
+            }
+
+            if (isset($ticket['foreign_image']) && $ticket['foreign_image'] instanceof \Illuminate\Http\UploadedFile) {
+                $foreignImage = $ticket['foreign_image']->store('tickets', 'public');
+            }
+
+            $event->ticketTypes()->create([
+                'name' => $ticket['name'],
+                'type' => $ticket['type'],
+                'national_price' => $ticket['national_price'],
+                'foreign_price' => $ticket['foreign_price'],
+                'national_image' => $nationalImage,
+                'foreign_image' => $foreignImage,
+                'max_slots' => $ticket['max_slots'] ?? null,
+                'prefix'         => $ticket['prefix'],     
+                'start_number'   => $ticket['start_number']
+            ]);
+        }
+    }
+
+    $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
+    return redirect()->route('events.index', $statusMap[$request->is_active]);
+}
     /**
      * Display the specified resource.
      */
