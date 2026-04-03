@@ -10,13 +10,13 @@
                 <div class="success-card" style="background: #fff; padding: 60px 40px; border-radius: 40px; border: 1px solid #f1f5f9; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
                     
                     @php 
-                        // DATA FROM SESSION OR REQUEST
-                        // It is safer to use the session data we saved earlier
                         $order = session('pending_registration');
-                        $qty = 1; // Forced single ticket as per your rule
-                        $price = $order['price'] ?? request('price', 0);
-                        $bibName = $order['bib_name'] ?? request('bib_name', 'Runner');
-                        $category = $order['category'] ?? request('category', 'Race');
+                        // Use the data specifically calculated in the controller
+                        $finalPrice = $paymentData['amount'] ?? 0;
+                        $isEarlyBird = $paymentData['is_early_bird'] ?? false;
+                        
+                        $bibName = $order['bib_name'] ?? 'Runner';
+                        $category = $order['category'] ?? 'Race';
                     @endphp
 
                     <div class="qr-wrap mb-4 text-center">
@@ -24,7 +24,6 @@
                             Scan to Pay (MMQR)
                         </p>
                         <div style="padding: 15px; border: 2px solid #CEF531; border-radius: 20px; background: #fff; display: inline-block;">
-                            {{-- Ensure this path is correct in your public folder --}}
                             <img src="{{ asset('images/kbz_qr.jpg') }}" alt="Payment QR" style="width: 240px; height: auto; border-radius: 12px;">
                         </div>
                     </div>
@@ -32,20 +31,29 @@
                     <h2 style="font-weight: 800; margin-bottom: 10px; text-transform: uppercase;">
                         Complete Your Registration
                     </h2>
+
+                    {{-- Early Bird Badge --}}
+                    @if($isEarlyBird)
+                        <div class="mb-3">
+                            <span style="background: #CEF531; color: #000; padding: 5px 15px; border-radius: 50px; font-size: 11px; font-weight: 800; text-transform: uppercase;">
+                                🎉 Early Bird Discount Applied
+                            </span>
+                        </div>
+                    @endif
                     
                     <div class="alert alert-warning py-3 mb-4" style="border-radius: 12px; background: #fefce8; border: 1px solid #fef08a;">
-                        <span style="display: block; font-size: 12px; color: #854d0e; font-weight: 700; text-transform: uppercase;">Total Amount</span>
-                        <strong style="font-size: 24px; color: #000;">{{ $price }} MMK</strong>
+                        <span style="display: block; font-size: 12px; color: #854d0e; font-weight: 700; text-transform: uppercase;">Total Amount to Transfer</span>
+                        {{-- Added number_format for clean display (e.g., 30,000) --}}
+                        <strong style="font-size: 32px; color: #000;">{{ number_format($finalPrice) }} MMK</strong>
                     </div>
 
                     <div class="upload-box" style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
                         <form action="{{ route('payment.verify') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             
-                            {{-- PASSING ALL NECESSARY DATA TO THE CONTROLLER --}}
                             <input type="hidden" name="bib_name" value="{{ $bibName }}">
                             <input type="hidden" name="category" value="{{ $category }}">
-                            <input type="hidden" name="amount" value="{{ $price }}">
+                            <input type="hidden" name="amount" value="{{ $finalPrice }}">
                             <input type="hidden" name="runner_id" value="{{ Auth::user()->runner_id }}">
 
                             <div class="mb-4 text-start">

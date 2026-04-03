@@ -54,7 +54,7 @@ class PaymentController extends Controller
         return hash_equals($expectedSign, $receivedSign);
     }
 
-    public function verifyPayment(Request $request)
+   public function verifyPayment(Request $request)
 {
     // 1. Validation
     $request->validate([
@@ -66,7 +66,6 @@ class PaymentController extends Controller
 
     // 2. Get session
     $order = session('pending_registration');
-
     if (!$order) {
         return redirect()->route('athlete.register')->with('error', 'Session expired.');
     }
@@ -76,6 +75,14 @@ class PaymentController extends Controller
     if (!$athlete) {
         return back()->with('error', 'Athlete not found.');
     }
+
+    // --- NEW: Fetch Ticket Type Model for Early Bird Logic ---
+    $ticketTypeModel = \App\Models\EventTicketType::find($order['ticket_type_id']);
+    
+    // Count existing registrations to see if EB limit is reached
+    $currentRegistrationsCount = \App\Models\Ticket::where('ticket_type_id', $order['ticket_type_id'])
+        ->where('status', '!=', 'rejected')
+        ->count();
 
     // 4. Generate ONE Bib for the team
     $generatedBib = $this->generateBib(
@@ -92,7 +99,14 @@ class PaymentController extends Controller
     $request->payment_slip->move($saveDir, $imageName);
     
     $event = \App\Models\Event::find($order['event_id']);
+    
+    // Use the amount from request as base
     $amount = (float) preg_replace('/[^0-9.]/', '', $request->amount);
+
+    // Apply Early Bird Discount if applicable
+    if ($ticketTypeModel && $ticketTypeModel->early_bird_limit > 0 && $currentRegistrationsCount < $ticketTypeModel->early_bird_limit) {
+        $amount = $amount - ($ticketTypeModel->early_bird_discount ?? 0);
+    }
 
     // --- 6. Create Ticket for CAPTAIN ---
     $captainTicket = Ticket::create([
@@ -111,42 +125,43 @@ class PaymentController extends Controller
     ]);
 
     // --- 7. Create Ticket for FRIEND (If Relay) ---
-$ticketType = strtolower(session('ticket_type'));
-$friendUserId = session('friend_user_id');
-$friendReg = session('friend_registration'); // Get the specific friend details saved earlier
+    // Note: Renamed variable to $registrationType to avoid conflict with $ticketTypeModel
+    $registrationType = strtolower(session('ticket_type'));
+    $friendUserId = session('friend_user_id');
+    $friendReg = session('friend_registration');
 
-if ($ticketType === 'relay' && $friendUserId) {
-    $friendUser = \App\Models\User::find($friendUserId);
+    if ($registrationType === 'relay' && $friendUserId) {
+        $friendUser = \App\Models\User::find($friendUserId);
 
-    if ($friendUser) {
-        $friendAthlete = \App\Models\Athlete::where('runner_id', $friendUser->runner_id)->first();
-        
-        if ($friendAthlete) {
-            Ticket::create([
-                'athlete_id'       => $friendAthlete->id,
-                'bib_name'         => $friendReg['bib_name'] ?? ($friendAthlete->first_name . ' ' . $friendAthlete->last_name),
-                'bib_number'       => $generatedBib, // Same BIB for the relay team
-                'category'         => $order['category'],
-                'ticket_type_id'   => $order['ticket_type_id'],
-                'price'            => $amount, // Friend is covered by Captain's payment
-                'event_id'         => $order['event_id'],
-                'event'            => $event->name, 
-                't_shirt_size'     => $friendReg['t_shirt_size'] ?? 'M', 
-                'experience_level' => $order['exp_level'] ?? 'Beginner',
-                'transaction_id'   => $imageName, 
-                'status'           => 'pending',
-            ]);
+        if ($friendUser) {
+            $friendAthlete = \App\Models\Athlete::where('runner_id', $friendUser->runner_id)->first();
             
-            \Log::info("Friend ticket created for: " . $friendUser->runner_id);
+            if ($friendAthlete) {
+                Ticket::create([
+                    'athlete_id'       => $friendAthlete->id,
+                    'bib_name'         => $friendReg['bib_name'] ?? ($friendAthlete->first_name . ' ' . $friendAthlete->last_name),
+                    'bib_number'       => $generatedBib, 
+                    'category'         => $order['category'],
+                    'ticket_type_id'   => $order['ticket_type_id'],
+                    'price'            => $amount, // Usually 0 because Captain paid the full discounted/regular amount
+                    'event_id'         => $order['event_id'],
+                    'event'            => $event->name, 
+                    't_shirt_size'     => $friendReg['t_shirt_size'] ?? 'M', 
+                    'experience_level' => $order['exp_level'] ?? 'Beginner',
+                    'transaction_id'   => $imageName, 
+                    'status'           => 'pending',
+                ]);
+                
+                \Log::info("Friend ticket created for: " . $friendUser->runner_id);
+            }
         }
     }
-}
 
     // 8. Clear all registration sessions
-    session()->forget(['pending_registration', 'friend_user_id', 'ticket_type']);
+    session()->forget(['pending_registration', 'friend_user_id', 'ticket_type', 'friend_registration']);
 
     return redirect()->route('user.dashboard')
-        ->with('success', 'Relay Registration submitted! Both runners are now pending verification.');
+        ->with('success', 'Registration submitted! Price recorded: ' . number_format($amount) . ' MMK');
 }
 
     private function generateBib($eventId, $ticketTypeId, $gender = 'male')

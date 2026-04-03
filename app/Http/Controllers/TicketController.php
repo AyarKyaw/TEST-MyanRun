@@ -573,11 +573,44 @@ class TicketController extends Controller
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
+        // 1. Fetch Ticket Type and Athlete (to check nationality)
+        $ticketType = \App\Models\EventTicketType::find($order['ticket_type_id']);
+        $athlete = \App\Models\Athlete::find($order['athlete_id']);
+
+        if (!$ticketType || !$athlete) {
+            return back()->with('error', 'Invalid registration data.');
+        }
+
+        // 2. Determine the Base Price based on nationality
+        $basePrice = (strtolower($athlete->nationality) === 'myanmar') 
+            ? $ticketType->national_price 
+            : $ticketType->foreign_price;
+
+        // 3. Count current registrations to check Early Bird limit
+        $currentRegistrationsCount = \App\Models\Ticket::where('ticket_type_id', $order['ticket_type_id'])
+            ->where('status', '!=', 'rejected')
+            ->count();
+
+        // 4. Calculate Final Amount
+        $isEarlyBird = false;
+        $discountAmount = 0;
+
+        if ($ticketType->early_bird_limit > 0 && $currentRegistrationsCount < $ticketType->early_bird_limit) {
+            $isEarlyBird = true;
+            $discountAmount = $ticketType->early_bird_discount ?? 0;
+        }
+
+        $finalAmount = $basePrice - $discountAmount;
+
+        // 5. Prepare Payment Data
         $paymentData = [
-            'amount' => $request->total_amount,
-            'transaction_id' => 'MR-' . strtoupper(uniqid()),
-            'account_name' => 'Runderful Myanmar Co., Ltd',
-            'kbz_pay_qr' => asset('images/payments/kbzpay-qr.png'),
+            'amount'          => $finalAmount,
+            'original_amount' => $basePrice,
+            'discount'        => $discountAmount,
+            'is_early_bird'   => $isEarlyBird,
+            'transaction_id'  => 'MR-' . strtoupper(uniqid()),
+            'account_name'    => 'Runderful Myanmar Co., Ltd',
+            'kbz_pay_qr'      => asset('images/payments/kbzpay-qr.png'),
         ];
 
         session(['payment_data' => $paymentData]);
@@ -600,55 +633,59 @@ class TicketController extends Controller
     }
 
     public function showReviewPage()
-    {
-        $order = session('pending_registration');
-        $user = auth()->user();
-
-        if (!$order || !isset($order['ticket_type_id'])) {
-            return redirect()->route('athlete.register')->with('error', 'Session expired.');
-        }
-
-        // 1. Fetch the actual Ticket Type from the DB
-        $ticketType = \App\Models\EventTicketType::find($order['ticket_type_id']);
-        if (!$ticketType) {
-            return redirect()->route('athlete.register')->with('error', 'Invalid ticket type.');
-        }
-
-        // 2. Parse the Base Price (National vs Foreign)
-        $isNational = (strtolower($user->nationality ?? '') === 'myanmar');
-        $basePrice = $isNational ? (float)$ticketType->national_price : (float)$ticketType->foreign_price;
-
-        // 3. Early Bird Calculation
-        $soldCount = \App\Models\Ticket::where('ticket_type_id', $ticketType->id)
-            ->whereIn('status', ['paid', 'confirmed'])
-            ->count();
-
-        $discountAmount = 0;
-        $isEarlyBirdActive = false;
-
-        if ($ticketType->early_bird_limit > 0 && $soldCount < $ticketType->early_bird_limit) {
-            $discountAmount = (float)$ticketType->early_bird_discount;
-            $isEarlyBirdActive = true;
-        }
-
-        // 4. Final Totals
-        $subtotal = $basePrice;
-        $serviceFee = 0.00; 
-        $total = ($subtotal - $discountAmount) + $serviceFee;
-        
-        $fullName = trim("{$user->first_name} {$user->mid_name} {$user->last_name}");
-
-        // Add these to the compact list so you can show the discount in the Blade view
-        return view('ticket.checkout', compact(
-            'order', 
-            'subtotal', 
-            'discountAmount', 
-            'isEarlyBirdActive', 
-            'serviceFee', 
-            'total', 
-            'fullName'
-        ));
+{
+    $order = session('pending_registration');
+    
+    // 1. Safety Check
+    if (!$order || !isset($order['athlete_id'])) {
+        return redirect()->route('athlete.register')->with('error', 'Session expired.');
     }
+
+    // 2. Fetch the Athlete and Ticket Type
+    $athlete = \App\Models\Athlete::find($order['athlete_id']);
+    $ticketType = \App\Models\EventTicketType::find($order['ticket_type_id']);
+
+    if (!$athlete || !$ticketType) {
+        return redirect()->route('athlete.register')->with('error', 'Invalid registration data.');
+    }
+
+    // 3. SECURE NATIONALITY CHECK
+    // We check the 'nationality' column in the athletes table
+    $isNational = (trim(strtolower($athlete->nationality)) === 'myanmar');
+
+    // 4. Set Base Price
+    $basePrice = $isNational ? (float)$ticketType->national_price : (float)$ticketType->foreign_price;
+
+    // 5. Early Bird Calculation (Include 'pending' to be accurate)
+    $soldCount = \App\Models\Ticket::where('ticket_type_id', $ticketType->id)
+        ->where('status', '!=', 'rejected') 
+        ->count();
+
+    $discountAmount = 0;
+    $isEarlyBirdActive = false;
+
+    if ($ticketType->early_bird_limit > 0 && $soldCount < $ticketType->early_bird_limit) {
+        $discountAmount = (float)$ticketType->early_bird_discount;
+        $isEarlyBirdActive = true;
+    }
+
+    // 6. Final Totals
+    $subtotal = $basePrice;
+    $serviceFee = 0.00; 
+    $total = ($subtotal - $discountAmount) + $serviceFee;
+    
+    $fullName = trim("{$athlete->first_name} {$athlete->last_name}");
+
+    return view('ticket.checkout', compact(
+        'order', 
+        'subtotal', 
+        'discountAmount', 
+        'isEarlyBirdActive', 
+        'serviceFee', 
+        'total', 
+        'fullName'
+    ));
+}
 
     public function updateId(Request $request)
     {
