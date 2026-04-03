@@ -78,7 +78,7 @@
                         <div class="post-wrap">
                             <article class="entry format-standard wow fadeInUp animated">
                                 <div class="feature-post">
-                                    <img src="{{ asset('images/ADM/Register.jpg') }}" alt="image">
+                                    <img src="{{ asset('images/Adm/Register.jpg') }}" alt="image">
                                 </div>
                                 <div class="main-post">
                                     <div class="tag"><ul><li><a href="">MyanRun</a></li></ul></div>
@@ -87,7 +87,7 @@
                             </article>
                             <article class="entry format-standard wow fadeInUp animated">
                                 <div class="feature-post">
-                                    <img src="{{ asset('images/ADM/t_shirt(cm).jpg') }}" alt="image">
+                                    <img src="{{ asset('images/Adm/t_shirt(cm).jpg') }}" alt="image">
                                 </div>
                                 <div class="main-post">
                                     <div class="tag"><ul><li><a href="">MyanRun</a></li></ul></div>
@@ -96,7 +96,7 @@
                             </article>
                             <article class="entry format-standard wow fadeInUp animated">
                                 <div class="feature-post">
-                                    <img src="{{ asset('images/ADM/t_shirt(inches).jpg') }}" alt="image">
+                                    <img src="{{ asset('images/Adm/t_shirt(inches).jpg') }}" alt="image">
                                 </div>
                                 <div class="main-post">
                                     <div class="tag"><ul><li><a href="">MyanRun</a></li></ul></div>
@@ -105,7 +105,7 @@
                             </article>
                             <article class="entry format-standard wow fadeInUp animated">
                                 <div class="feature-post">
-                                    <img src="{{ asset('images/ADM/Entitlement.jpg') }}" alt="image">
+                                    <img src="{{ asset('images/Adm/Entitlement.jpg') }}" alt="image">
                                 </div>
                                 <div class="main-post">
                                     <div class="tag"><ul><li><a href="">MyanRun</a></li></ul></div>
