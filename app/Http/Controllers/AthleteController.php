@@ -386,6 +386,20 @@ class AthleteController extends Controller
             return redirect()->route('athlete.register')->with('error', 'Session expired. Please fill the form again.');
         }
 
-        return view('ticket.consent', compact('data'));
+        // Get the event name from the session or via the event_id
+        // If you don't have 'event_name' in session, we fetch it from the DB using event_id
+        $eventId = session('event_id');
+        $event = \App\Models\Event::find($eventId);
+        $eventName = $event ? $event->name : (session('event_name') ?? 'Official Race');
+
+        // --- Event Specific Consent Routing ---
+        if ($eventName === 'Alaingni Monsoon Duathlon 2026') {
+            // Returns resources/views/ticket/consent_alaingni.blade.php
+            return view('ticket.consent_alaingni', compact('data', 'event'));
+        }
+
+        // Default consent page
+        // Returns resources/views/ticket/consent.blade.php
+        return view('ticket.consent', compact('data', 'event'));
     }
 }
