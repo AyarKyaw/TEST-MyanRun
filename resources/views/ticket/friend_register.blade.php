@@ -267,21 +267,21 @@
                 <div>
                     <label class="label-text">First Name</label>
                     <input type="text" name="first_name" 
-                        value="{{ old('first_name', $friendAthlete->first_name ?? $friendUser->first_name ?? '') }}"
-                        placeholder="First Name" required 
+                        value="{{ old('first_name', $modeBData['first_name'] ?? $friendAthlete->first_name ?? $friendUser->first_name ?? '') }}"
+                        placeholder="First Name" required readonly
                         class="input-field">
                 </div>
                 <div>
                     <label class="label-text">Middle Name (Optional)</label>
-                    <input type="text" name="middle_name" value="{{ old('middle_name', $friendAthlete->middle_name ?? $friendUser->middle_name ?? '') }}" placeholder="Middle Name"
-                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');"
+                    <input type="text" name="middle_name" value="{{ old('middle_name', $modeBData['middle_name'] ?? $friendAthlete->middle_name ?? $friendUser->middle_name ?? '') }}" placeholder="Middle Name"
+                        oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '');" readonly
                         class="input-field">
                 </div>
                 <div>
                     <label class="label-text">Last Name</label>
                     <input type="text" name="last_name" 
-                        value="{{ old('last_name', $friendAthlete->last_name ?? $friendUser->last_name ?? '') }}" 
-                        placeholder="Last Name" required 
+                        value="{{ old('last_name', $modeBData['last_name'] ?? $friendAthlete->last_name ?? $friendUser->last_name ?? '') }}" 
+                        placeholder="Last Name" required readonly
                         class="input-field">
                 </div>
             </div>
@@ -471,8 +471,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="label-text">Email Address</label>
-                        <input type="email" name="email" value="{{ old('email', $friendAthlete->email ?? $friendUser->email ?? '') }}"  required 
-                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" >
+                        <input type="email" name="email" value="{{ old('email', $modeBData['email'] ?? $friendAthlete->email ?? $friendUser->email ?? '') }}"  required 
+                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');" class="input-field" readonly>
                     </div>
                     <div>
                         <label class="label-text">Viber</label>
@@ -481,8 +481,8 @@
                     </div>
                     <div>
                         <label class="label-text">Mobile Number</label>
-                        <input type="tel" name="phone_1" value="{{ old('phone', $friendUser->phone ?? '') }}"  required 
-                               oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" >
+                        <input type="tel" name="phone_1" value="{{ old('phone', $modeBData['phone'] ?? $friendUser->phone ?? '') }}"  required 
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-field" readonly >
                     </div>
                     <div>
                         <label class="label-text">Emergency Contact Number</label>
@@ -554,33 +554,6 @@
                             <textarea name="medical_conditions" id="medical_conditions" rows="3" 
                                     class="input-field resize-none border-red-100 focus:border-red-400" 
                                     placeholder="e.g. Asthma, Heart Disease, Recent Surgery, etc.">{{ old('medical_conditions', $friendAthlete->medical_conditions ?? '') }}</textarea>
-                        </div>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="label-text mb-3 block">Do you have an ITRA Profile?</label>
-                        <div class="flex gap-4 mb-4">
-                            {{-- No Option --}}
-                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
-                                <input type="radio" name="has_itra" value="no" class="hidden" 
-                                    {{ !old('itra_details', $friendAthlete->itra_details ?? '') ? 'checked' : '' }} 
-                                    onchange="toggleITRA(false)">
-                                <span class="text-xs font-black uppercase text-slate-600">No, I don't</span>
-                            </label>
-                            {{-- Yes Option --}}
-                            <label class="flex-1 flex items-center justify-center p-3 border-2 border-slate-100 rounded-2xl cursor-pointer transition-all has-[:checked]:border-[#C3E92D] has-[:checked]:bg-lime-50">
-                                <input type="radio" name="has_itra" value="yes" class="hidden" 
-                                    onchange="toggleITRA(true)">
-                                <span class="text-xs font-black uppercase text-slate-600">Yes, I have</span>
-                            </label>
-                        </div>
-                        
-                        {{-- ITRA Details Input --}}
-                        <div id="itra_details_container" class="{{ old('itra_details', $friendAthlete->itra_details ?? '') ? '' : 'hidden' }}">
-                            <label class="label-text text-[#C3E92D]">ITRA Index or Profile Link</label>
-                            <input type="text" name="itra_details" id="itra_details" 
-                                value=""
-                                class="input-field border-lime-100 focus:border-[#C3E92D]" 
-                                placeholder="Enter Here...">
                         </div>
                     </div>
                 </div>

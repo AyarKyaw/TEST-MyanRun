@@ -114,8 +114,9 @@ class AthleteController extends Controller
 
     public function submit(Request $request)
     {   
-        $request->validate([
-            'face_image' => 'nullable|image|max:2048', // Face ID hidden/optional for now
+        // 1. Define standard validation rules
+        $rules = [
+            'face_image' => 'nullable|image|max:2048',
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'bib_name' => 'required|string|max:20', 
@@ -127,14 +128,26 @@ class AthleteController extends Controller
             't_shirt_size' => 'required',
             'blood_type' => 'required',
             'nrc_number' => 'nullable|required_if:nat_type,national|digits:6',
-        ]);
+        ];
 
+        // 2. ADD UNIQUE CHECKS: Only if it's a relay and they are NOT linking an existing runner
+        if (session('ticket_type') === 'relay' && !$request->filled('friend_runner_id')) {
+            $rules['friend_email'] = 'required|email|unique:users,email';
+            // Check phone too, as duplicate phones will cause login issues later
+            $rules['friend_phone'] = 'required|digits_between:9,15'; 
+        }
+
+        $request->validate($rules);
+
+        // 3. Format Date
         $formattedDob = Carbon::createFromFormat('d/m/Y', $request->dob)->format('Y-m-d');
 
+        // 4. Handle ID Number
         $idNumber = ($request->nat_type === 'national') 
             ? "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_naing})" . str_pad($request->nrc_number, 6, '0', STR_PAD_LEFT)
             : strtoupper($request->passport_id);
 
+        // 5. Handle Image
         $path = $request->existing_face;
         if ($request->hasFile('face_image')) {
             $path = $request->file('face_image')->store('athletes', 'public');
@@ -142,6 +155,19 @@ class AthleteController extends Controller
 
         $finalBib = $this->generateBib($request->gender, session('ticket_category'));
 
+        // 6. Save Mode B Data to Session
+        if (session('ticket_type') === 'relay' && !$request->filled('friend_runner_id')) {
+            session([
+                'partner_mode_b_data' => [
+                    'first_name' => $request->friend_first_name,
+                    'last_name'  => $request->friend_last_name,
+                    'email'      => $request->friend_email,
+                    'phone'      => $request->friend_phone,
+                ]
+            ]);
+        }
+
+        // 7. Update/Create Athlete
         $athlete = Athlete::updateOrCreate(
             ['runner_id' => Auth::user()->runner_id],
             [
@@ -166,6 +192,7 @@ class AthleteController extends Controller
             ]
         );
 
+        // 8. Set Primary Registration Session
         session([
             'pending_registration' => [
                 'athlete_id'   => $athlete->id,
@@ -181,22 +208,14 @@ class AthleteController extends Controller
             ]
         ]);
 
+        // 9. Relay Handling Logic
         if (session('ticket_type') === 'relay') {
             if ($request->filled('friend_runner_id')) {
-                if (!$request->filled('friend_password')) {
-                    return back()->withErrors(['friend_password' => 'Password is required to link this Runner ID.'])->withInput();
-                }
-
+                // ... existing login logic ...
                 $friend = User::where('runner_id', $request->friend_runner_id)->first();
-
+                
                 if (!$friend || !\Hash::check($request->friend_password, $friend->password)) {
-                    return back()
-                        ->withErrors(['friend_password' => 'Partner Runner ID or Password does not match our records.'])
-                        ->withInput();
-                }
-
-                if ($friend->id === Auth::id()) {
-                    return back()->withErrors(['friend_runner_id' => 'You cannot be your own partner.'])->withInput();
+                    return back()->withErrors(['friend_password' => 'Partner Runner ID or Password does not match.'])->withInput();
                 }
 
                 session(['friend_user_id' => $friend->id]);
@@ -219,6 +238,8 @@ class AthleteController extends Controller
         $friendAthlete = null;
         $friendUser = null;
         $nrcParts = ['state' => '', 'district' => '', 'naing' => 'နိုင်', 'number' => ''];
+
+        $modeBData = session('partner_mode_b_data');
 
         if (session()->has('friend_user_id')) {
             $friendUser = User::find(session('friend_user_id'));
@@ -243,6 +264,7 @@ class AthleteController extends Controller
         return view('ticket.friend_register', [
             'friendAthlete' => $friendAthlete,
             'friendUser' => $friendUser, 
+            'modeBData' => $modeBData,
             'nrcParts' => $nrcParts,
             'category' => session('ticket_category'),
             'type' => session('nat_type', 'national'), 

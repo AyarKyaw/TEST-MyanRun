@@ -22,7 +22,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
+                                <a href="/event" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -30,9 +30,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
+                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -44,7 +44,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -55,7 +55,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -66,7 +66,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
+                                        <a href="/event"></a>
                                     </li>
                                 </ul>
                             </div>
@@ -92,7 +92,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
+                                <a href="/event" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -100,9 +100,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
+                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -114,7 +114,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -125,7 +125,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -136,7 +136,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
+                                        <a href="/event"></a>
                                     </li>
                                 </ul>
                             </div>
@@ -161,7 +161,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
+                                <a href="/event" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -169,9 +169,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
+                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -183,7 +183,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -194,7 +194,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -205,7 +205,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
+                                        <a href="/event"></a>
                                     </li>
                                 </ul>
                             </div>
@@ -230,7 +230,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
+                                <a href="/event" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -238,9 +238,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                              <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
+                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -252,7 +252,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -263,7 +263,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -274,7 +274,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
+                                        <a href="/event"></a>
                                     </li>
                                 </ul>
                             </div>
@@ -300,7 +300,7 @@
                                 wellness.
                             </p> -->
                             <div class="button">
-                                <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join Myanrun</a>
+                                <a href="/event" class="flat-button">Join Myanrun</a>
                             </div>
                         </div>
                         <div class="box-events-slide">
@@ -308,9 +308,9 @@
                                 <img src="{{ asset('images/logo/RUNderful Myanmar Logo.png') }}" alt="Logo" />
                             </div>
                             <span class="new-event">new Event </span>
-                            <img src="{{ asset('images/cherry.jpg') }}" alt="image event" class="new-event">
+                            <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/ticket?event=Cherry+Trail+Run+2026" class="">Cherry Trail Run 2026</a>
+                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -322,7 +322,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">02 May, 2026 ( Saturday )</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -333,7 +333,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Start 05:00 AM</a>
+                                        <a href="/event"></a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -344,7 +344,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/ticket?event=Cherry+Trail+Run+2026">Pyin Oo Lwin</a>
+                                        <a href="/event"></a>
                                     </li>
                                 </ul>
                             </div>
@@ -628,7 +628,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                02 May, 2026 ( Saturday )
+                               
                             </p>
                             <p>
                                 <span>
@@ -639,7 +639,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 05:00 AM
+                                
                             </p>
                             <p>
                                 <span>
@@ -650,7 +650,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               Pyin Oo Lwin
+                               
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/local16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: 20% center;"alt="denpasar marathon event 2023">
@@ -662,7 +662,7 @@
                             <!-- <span style="font-size:22px; font-weight:bold; color:#C3E92D;">100,000 MMK</span><br>
                             <small style="color:#ff5252; font-weight:600;">Early Bird Sale</small> -->
                         </p>
-                        <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
+                        <a href="/event" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -681,7 +681,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                02 May, 2026 ( Saturday )
+                               
                             </p>
                             <p>
                                 <span>
@@ -692,7 +692,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 05:00 AM
+                                
                             </p>
                             <p>
                                 <span>
@@ -703,7 +703,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               Pyin Oo Lwin
+                               
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/local36.jpg') }}"style="width:100%; height:500px; object-fit:cover; object-position: 10% center;" alt="denpasar marathon event 2023">
@@ -713,7 +713,7 @@
                         <p class="price">
                             <span style="">160,000 MMK</span><br>
                         </p>
-                       <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
+                       <a href="/event" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -732,7 +732,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                02 May, 2026 ( Saturday )
+                               
                             </p>
                             <p>
                                 <span>
@@ -743,7 +743,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 05:00 AM
+                                
                             </p>
                             <p>
                                 <span>
@@ -754,7 +754,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               Pyin Oo Lwin
+                               
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/f16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: center 90%;"alt="denpasar marathon event 2023">
@@ -764,7 +764,7 @@
                         <p class="price">
                             <span style="">200,000 MMK</span><br>
                         </p>
-                       <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
+                       <a href="/event" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -783,7 +783,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               02 May, 2026 ( Saturday )
+                              
                             </p>
                             <p>
                                 <span>
@@ -794,7 +794,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                                Start 05:00 AM
+                                
                             </p>
                             <p>
                                 <span>
@@ -805,7 +805,7 @@
                                             fill="#C3E92D" />
                                     </svg>
                                 </span>
-                               Pyin Oo Lwin
+                               
                             </p>
                         </div>
                         <img decoding="async" src="{{ asset('images/f36.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: center 90%;" alt="denpasar marathon event 2023">
@@ -815,7 +815,7 @@
                         <p class="price">
                             <span style="">250,000 MMK</span><br>
                         </p>
-                    <a href="/ticket?event=Cherry+Trail+Run+2026" target="_blank" class="flat-button">BUY NOW</a>
+                    <a href="/event" target="_blank" class="flat-button">BUY NOW</a>
                         <div class="item-event-price-bg">
                         </div>
                     </div>
@@ -900,7 +900,7 @@
                                         </select>
                                     </fieldset>
                                     <p class="form-submit">
-                                        <a name="submit" href="/ticket?event=Cherry+Trail+Run+2026" id="comment-reply"
+                                        <a name="submit" href="/event" id="comment-reply"
                                 class="flat-button btn-submit-comment"><span>Join our event</span></a>
                                     </p>
                                 </form>
@@ -1435,7 +1435,7 @@
                 </h2>
                 <!-- <span class="sale wow fadeInUp animated ">-30%</span> -->
                 <!-- <img src="images/retinal/runclub.png" alt="runclub" class="wow fadeInUp animated"> -->
-                <br><br><a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
+                <br><br><a href="/event" class="flat-button wow fadeInUp animated ">Join MyanRun</a><br> <br>
             </div>
         </div>
     </div><!-- banner-paralax -->
@@ -1627,7 +1627,7 @@
                                 </select>
                             </fieldset>
                             <p class="form-submit">
-                                <a name="submit" href="/ticket?event=Cherry+Trail+Run+2026" id="comment-reply"
+                                <a name="submit" href="/event" id="comment-reply"
                                 class="submit-register"span>Join our event</span></a>
                             </p>
                         </form>
@@ -1651,30 +1651,30 @@
                 <div class="marathon-body">
                     
                     <div class="marathon-image">
-                      <img src="{{ asset('images/cherry.jpg') }}" alt="Cherry Trail Run 2026">
+                      <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="Myanrun">
                     </div>
         <!-- LEFT TEXT -->
         <div class="marathon-text">
-          <h4 class="mb-2">Cherry Trail Run 2026</h4>
+          <h4 class="mb-2">Myanrun</h4>
 
           <p class="mb-3 primary-text">
-            Registration for the Cherry Trail Run 2026
+            Registration for the Myanrun
           </p>
 
           <!-- <p class="mb-4">
             <strong>
-              Cherry Trail Run 2026 ညစာအတွက် မှတ်ပုံတင်ခြင်း တိုက်ရိုက်ထုတ်လွှင့်နေပါသည်။
+              Myanrun ညစာအတွက် မှတ်ပုံတင်ခြင်း တိုက်ရိုက်ထုတ်လွှင့်နေပါသည်။
             </strong>
           </p> -->
 
         <div class="button">
-            <a href="/ticket?event=Cherry+Trail+Run+2026" class="flat-button">Join our event</a>
+            <a href="/event" class="flat-button">Join our event</a>
         </div>
 
           <hr>
 
-          <p class="mb-1"><strong>Date:</strong> 02 May, 2026 ( Saturday )</p>
-          <p class="mb-0"><strong>Venue:</strong>Pyin Oo Lwin</p>
+          <p class="mb-1"><strong>Date:</strong></p>
+          <p class="mb-0"><strong>Venue:</strong></p>
         </div>
 
         <!-- RIGHT IMAGE -->
