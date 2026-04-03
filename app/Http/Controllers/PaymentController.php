@@ -103,11 +103,6 @@ class PaymentController extends Controller
     // Use the amount from request as base
     $amount = (float) preg_replace('/[^0-9.]/', '', $request->amount);
 
-    // Apply Early Bird Discount if applicable
-    if ($ticketTypeModel && $ticketTypeModel->early_bird_limit > 0 && $currentRegistrationsCount < $ticketTypeModel->early_bird_limit) {
-        $amount = $amount - ($ticketTypeModel->early_bird_discount ?? 0);
-    }
-
     // --- 6. Create Ticket for CAPTAIN ---
     $captainTicket = Ticket::create([
         'athlete_id'       => $order['athlete_id'],
