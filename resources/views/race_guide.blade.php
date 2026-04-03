@@ -3,78 +3,38 @@
 @section('title', 'Race Guide - MYANRUN')
 
 @section('content')
-    <!-- Page Title -->
     <div class="page-title">
         <div class="themeflat-container">
             <div class="row">
                 <div class="col-md-12">
                     <div class="page-title-heading">
                         <h1 class="title">race guide</h1>
-                    </div><!-- /.page-title-captions -->
-                    <div class="breadcrumbs">
+                    </div><div class="breadcrumbs">
                         <ul>
-                            <li><a href="index.html">Homepage</a></li>
+                            <li><a href="{{ url('/') }}">Homepage</a></li>
                             <li> <i class="icon-Arrow---Right-2"></i></li>
-                           
                             <li><a>Race Guide</a></li>
                         </ul>
-                    </div><!-- /.breadcrumbs -->
+                    </div></div></div></div></div><section class="main-content blog-posts">
+        <div class="themeflat-container">
+            
+            <div class="pdf-preview">
+                @foreach(range(1, 10) as $i)
+                    <img src="{{ asset('images/bike/' . $i . '.jpg') }}" alt="Race Guide Page {{ $i }}" style="width: 100%; display: block; margin-bottom: 20px;">
+                @endforeach
+            </div>
 
-                </div><!-- /.col-md-12 -->
-            </div><!-- /.row -->
-        </div><!-- /.container -->
-    </div><!-- /.page-title -->
-
-    <!-- Blog Posts -->
-    <section class="main-content blog-posts">
-    <div class="themeflat-container">
-
-        <!-- Tabs -->
-        <div class="text-center mb-4">
-    <button class="tab-btn active" onclick="showTab('eng')" style="display: inline-flex; align-items: center; gap: 8px;">
-        <img src="https://flagcdn.com/w40/gb.png" width="20" alt="UK Flag"> 
-        English
-    </button>
-
-    <button class="tab-btn" onclick="showTab('mm')" style="display: inline-flex; align-items: center; gap: 8px;">
-        <img src="https://flagcdn.com/w40/mm.png" width="20" alt="Myanmar Flag"> 
-        Myanmar
-    </button>
-</div>
-
-        <div id="eng" class="tab-content active">
-    <div class="pdf-preview">
-        @foreach(range(1, 46) as $i)
-            <img src="{{ asset('images/pdf/Eng_page-' . sprintf('%04d', $i) . '.jpg') }}" alt="English PDF Page {{ $i }}">
-        @endforeach
-    </div>
-</div>
-
-<div id="mm" class="tab-content">
-    <div class="pdf-preview">
-        @foreach(range(1, 46) as $i)
-            <img src="{{ asset('images/mpdf/RaceGuide_KBZC10MR26_Myanmar_page-' . sprintf('%04d', $i) . '.jpg') }}" alt="Myanmar PDF Page {{ $i }}">
-        @endforeach
-    </div>
-</div>
-
-    </div>
-</section>
-@push('scripts')
- <script>
-function showTab(tab){
-    
-    document.querySelectorAll('.tab-content').forEach(el=>{
-        el.classList.remove('active');
-    });
-
-    document.querySelectorAll('.tab-btn').forEach(el=>{
-        el.classList.remove('active');
-    });
-
-    document.getElementById(tab).classList.add('active');
-    event.target.classList.add('active');
-}
-</script>
-@endpush
+        </div>
+    </section>
 @endsection
+
+@push('scripts')
+<style>
+    .pdf-preview img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #eee;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+</style>
+@endpush
