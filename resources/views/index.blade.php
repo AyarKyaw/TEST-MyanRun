@@ -32,7 +32,7 @@
                              <span class="new-event">new Event </span>
                             <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
+                                <h2 class="title-event"><a href="/event" class="">Join Our Event</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -44,7 +44,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Cherry Trail RUN 2026</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -55,9 +55,9 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Alaingni Monsoon Duathlon 2026</a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <span class="icon-new">
                                             <svg width="13" height="16" viewBox="0 0 13 16" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -67,7 +67,7 @@
                                             </svg>
                                         </span>
                                         <a href="/event"></a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             
@@ -102,7 +102,7 @@
                              <span class="new-event">new Event </span>
                             <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
+                                <h2 class="title-event"><a href="/event" class="">Join Our Event</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -114,7 +114,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Cherry Trail RUN 2026</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -125,9 +125,9 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Alaingni Monsoon Duathlon 2026</a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <span class="icon-new">
                                             <svg width="13" height="16" viewBox="0 0 13 16" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -137,7 +137,7 @@
                                             </svg>
                                         </span>
                                         <a href="/event"></a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             
@@ -171,7 +171,7 @@
                              <span class="new-event">new Event </span>
                             <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
+                                <h2 class="title-event"><a href="/event" class="">Join Our Event</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -183,7 +183,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Cherry Trail RUN 2026</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -194,9 +194,9 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Alaingni Monsoon Duathlon 2026</a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <span class="icon-new">
                                             <svg width="13" height="16" viewBox="0 0 13 16" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -206,7 +206,7 @@
                                             </svg>
                                         </span>
                                         <a href="/event"></a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             
@@ -240,7 +240,7 @@
                              <span class="new-event">new Event </span>
                             <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
+                                <h2 class="title-event"><a href="/event" class="">Join Our Event</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -252,7 +252,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Cherry Trail RUN 2026</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -263,9 +263,9 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Alaingni Monsoon Duathlon 2026</a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <span class="icon-new">
                                             <svg width="13" height="16" viewBox="0 0 13 16" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -275,7 +275,7 @@
                                             </svg>
                                         </span>
                                         <a href="/event"></a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             
@@ -310,7 +310,7 @@
                             <span class="new-event">new Event </span>
                             <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="image event" class="new-event">
                             <div class="content-event">
-                                <h2 class="title-event"><a href="/event" class="">Myanrun</a>
+                                <h2 class="title-event"><a href="/event" class="">Join Our Event</a>
                                 </h2>
                                 <ul>
                                     <li>
@@ -322,7 +322,7 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Cherry Trail RUN 2026</a>
                                     </li>
                                     <li>
                                         <span class="icon-new">
@@ -333,9 +333,9 @@
                                                     fill="#C3E92D" />
                                             </svg>
                                         </span>
-                                        <a href="/event"></a>
+                                        <a href="/event">Alaingni Monsoon Duathlon 2026</a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <span class="icon-new">
                                             <svg width="13" height="16" viewBox="0 0 13 16" fill="none"
                                                 xmlns="http://www.w3.org/2000/svg">
@@ -345,7 +345,7 @@
                                             </svg>
                                         </span>
                                         <a href="/event"></a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </div>
                             
@@ -357,15 +357,39 @@
         <div class="swiper-pagination"></div>
     </div><!-- Widget-slide -->
     
-    <div class="marathon-countdown text-center" style="padding-top: 0; padding-bottom: 0;">
-    <div class="countdown-line">
-        <span><strong id="days">00</strong> Days</span>
-        <span class="separator">:</span>
-        <span><strong id="hours">00</strong> Hours</span>
-        <span class="separator">:</span>
-        <span><strong id="minutes">00</strong> Minutes</span>
-        <span class="separator">:</span>
-        <span><strong id="seconds">00</strong> Seconds</span>
+    <div class="marathon-event-1 text-center" style="margin-bottom: 30px;">
+    <h2 style="font-size: 2rem; font-weight: 800; text-transform: uppercase; color: #1e293b; margin-bottom: 10px;">
+        Cherry Trail <span style="color: #C3E92D;">RUN</span> 2026
+    </h2>
+    <div class="marathon-countdown" style="padding-top: 0; padding-bottom: 0;">
+        <div class="countdown-line">
+            <span><strong class="days">00</strong> Days</span>
+            <span class="separator">:</span>
+            <span><strong class="hours">00</strong> Hours</span>
+            <span class="separator">:</span>
+            <span><strong class="minutes">00</strong> Minutes</span>
+            <span class="separator">:</span>
+            <span><strong class="seconds">00</strong> Seconds</span>
+        </div>
+    </div>
+</div>
+
+<hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 40px 0;">
+
+<div class="marathon-event-2 text-center">
+    <h2 style="font-size: 2rem; font-weight: 800; text-transform: uppercase; color: #1e293b; margin-bottom: 10px;">
+        Alaingni Monsoon <span style="color: #C3E92D;">Duathlon </span> 2026
+    </h2>
+    <div class="marathon-countdown" style="padding-top: 0; padding-bottom: 0;">
+        <div class="countdown-line">
+            <span><strong class="days">00</strong> Days</span>
+            <span class="separator">:</span>
+            <span><strong class="hours">00</strong> Hours</span>
+            <span class="separator">:</span>
+            <span><strong class="minutes">00</strong> Minutes</span>
+            <span class="separator">:</span>
+            <span><strong class="seconds">00</strong> Seconds</span>
+        </div>
     </div>
 </div>
     
@@ -1655,10 +1679,10 @@
                     </div>
         <!-- LEFT TEXT -->
         <div class="marathon-text">
-          <h4 class="mb-2">Myanrun</h4>
+          <!-- <h4 class="mb-2">Myanrun</h4> -->
 
           <p class="mb-3 primary-text">
-            Registration for the Myanrun
+            Registration for the MYANRUN
           </p>
 
           <!-- <p class="mb-4">
@@ -1673,8 +1697,8 @@
 
           <hr>
 
-          <p class="mb-1"><strong>Date:</strong></p>
-          <p class="mb-0"><strong>Venue:</strong></p>
+          <p class="mb-1"><strong></strong></p>
+          <p class="mb-0"><strong></strong></p>
         </div>
 
         <!-- RIGHT IMAGE -->
@@ -1955,118 +1979,116 @@
 @endsection
 @push('scripts')
 <script>
-const videoModal = document.getElementById('videoModal');
-const popupVideo = document.getElementById('popupVideo');
+    // 1. Video Modal Logic
+    const videoModal = document.getElementById('videoModal');
+    const popupVideo = document.getElementById('popupVideo');
 
-videoModal.addEventListener('shown.bs.modal', () => {
-    popupVideo.play();
-});
+    if (videoModal && popupVideo) {
+        videoModal.addEventListener('shown.bs.modal', () => {
+            popupVideo.play();
+        });
 
-videoModal.addEventListener('hidden.bs.modal', () => {
-    popupVideo.pause();
-    popupVideo.currentTime = 0; // reset video to start
-});
-</script>
-    <script>
-document.addEventListener("DOMContentLoaded", function () {
-    new bootstrap.Modal(
-        document.getElementById("marathonClosedModal"),
-        {
-            backdrop: "static",
-            keyboard: false
-        }
-    ).show();
-});
-</script>
-<script>
-const targetDate = new Date("May 2, 2026 05:00:00").getTime();
-
-const countdown = setInterval(() => {
-    const now = new Date().getTime();
-    const distance = targetDate - now;
-
-    if (distance < 0) {
-        clearInterval(countdown);
-        document.querySelector(".marathon-countdown").innerHTML =
-            "<p class='text-danger'>Countdown Ended</p>";
-        return;
+        videoModal.addEventListener('hidden.bs.modal', () => {
+            popupVideo.pause();
+            popupVideo.currentTime = 0; 
+        });
     }
 
-    document.getElementById("days").innerText =
-        String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, "0");
-
-    document.getElementById("hours").innerText =
-        String(Math.floor((distance / (1000 * 60 * 60)) % 24)).padStart(2, "0");
-
-    document.getElementById("minutes").innerText =
-        String(Math.floor((distance / (1000 * 60)) % 60)).padStart(2, "0");
-
-    document.getElementById("seconds").innerText =
-        String(Math.floor((distance / 1000) % 60)).padStart(2, "0");
-}, 1000);
-
-window.addEventListener('load', function () {
-        const loader = document.querySelector('.preload');
-        if (loader) {
-            loader.style.opacity = '0';
-            loader.style.transition = 'opacity 0.4s ease';
-            setTimeout(() => { 
-                loader.style.display = 'none'; 
-            }, 400);
+    // 2. Auto-show Marathon Closed Modal
+    document.addEventListener("DOMContentLoaded", function () {
+        const closedModalEl = document.getElementById("marathonClosedModal");
+        if (closedModalEl) {
+            new bootstrap.Modal(closedModalEl, {
+                backdrop: "static",
+                keyboard: false
+            }).show();
         }
     });
 
-</script>
-<script>
-            const swiper = new Swiper(".mySwiper", {
-                loop: true,
-                autoplay: {
-                delay: 3000, // 3 seconds per slide
-                disableOnInteraction: false,
-                },
-                speed: 1000, // transition speed
-                pagination: {
-                el: ".swiper-pagination",
-                clickable: true,
-                },
-                navigation: {
-                nextEl: ".swiper-button-next",
-                prevEl: ".swiper-button-prev",
-                },
-                effect: 'fade',
-                fadeEffect: {
-                    crossFade: true
-                },
+    // 3. Reusable Multi-Event Countdown Function
+    function initializeCountdown(dateString, containerSelector) {
+        const targetDate = new Date(dateString).getTime();
+        const container = document.querySelector(containerSelector);
+
+        if (!container) return;
+
+        const timer = setInterval(() => {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                clearInterval(timer);
+                container.innerHTML = "<p class='text-danger font-bold'>Event Started!</p>";
+                return;
+            }
+
+            const d = String(Math.floor(distance / (1000 * 60 * 60 * 24))).padStart(2, "0");
+            const h = String(Math.floor((distance / (1000 * 60 * 60)) % 24)).padStart(2, "0");
+            const m = String(Math.floor((distance / (1000 * 60)) % 60)).padStart(2, "0");
+            const s = String(Math.floor((distance / 1000) % 60)).padStart(2, "0");
+
+            // Updates by class inside the specific event container
+            if(container.querySelector(".days")) container.querySelector(".days").innerText = d;
+            if(container.querySelector(".hours")) container.querySelector(".hours").innerText = h;
+            if(container.querySelector(".minutes")) container.querySelector(".minutes").innerText = m;
+            if(container.querySelector(".seconds")) container.querySelector(".seconds").innerText = s;
+        }, 1000);
+    }
+
+    // Initialize Countdown instances
+    document.addEventListener("DOMContentLoaded", function() {
+        initializeCountdown("May 2, 2026 05:00:00", ".marathon-event-1");
+        initializeCountdown("May 24, 2026 06:00:00", ".marathon-event-2");
+    });
+
+    // 4. Swiper Initialization
+    const swiper = new Swiper(".mySwiper", {
+        loop: true,
+        autoplay: { delay: 3000, disableOnInteraction: false },
+        speed: 1000,
+        pagination: { el: ".swiper-pagination", clickable: true },
+        navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+        effect: 'fade',
+        fadeEffect: { crossFade: true },
+    });
+
+    // 5. Phone Input Masking (+95 9)
+    const phoneInput = document.getElementById('phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function (e) {
+            const prefix = '+95 9';
+            if (!this.value.startsWith(prefix)) { this.value = prefix; }
+            const suffix = this.value.substring(prefix.length).replace(/\D/g, '');
+            this.value = prefix + suffix.substring(0, 9);
+        });
+
+        phoneInput.addEventListener('keydown', function(e) {
+            const prefix = '+95 9';
+            if (e.key === 'Backspace' && this.selectionStart <= prefix.length) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // 6. Modal Conflict Manager & Mobile Menu Close
+    document.addEventListener('DOMContentLoaded', function() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('show.bs.modal', function () {
+                const openModal = document.querySelector('.modal.show');
+                if (openModal && openModal !== this) {
+                    const modalInstance = bootstrap.Modal.getInstance(openModal);
+                    if (modalInstance) { modalInstance.hide(); }
+                }
+
+                const mobileMenu = document.querySelector('.overlay-menu-mobie');
+                const closeBtn = document.querySelector('.close-menus');
+                if (mobileMenu && mobileMenu.classList.contains('active') && closeBtn) {
+                    closeBtn.click();
+                }
             });
-        </script>
-@endpush
-@push('scripts')
-<script>
-document.getElementById('phone').addEventListener('input', function (e) {
-    const prefix = '+95 9';
-    
-    // 1. Force the prefix to stay
-    if (!this.value.startsWith(prefix)) {
-        this.value = prefix;
-    }
-
-    // 2. Remove any non-numeric characters after the prefix
-    const suffix = this.value.substring(prefix.length).replace(/\D/g, '');
-    
-    // 3. Enforce max length of 9 digits after the prefix
-    const limitedSuffix = suffix.substring(0, 9);
-    
-    // 4. Update the input value
-    this.value = prefix + limitedSuffix;
-});
-
-// Prevent backspacing into the prefix
-document.getElementById('phone').addEventListener('keydown', function(e) {
-    const prefix = '+95 9';
-    if (e.key === 'Backspace' && this.selectionStart <= prefix.length) {
-        e.preventDefault();
-    }
-});
+        });
+    });
 </script>
 @endpush
 @push('scripts')

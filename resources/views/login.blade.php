@@ -46,9 +46,12 @@
             </div>
 
             <div>
-                <div class="flex justify-between mb-2">
+                <div class="flex justify-between items-start mb-2">
                     <label class="block text-sm font-semibold text-slate-700">Password</label>
-                    <a href="/forgot_password" class="text-xs text-[#C3E92D] hover:underline">Forgot Password?</a>
+                    <div class="text-right">
+                        <a href="/forgot_password" class="text-xs text-[#C3E92D] hover:underline block font-bold">Forgot Password?</a>
+                        <span class="text-[10px] text-slate-400 block mt-0.5">(စကားဝှက်မေ့နေပါသလား)</span>
+                    </div>
                 </div>
                 <div class="relative">
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
@@ -73,10 +76,15 @@
                 LOGIN
             </button>
 
-            <p class="text-center mt-8 text-slate-600">
-                Don't have an account? 
-                <a href="{{ route('register') }}" class="text-[#C3E92D] font-bold hover:underline ml-1">Register Here</a>
-            </p>
+            <div class="text-center mt-8">
+                <p class="text-slate-600">
+                    Don't have an account? 
+                    <a href="{{ route('register') }}" class="text-slate-900 font-black hover:underline ml-1">Register Here</a>
+                </p>
+                <p class="text-[11px] text-slate-400 mt-1">
+                    အကောင့်မရှိသေးပါက ဤနေရာတွင် အသစ်ဖွင့်နိုင်ပါသည်
+                </p>
+            </div>
         </form>
     </div>
 
