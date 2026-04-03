@@ -1675,7 +1675,7 @@
                 <div class="marathon-body">
                     
                     <div class="marathon-image">
-                      <img src="{{ asset('images/logo/myarun(logo).jpg') }}" alt="Myanrun">
+                      <img src="{{ asset('images/MYAN RUN - POPUP.png') }}" alt="Myanrun">
                     </div>
         <!-- LEFT TEXT -->
         <div class="marathon-text">
