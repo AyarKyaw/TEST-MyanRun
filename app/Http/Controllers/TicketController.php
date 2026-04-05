@@ -326,17 +326,23 @@ class TicketController extends Controller
 
     public function exportExcel(Request $request) 
     {
-        $eventId = $request->get('event_id'); // Get event ID from the link
+        // Change 'event_id' to 'event' to match your Blade <a> tag
+        $eventId = $request->get('event'); 
+        
         $category = $request->get('category', 'all');
         $status = $request->get('status', 'all'); 
         
-        // Fetch event name for a better filename (e.g., Alaingni_Monsoon_Duathlon_2026)
+        // Fetch event
         $event = \App\Models\Event::find($eventId);
-        $eventPrefix = $event ? str_replace(' ', '_', $event->name) : 'Tickets';
         
+        // Safety check: if event is not found, handle it
+        if (!$event) {
+            return back()->with('error', 'Event not found.');
+        }
+
+        $eventPrefix = str_replace(' ', '_', $event->name);
         $fileName = $eventPrefix . '_' . $status . '_' . $category . '_' . date('d-m-Y') . '.xlsx';
         
-        // Pass the eventId to the Export class
         return Excel::download(new TicketExport($category, $status, $eventId), $fileName);
     }
 

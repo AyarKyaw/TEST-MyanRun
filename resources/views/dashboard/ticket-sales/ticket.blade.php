@@ -206,10 +206,10 @@
                                                 <small class="text-muted">BIB: {{ $customer->bib_name }}</small>
                                             </div>
                                         </td>
-                                        <td><span class="badge badge-outline-dark fs-14">#{{ $customer->bib_number }}</span></td>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->bib_number }}</span></td>
                                         <td>
                                             @php $badgeClass = match($customer->status) { 'approved' => 'success', 'rejected' => 'danger', default => 'warning' }; @endphp
-                                            <span class="badge badge-{{ $badgeClass }} badge-sm">{{ ucfirst($customer->status) }}</span>
+                                            <span class="badge badge-{{ $badgeClass }} text-dark badge-sm">{{ ucfirst($customer->status) }}</span>
                                         </td>
                                         <td><span class="fw-bold text-dark">{{ number_format($customer->price) }} <small>MMK</small></span></td>
                                         <td>
