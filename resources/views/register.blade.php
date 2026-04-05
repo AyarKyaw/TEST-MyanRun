@@ -32,7 +32,7 @@
             <p class="text-slate-500 mt-2">Join the ultimate running experience</p>
         </div>
 
-        <form id="registrationForm" class="space-y-8" action="{{ route('register') }}" method="POST">
+        <form id="registrationForm" class="space-y-8" action="{{ route('register.submit') }}" method="POST">
             @csrf
             
             <div>
