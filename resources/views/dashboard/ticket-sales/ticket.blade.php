@@ -89,10 +89,21 @@
                             <span><i class="fa fa-file-excel me-2 text-success"></i>Export {{ ucfirst(request('status', 'all')) }}</span>
                         </button>
                         <ul class="dropdown-menu w-100 shadow-lg border-0 mt-2">
-                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => 'all', 'status' => request('status', 'all')]) }}">All Categories</a></li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'status' => request('status', 'all')]) }}">
+                                    All Categories
+                                </a>
+                            </li>
+                            
                             <div class="dropdown-divider"></div>
-                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '16km', 'status' => request('status', 'all')]) }}">16KM Category</a></li>
-                            <li><a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['category' => '36km', 'status' => request('status', 'all')]) }}">36KM Category</a></li>
+
+                            @foreach($event->ticketTypes as $type)
+                                <li>
+                                    <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => $type->name, 'status' => request('status', 'all')]) }}">
+                                        {{ $type->name }} Category
+                                    </a>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                 </div>

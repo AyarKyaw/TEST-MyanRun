@@ -8,11 +8,13 @@ class TicketExport implements WithMultipleSheets
 {
     protected $category;
     protected $status;
+    protected $eventId; // New property
 
-    public function __construct($category, $status = 'all')
+    public function __construct($category, $status = 'all', $eventId = null)
     {
         $this->category = $category;
         $this->status = $status;
+        $this->eventId = $eventId;
     }
 
     /**
@@ -21,9 +23,10 @@ class TicketExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
-            new TicketSheetExport($this->category, $this->status, 'all', 'All Runners'),
-            new TicketSheetExport($this->category, $this->status, 'female', 'Female Only'),
-            new TicketSheetExport($this->category, $this->status, 'male', 'Male Only'),
+            // Pass $this->eventId as the 5th parameter to each sheet
+            new TicketSheetExport($this->category, $this->status, 'all', 'All Runners', $this->eventId),
+            new TicketSheetExport($this->category, $this->status, 'female', 'Female Only', $this->eventId),
+            new TicketSheetExport($this->category, $this->status, 'male', 'Male Only', $this->eventId),
         ];
     }
 }
