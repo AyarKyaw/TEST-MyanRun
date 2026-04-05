@@ -21,39 +21,49 @@ class RegisterController extends Controller
     }
 
     public function register(Request $request)
-{   
-    // 1. Validation Logic
-    $request->validate([
-        'first_name'  => 'required|string|max:255',
-        'middle_name' => 'nullable|string|max:255',
-        'last_name'   => 'required|string|max:255',
-        'email'       => 'required|string|email|max:255|unique:users',
-        'phone'       => ['required', 'string', 'regex:/^[0-9]{7,9}$/'],
-        'password'    => 'required|string|min:8|confirmed',
-    ]);
+    {    
+        $request->validate([
+            'first_name'  => 'required|string|max:255',
+            'middle_name' => 'nullable|string|max:255',
+            'last_name'   => 'required|string|max:255',
+            'email'       => 'required|string|email|max:255|unique:users',
+            'phone'       => ['required', 'string', 'regex:/^[0-9]{7,9}$/'],
+            'password'    => 'required|string|min:8|confirmed',
+        ]);
 
-    $lastUser = User::orderBy('runner_id', 'desc')->first();
-    $nextNumber = $lastUser ? ((int)substr($lastUser->runner_id, 5) + 1) : 1;
-    
-    // Format it as RUN-001, RUN-002, etc.
-    $runnerId = 'RUN-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        // 1. Get the last runner ID using a more reliable sort
+        // We sort by length first, then the string, to ensure RUN-1000 comes after RUN-999
+        $lastUser = User::where('runner_id', 'LIKE', 'RUN-%')
+            ->orderByRaw('LENGTH(runner_id) DESC')
+            ->orderBy('runner_id', 'desc')
+            ->first();
 
-    // 3. Create the User
-    $user = User::create([
-        'first_name'  => $request->first_name,
-        'middle_name' => $request->middle_name,
-        'last_name'   => $request->last_name,
-        'email'       => $request->email,
-        'phone'       => '+959' . ltrim($request->phone, '0'),
-        'password'    => Hash::make($request->password),
-        'runner_id'   => $runnerId, // Assign the dynamic ID here
-    ]);
+        if ($lastUser) {
+            // 2. Use explode or preg_replace to get JUST the number part safely
+            $lastNumber = (int) str_replace('RUN-', '', $lastUser->runner_id);
+            $nextNumber = $lastNumber + 1;
+        } else {
+            $nextNumber = 1000; // Or 1, depending on where you want to start
+        }
+        
+        // 3. Format it correctly
+        // If you want to keep 4 digits (RUN-1001), use padding of 4
+        $runnerId = 'RUN-' . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
 
+        $user = User::create([
+            'first_name'  => $request->first_name,
+            'middle_name' => $request->middle_name,
+            'last_name'   => $request->last_name,
+            'email'       => $request->email,
+            'phone'       => '+959' . ltrim($request->phone, '0'),
+            'password'    => Hash::make($request->password),
+            'runner_id'   => $runnerId, 
+        ]);
 
-    Auth::login($user);
+        Auth::login($user);
 
-    return redirect('/')->with('success', 'Welcome to Myan Run!');
-}
+        return redirect('/')->with('success', 'Welcome to Myan Run!');
+    }
 
     public function login(Request $request)
     {
