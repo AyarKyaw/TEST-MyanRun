@@ -22,6 +22,7 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {    
+        // 1. Validation Logic
         $request->validate([
             'first_name'  => 'required|string|max:255',
             'middle_name' => 'nullable|string|max:255',
@@ -31,43 +32,30 @@ class RegisterController extends Controller
             'password'    => 'required|string|min:8|confirmed',
         ]);
 
-        // 1. Get the last runner ID using a more reliable sort
-        // We sort by length first, then the string, to ensure RUN-1000 comes after RUN-999
-        $lastUser = User::where('runner_id', 'LIKE', 'RUN-%')
-            ->orderByRaw('LENGTH(runner_id) DESC')
-            ->orderBy('runner_id', 'desc')
-            ->first();
-
-        if ($lastUser) {
-            // 2. Use explode or preg_replace to get JUST the number part safely
-            $lastNumber = (int) str_replace('RUN-', '', $lastUser->runner_id);
-            $nextNumber = $lastNumber + 1;
-        } else {
-            $nextNumber = 1; // Or 1, depending on where you want to start
-        }
-        // 1. Get the absolute maximum number from the runner_id column
-        $maxRunnerId = User::where('runner_id', 'LIKE', 'RUN-%')
+        // 2. Determine the Next Runner ID
+        // We strip 'RUN-', convert the rest to a number, and find the MAX
+        $maxNumber = \App\Models\User::where('runner_id', 'LIKE', 'RUN-%')
             ->selectRaw("MAX(CAST(REPLACE(runner_id, 'RUN-', '') AS UNSIGNED)) as max_id")
-            ->first()
-            ->max_id;
+            ->value('max_id');
 
-        // 2. Increment that number
-        $nextNumber = $maxRunnerId ? ($maxRunnerId + 1) : 1000;
-
-        // 3. Format it with your 7-digit padding
+        // Start at 1000 if the database is empty, otherwise increment
+        $nextNumber = $maxNumber ? ($maxNumber + 1) : 1000;
+        
+        // Format as RUN-0001001, etc.
         $runnerId = 'RUN-' . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
 
-        $user = User::create([
+        // 3. Create the User
+        $user = \App\Models\User::create([
             'first_name'  => $request->first_name,
             'middle_name' => $request->middle_name,
             'last_name'   => $request->last_name,
             'email'       => $request->email,
             'phone'       => '+959' . ltrim($request->phone, '0'),
-            'password'    => Hash::make($request->password),
+            'password'    => \Hash::make($request->password),
             'runner_id'   => $runnerId, 
         ]);
 
-        Auth::login($user);
+        \Auth::login($user);
 
         return redirect('/')->with('success', 'Welcome to Myan Run!');
     }
