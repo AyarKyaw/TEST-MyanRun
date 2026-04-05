@@ -43,7 +43,7 @@ class RegisterController extends Controller
         
         // Format as RUN-0001001, etc.
         $runnerId = 'RUN-' . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
-
+        
         // 3. Create the User
         $user = \App\Models\User::create([
             'first_name'  => $request->first_name,
