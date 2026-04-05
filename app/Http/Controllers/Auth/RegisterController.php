@@ -43,7 +43,7 @@ class RegisterController extends Controller
             $lastNumber = (int) str_replace('RUN-', '', $lastUser->runner_id);
             $nextNumber = $lastNumber + 1;
         } else {
-            $nextNumber = 1000; // Or 1, depending on where you want to start
+            $nextNumber = 1; // Or 1, depending on where you want to start
         }
         // 1. Get the absolute maximum number from the runner_id column
         $maxRunnerId = User::where('runner_id', 'LIKE', 'RUN-%')
