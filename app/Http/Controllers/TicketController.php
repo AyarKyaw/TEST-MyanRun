@@ -69,7 +69,9 @@ class TicketController extends Controller
         $query = \App\Models\Ticket::where('event', $eventName)->with(['athlete.user']);
 
         // 1. Filter by status
-        $query->where('status', $status);
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
 
         // 2. Filter by Search
         if (!empty($search)) {

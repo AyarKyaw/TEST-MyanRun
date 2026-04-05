@@ -90,6 +90,11 @@
                         </button>
                         <ul class="dropdown-menu w-100 shadow-lg border-0 mt-2">
                             <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['status' => 'all', 'event' => $event->id, 'category' => 'all']) }}">
+                                    All Status
+                                </a>
+                            </li>
+                            <li>
                                 <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'status' => request('status', 'all')]) }}">
                                     All Categories
                                 </a>
@@ -162,18 +167,30 @@
             <div class="col-lg-12">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-header bg-white pt-4 px-4 border-0">
-                        <ul class="nav nav-tabs" role="tablist">
-                            @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $status => $color)
-                                <li class="nav-item">
-                                    <a class="nav-link {{ request('status', 'pending') == $status ? 'active' : '' }}" 
-                                       href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
-                                         {{ ucfirst($status) }} 
-                                         <span class="badge rounded-pill bg-{{ $color }} ms-2 fs-10" style="vertical-align: middle;">{{ $counts[$status] ?? 0 }}</span>
-                                    </a>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
+    <ul class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
+               href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName, 'search' => request('search')]) }}">
+                All 
+                <span class="badge rounded-pill bg-secondary ms-2 fs-10" style="vertical-align: middle;">
+                    {{ $counts['all'] ?? 0 }}
+                </span>
+            </a>
+        </li>
+
+        @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $status => $color)
+            <li class="nav-item">
+                <a class="nav-link {{ request('status', 'pending') == $status && request('status') != 'all' ? 'active' : '' }}" 
+                   href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
+                   {{ ucfirst($status) }} 
+                   <span class="badge rounded-pill bg-{{ $color }} ms-2 fs-10" style="vertical-align: middle;">
+                       {{ $counts[$status] ?? 0 }}
+                   </span>
+                </a>
+            </li>
+        @endforeach
+    </ul>
+</div>
                     
                     <div class="card-body p-0">
                         <div class="table-responsive">
