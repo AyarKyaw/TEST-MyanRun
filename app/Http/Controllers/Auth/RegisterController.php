@@ -45,9 +45,16 @@ class RegisterController extends Controller
         } else {
             $nextNumber = 1000; // Or 1, depending on where you want to start
         }
-        
-        // 3. Format it correctly
-        // If you want to keep 4 digits (RUN-1001), use padding of 4
+        // 1. Get the absolute maximum number from the runner_id column
+        $maxRunnerId = User::where('runner_id', 'LIKE', 'RUN-%')
+            ->selectRaw("MAX(CAST(REPLACE(runner_id, 'RUN-', '') AS UNSIGNED)) as max_id")
+            ->first()
+            ->max_id;
+
+        // 2. Increment that number
+        $nextNumber = $maxRunnerId ? ($maxRunnerId + 1) : 1000;
+
+        // 3. Format it with your 7-digit padding
         $runnerId = 'RUN-' . str_pad($nextNumber, 7, '0', STR_PAD_LEFT);
 
         $user = User::create([
