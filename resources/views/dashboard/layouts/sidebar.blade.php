@@ -1,27 +1,29 @@
 <div class="deznav" style="margin-top: 30px">
     <div class="deznav-scroll">
         <ul class="metismenu" id="menu">
+            
+            {{-- START ADMIN CHECK --}}
             @if(Auth::guard('admin')->check())
                 @php 
                     $admin = Auth::guard('admin')->user(); 
                 @endphp
 
-             {{-- 1. Admin Management - Super Admin Only --}}
-@if(Auth::guard('admin')->user()->role === 'super_admin')
-<li>
-    <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
-        <i class="flaticon-381-user-9"></i>
-        <span class="nav-text" data-i18n="Admins">Admin Management</span>
-    </a>
-    <ul aria-expanded="false">
-        {{-- Use named routes for cleaner code --}}
-        <li><a href="{{ route('admin.admins.index') }}" data-i18n="All Admins">All Admins</a></li>
-        <li><a href="{{ route('admin.admins.create') }}" data-i18n="Admin Create / Roles">Admin Create / Roles</a></li>
-    </ul>
-</li>
-@endif
+                {{-- 1. Admin Management - Super Admin Only --}}
+                @if($admin->role === 'super_admin')
+                <li>
+                    <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
+                        <i class="flaticon-381-user-9"></i>
+                        <span class="nav-text" data-i18n="Admins">Admin Management</span>
+                    </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('admin.admins.index') }}" data-i18n="All Admins">All Admins</a></li>
+                        <li><a href="{{ route('admin.admins.create') }}" data-i18n="Admin Create / Roles">Admin Create / Roles</a></li>
+                    </ul>
+                </li>
+                @endif
 
                 {{-- Registration Section - Super Admin Only --}}
+                @if($admin->role === 'super_admin')
                 <li>
                     <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
                         <i class="flaticon-381-id-card"></i>
@@ -43,7 +45,6 @@
                     <ul aria-expanded="false">
                         <li><a href="{{ route('dashboard.tickets.index') }}" data-i18n="Event Tickets">Event Tickets</a></li>
                         
-                        {{-- Dinner Tickets - Usually Super Admin Only --}}
                         @if($admin->role === 'super_admin')
                         <li>
                             <a class="has-arrow" href="javascript:void(0);" aria-expanded="false">Dinner Tickets</a>
@@ -99,7 +100,7 @@
                     </ul>
                 </li>
                 @endif
-            
+            @endif {{-- THIS WAS THE MISSING ENDIF FOR ADMIN GUARD --}}
 
             {{-- Agent Guard Section --}}
             @if(Auth::guard('agent')->check())

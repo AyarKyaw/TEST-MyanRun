@@ -345,18 +345,26 @@
                 </div>
             </form>
             <div class="modal-footer border-0 bg-light p-4">
-                <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">Close</button>
-                <div class="ms-auto d-flex gap-2" id="modal-action-buttons">
-                    <form id="reject-form" action="" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-danger px-4 py-2 rounded-2"><i class="fa fa-times me-1"></i> Reject</button>
-                    </form>
-                    <form id="approve-form" action="" method="POST">
-                        @csrf
-                        <button type="submit" class="btn btn-success px-4 py-2 rounded-2"><i class="fa fa-check me-1"></i> Approve Payment</button>
-                    </form>
-                </div>
-            </div>
+    <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">Close</button>
+    
+    {{-- Check the role directly from the guard --}}
+    @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'super_admin')
+    <div class="ms-auto d-flex gap-2" id="modal-action-buttons">
+        <form id="reject-form" action="" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-danger px-4 py-2 rounded-2">
+                <i class="fa fa-times me-1"></i> Reject
+            </button>
+        </form>
+        <form id="approve-form" action="" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-success px-4 py-2 rounded-2">
+                <i class="fa fa-check me-1"></i> Approve Payment
+            </button>
+        </form>
+    </div>
+    @endif
+</div>
         </div>
     </div>
 </div>
