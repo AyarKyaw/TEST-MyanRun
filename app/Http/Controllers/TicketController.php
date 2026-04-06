@@ -6,10 +6,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\Event;
+use App\Models\Admin;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 use Laranex\LaravelMyanmarPayments\LaravelMyanmarPayments;
 use App\Exports\TicketExport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -63,6 +65,17 @@ class TicketController extends Controller
 
     public function dashboard($eventName, Request $request)
     {
+        $admin = Auth::guard('admin')->user();
+        $event = \App\Models\Event::where('name', $eventName)->firstOrFail();
+
+        // --- Role Based Security ---
+        // If the user is an event_admin, check if they are assigned to this event
+        if ($admin->role === 'event_admin') {
+            if (!$event->admins->contains($admin->id)) {
+                abort(403, 'You are not assigned to manage this event.');
+            }
+        }
+
         $search = $request->query('search');
         $status = $request->query('status', 'pending'); 
 
@@ -95,9 +108,6 @@ class TicketController extends Controller
                            ->paginate(10) 
                            ->withQueryString();
 
-        // Fetch event to get max slots
-        $event = \App\Models\Event::where('name', $eventName)->first();
-
         // Define the variable so compact() can find it
         $eventLimit = $event?->total_max_slots;
 
@@ -129,23 +139,30 @@ class TicketController extends Controller
             'max_slots' => $eventLimit,
         ];
 
-        // Now 'max_slots' is a defined variable and won't throw an ErrorException
         return view('dashboard.ticket-sales.ticket', compact(
             'customers',
             'counts',
             'status',
             'eventName',
-            'eventLimit', // ✅ changed
+            'eventLimit', 
             'event'
         ));
     }
 
     public function index()
     {
-        // Fetch events grouped by their 'status' (1 for live, 0 for past)
-        $events = Event::orderBy('date', 'desc')->get()->groupBy('is_active');
+        $admin = Auth::guard('admin')->user();
+        $query = Event::query();
 
-        // Extract them into separate variables so the Blade @forelse works correctly
+        // If event admin, only show events they are assigned to in the list
+        if ($admin->role === 'event_admin') {
+            $query->whereHas('admins', function($q) use ($admin) {
+                $q->where('admin_id', $admin->id);
+            });
+        }
+
+        $events = $query->orderBy('date', 'desc')->get()->groupBy('is_active');
+
         $nowEvents = $events->get(1, collect());  // Status 1 = Live
         $pastEvents = $events->get(0, collect()); // Status 0 = Past
 
@@ -328,18 +345,18 @@ class TicketController extends Controller
 
     public function exportExcel(Request $request) 
     {
-        // Change 'event_id' to 'event' to match your Blade <a> tag
+        $admin = Auth::guard('admin')->user();
         $eventId = $request->get('event'); 
         
         $category = $request->get('category', 'all');
         $status = $request->get('status', 'all'); 
         
         // Fetch event
-        $event = \App\Models\Event::find($eventId);
-        
-        // Safety check: if event is not found, handle it
-        if (!$event) {
-            return back()->with('error', 'Event not found.');
+        $event = \App\Models\Event::findOrFail($eventId);
+
+        // --- Role Based Security ---
+        if ($admin->role === 'event_admin' && !$event->admins->contains($admin->id)) {
+            abort(403, 'You are not assigned to export data for this event.');
         }
 
         $eventPrefix = str_replace(' ', '_', $event->name);
@@ -581,7 +598,7 @@ class TicketController extends Controller
         ]);
     }
 
-    public function initiatePayment_s(Request $request, $id) // Added $id parameter to match your route
+    public function initiatePayment_s(Request $request, $id) 
     {
         $order = session('pending_registration');
         if (!$order) {
@@ -604,7 +621,6 @@ class TicketController extends Controller
             : $ticketType->foreign_price;
 
         // 3. GLOBAL LOGIC: Count all registrations for the WHOLE EVENT
-        // This counts every ticket type belonging to this event ID
         $totalEventRegistrations = \App\Models\Ticket::whereHas('ticketType', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
@@ -615,7 +631,6 @@ class TicketController extends Controller
         $isEarlyBird = false;
         $discountAmount = 0;
 
-        // Check the limit on the EVENT, but get the discount from the TICKET TYPE
         if ($event->early_bird_limit > 0 && $totalEventRegistrations < $event->early_bird_limit) {
             $isEarlyBird = true;
             $discountAmount = $ticketType->early_bird_discount ?? 0;
@@ -662,8 +677,6 @@ class TicketController extends Controller
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
-        // 2. Fetch the Athlete, Ticket Type, and the Parent Event
-        // We use 'with' to get the event details in one go
         $athlete = \App\Models\Athlete::find($order['athlete_id']);
         $ticketType = \App\Models\EventTicketType::with('event')->find($order['ticket_type_id']);
 
@@ -680,7 +693,6 @@ class TicketController extends Controller
         $basePrice = $isNational ? (float)$ticketType->national_price : (float)$ticketType->foreign_price;
 
         // 5. GLOBAL EARLY BIRD CALCULATION
-        // Count ALL tickets sold for this EVENT (across all distances/categories)
         $globalSoldCount = \App\Models\Ticket::whereHas('ticketType', function($query) use ($event) {
                 $query->where('event_id', $event->id);
             })
@@ -690,7 +702,6 @@ class TicketController extends Controller
         $discountAmount = 0;
         $isEarlyBirdActive = false;
 
-        // Logic: Check the EVENT's shared limit, but apply the TICKET TYPE's specific discount
         if ($event->early_bird_limit > 0 && $globalSoldCount < $event->early_bird_limit) {
             $discountAmount = (float)$ticketType->early_bird_discount;
             $isEarlyBirdActive = true;

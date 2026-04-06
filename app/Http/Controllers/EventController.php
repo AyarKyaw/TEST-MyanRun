@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Admin; // Added this
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth; // Added this
 
 class EventController extends Controller
 {
@@ -14,7 +16,16 @@ class EventController extends Controller
      */
     public function index(Request $request, $status = 'coming')
     {
+        $admin = Auth::guard('admin')->user();
         $query = \App\Models\Event::query();
+
+        // --- Role Based Filtering ---
+        // If the user is an Event Admin, only show events they are assigned to
+        if ($admin->role === 'event_admin') {
+            $query->whereHas('admins', function($q) use ($admin) {
+                $q->where('admin_id', $admin->id);
+            });
+        }
 
         // Map the URL string to your is_active integers
         if ($status === 'now') {
@@ -37,125 +48,137 @@ class EventController extends Controller
 
         return view('dashboard.events.event', compact('events', 'sidebarEvents', 'title', 'status', 'customers'));
     }
+
     // Show form to create event
     public function create()
     {
-        return view('dashboard.events.event-create');
+        // Fetch only Event Admins to show in the assignment field
+        $eventAdmins = Admin::where('role', 'event_admin')->get();
+        return view('dashboard.events.event-create', compact('eventAdmins'));
     }
+
     public function showPublicEvents()
-{
-    $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
+    {
+        $allEvents = \App\Models\Event::orderBy('date', 'asc')->get();
 
-    // Attach "is_full" status to each event
-    $allEvents->each(function ($event) {
-        $soldSlots = \App\Models\Ticket::where('event_id', $event->id)
-            ->whereIn('status', ['pending', 'confirmed', 'approved'])
-            ->whereNotNull('bib_number')
-            ->distinct()
-            ->count('bib_number');
+        // Attach "is_full" status to each event
+        $allEvents->each(function ($event) {
+            $soldSlots = \App\Models\Ticket::where('event_id', $event->id)
+                ->whereIn('status', ['pending', 'confirmed', 'approved'])
+                ->whereNotNull('bib_number')
+                ->distinct()
+                ->count('bib_number');
 
-        // If total_max_slots is null, assume unlimited. Otherwise compare.
-        $event->is_full = !is_null($event->total_max_slots) && ($soldSlots >= $event->total_max_slots);
-    });
+            // If total_max_slots is null, assume unlimited. Otherwise compare.
+            $event->is_full = !is_null($event->total_max_slots) && ($soldSlots >= $event->total_max_slots);
+        });
 
-    $nowEvents = $allEvents->where('is_active', 1);
-    $comingEvents = $allEvents->where('is_active', 2);
-    $pastEvents = $allEvents->where('is_active', 0);
+        $nowEvents = $allEvents->where('is_active', 1);
+        $comingEvents = $allEvents->where('is_active', 2);
+        $pastEvents = $allEvents->where('is_active', 0);
 
-    $userTickets = [];
-    if (auth()->check()) {
-        $userTickets = auth()->user()->tickets()
-            ->whereIn('status', ['pending', 'confirmed', 'approved'])
-            ->pluck('event') 
-            ->map(fn($item) => trim($item))
-            ->toArray();
+        $userTickets = [];
+        if (auth()->check()) {
+            $userTickets = auth()->user()->tickets()
+                ->whereIn('status', ['pending', 'confirmed', 'approved'])
+                ->pluck('event') 
+                ->map(fn($item) => trim($item))
+                ->toArray();
+        }
+
+        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
     }
 
-    return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
-}
     // Save the event
     public function store(Request $request)
-{
-    $request->validate([
-        'name'            => 'required',
-        'company'         => 'required',
-        'date'            => 'required|date',
-        'is_active'       => 'required|integer',
-        'image'           => 'required|image',
-        'location'        => 'nullable|string',
-        'video_url'       => 'nullable|string',
-        'description'     => 'nullable|string',
-        
-        // New Validation for Global Limit
-        'ticket_limit_type' => 'required|in:unlimited,limited',
-        'total_max_slots'   => 'nullable|required_if:ticket_limit_type,limited|integer|min:1',
+    {
+        $request->validate([
+            'name'            => 'required',
+            'company'         => 'required',
+            'date'            => 'required|date',
+            'is_active'       => 'required|integer',
+            'image'           => 'required|image',
+            'location'        => 'nullable|string',
+            'video_url'       => 'nullable|string',
+            'description'     => 'nullable|string',
+            
+            // New Validation for Global Limit
+            'ticket_limit_type' => 'required|in:unlimited,limited',
+            'total_max_slots'   => 'nullable|required_if:ticket_limit_type,limited|integer|min:1',
 
-        // Ticket types validation
-        'tickets.*.name' => 'required|string',
-        'tickets.*.type' => 'required|in:solo,relay',
-        'tickets.*.national_price' => 'required|numeric',
-        'tickets.*.foreign_price' => 'required|numeric',
-        'tickets.*.max_slots' => 'nullable|integer',
-        'tickets.*.prefix' => 'nullable|string|max:10',
-        'tickets.*.start_number' => 'nullable|integer|min:1',
-    ]);
+            // Ticket types validation
+            'tickets.*.name' => 'required|string',
+            'tickets.*.type' => 'required|in:solo,relay',
+            'tickets.*.national_price' => 'required|numeric',
+            'tickets.*.foreign_price' => 'required|numeric',
+            'tickets.*.max_slots' => 'nullable|integer',
+            'tickets.*.prefix' => 'nullable|string|max:10',
+            'tickets.*.start_number' => 'nullable|integer|min:1',
+            'admin_ids' => 'nullable|array' // Added validation for admins
+        ]);
 
-    // Create event
-    $event = new \App\Models\Event();
-    $event->name        = $request->name;
-    $event->company     = $request->company;
-    $event->date        = $request->date;
-    $event->location    = $request->location;
-    $event->video_url   = $request->video_url;
-    $event->description = $request->description;
-    $event->is_active   = $request->is_active;
+        // Create event
+        $event = new \App\Models\Event();
+        $event->name        = $request->name;
+        $event->company     = $request->company;
+        $event->date        = $request->date;
+        $event->location    = $request->location;
+        $event->video_url   = $request->video_url;
+        $event->description = $request->description;
+        $event->is_active   = $request->is_active;
 
-    // Handle Global Ticket Limit Logic
-    if ($request->ticket_limit_type === 'limited') {
-        $event->total_max_slots = $request->total_max_slots;
-    } else {
-        $event->total_max_slots = null; // Unlimited
-    }
-
-    if ($request->hasFile('image')) {
-        $event->image_path = $request->file('image')->store('events', 'public');
-    }
-
-    $event->save();
-
-    // Save ticket types
-    if ($request->has('tickets')) {
-        foreach ($request->tickets as $ticket) {
-            if (empty($ticket['name'])) continue;
-
-            $nationalImage = null;
-            $foreignImage = null;
-
-            if (isset($ticket['national_image']) && $ticket['national_image'] instanceof \Illuminate\Http\UploadedFile) {
-                $nationalImage = $ticket['national_image']->store('tickets', 'public');
-            }
-
-            if (isset($ticket['foreign_image']) && $ticket['foreign_image'] instanceof \Illuminate\Http\UploadedFile) {
-                $foreignImage = $ticket['foreign_image']->store('tickets', 'public');
-            }
-
-            $event->ticketTypes()->create([
-                'name' => $ticket['name'],
-                'type' => $ticket['type'],
-                'national_price' => $ticket['national_price'],
-                'foreign_price' => $ticket['foreign_price'],
-                'national_image' => $nationalImage,
-                'foreign_image' => $foreignImage,
-                'max_slots' => $ticket['max_slots'] ?? null,
-                'prefix'         => $ticket['prefix'],     
-                'start_number'   => $ticket['start_number']
-            ]);
+        // Handle Global Ticket Limit Logic
+        if ($request->ticket_limit_type === 'limited') {
+            $event->total_max_slots = $request->total_max_slots;
+        } else {
+            $event->total_max_slots = null; // Unlimited
         }
+
+        if ($request->hasFile('image')) {
+            $event->image_path = $request->file('image')->store('events', 'public');
+        }
+
+        $event->save();
+
+        // --- Save Admin Assignments ---
+        if ($request->has('admin_ids')) {
+            $event->admins()->attach($request->admin_ids);
+        }
+
+        // Save ticket types
+        if ($request->has('tickets')) {
+            foreach ($request->tickets as $ticket) {
+                if (empty($ticket['name'])) continue;
+
+                $nationalImage = null;
+                $foreignImage = null;
+
+                if (isset($ticket['national_image']) && $ticket['national_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $nationalImage = $ticket['national_image']->store('tickets', 'public');
+                }
+
+                if (isset($ticket['foreign_image']) && $ticket['foreign_image'] instanceof \Illuminate\Http\UploadedFile) {
+                    $foreignImage = $ticket['foreign_image']->store('tickets', 'public');
+                }
+
+                $event->ticketTypes()->create([
+                    'name' => $ticket['name'],
+                    'type' => $ticket['type'],
+                    'national_price' => $ticket['national_price'],
+                    'foreign_price' => $ticket['foreign_price'],
+                    'national_image' => $nationalImage,
+                    'foreign_image' => $foreignImage,
+                    'max_slots' => $ticket['max_slots'] ?? null,
+                    'prefix'         => $ticket['prefix'],     
+                    'start_number'   => $ticket['start_number']
+                ]);
+            }
+        }
+
+        $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
+        return redirect()->route('events.index', $statusMap[$request->is_active]);
     }
 
-    $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
-    return redirect()->route('events.index', $statusMap[$request->is_active]);
-}
     /**
      * Display the specified resource.
      */
@@ -185,91 +208,98 @@ class EventController extends Controller
     public function edit($id)
     {
         $event = \App\Models\Event::findOrFail($id);
-        return view('dashboard.events.edit', compact('event'));
+        $eventAdmins = Admin::where('role', 'event_admin')->get(); // Added this
+        return view('dashboard.events.edit', compact('event', 'eventAdmins'));
     }
 
-   public function update(Request $request, $id)
-{
-    $event = \App\Models\Event::findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        $event = \App\Models\Event::findOrFail($id);
 
-    $request->validate([
-        'name'             => 'required|string|max:255',
-        'date'             => 'nullable|date',
-        'is_active'        => 'required',
-        'company'          => 'nullable|string',
-        'location'         => 'nullable|string',
-        'video_url'        => 'nullable|string',
-        'description'      => 'nullable|string',
-        'early_bird_limit' => 'nullable|integer|min:0', // 1. Added validation
-        'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'tickets'          => 'nullable|array',
-    ]);
+        $request->validate([
+            'name'             => 'required|string|max:255',
+            'date'             => 'nullable|date',
+            'is_active'        => 'required',
+            'company'          => 'nullable|string',
+            'location'         => 'nullable|string',
+            'video_url'        => 'nullable|string',
+            'description'      => 'nullable|string',
+            'early_bird_limit' => 'nullable|integer|min:0', 
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tickets'          => 'nullable|array',
+            'admin_ids'        => 'nullable|array' // Added validation for admins
+        ]);
 
-    // 2. Update Event Details
-    $event->name             = $request->name;
-    $event->company          = $request->company;
-    $event->date             = $request->date;
-    $event->is_active        = $request->is_active;
-    $event->location         = $request->location;
-    $event->video_url        = $request->video_url;
-    $event->description      = $request->description;
-    $event->early_bird_limit = $request->early_bird_limit ?? 0; // 3. Save Global Limit
+        // Update Event Details
+        $event->name             = $request->name;
+        $event->company          = $request->company;
+        $event->date             = $request->date;
+        $event->is_active        = $request->is_active;
+        $event->location         = $request->location;
+        $event->video_url        = $request->video_url;
+        $event->description      = $request->description;
+        $event->early_bird_limit = $request->early_bird_limit ?? 0;
 
-    if ($request->ticket_limit_type === 'unlimited') {
-        $event->total_max_slots = null;
-    } else {
-        $event->total_max_slots = $request->total_max_slots;
-    }
-
-    if ($request->hasFile('image')) {
-        $event->image_path = $request->file('image')->store('events', 'public');
-    }
-
-    $event->save();
-
-    // 4. Handle Ticket Types
-    if ($request->has('tickets')) {
-        foreach ($request->tickets as $index => $ticketData) {
-            
-            $ticketType = isset($ticketData['id']) 
-                ? \App\Models\EventTicketType::find($ticketData['id']) 
-                : new \App\Models\EventTicketType();
-
-            $ticketType->event_id            = $event->id;
-            $ticketType->name                = $ticketData['name'];
-            $ticketType->type                = $ticketData['type'];
-            $ticketType->national_price      = $ticketData['national_price'];
-            $ticketType->foreign_price       = $ticketData['foreign_price'];
-            $ticketType->max_slots           = $ticketData['max_slots'] ?? null;
-            $ticketType->prefix              = $ticketData['prefix'] ?? null;
-            $ticketType->start_number        = $ticketData['start_number'] ?? 1;
-
-            // Maintain legacy ticket-level EB data
-            $ticketType->has_gender_bib      = $ticketData['has_gender_bib'] ?? 0;
-            $ticketType->early_bird_limit    = $ticketData['early_bird_limit'] ?? null;
-            $ticketType->early_bird_discount = $ticketData['early_bird_discount'] ?? 0;
-
-            // Handle Files (Remains the same...)
-            if ($request->hasFile("tickets.$index.national_image")) {
-                $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets/display', 'public');
-            }
-            if ($request->hasFile("tickets.$index.foreign_image")) {
-                $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets/display', 'public');
-            }
-            if ($request->hasFile("tickets.$index.ticket_png")) {
-                $ticketType->ticket_png = $request->file("tickets.$index.ticket_png")->store('tickets/templates', 'public');
-            }
-
-            $ticketType->save();
+        if ($request->ticket_limit_type === 'unlimited') {
+            $event->total_max_slots = null;
+        } else {
+            $event->total_max_slots = $request->total_max_slots;
         }
+
+        if ($request->hasFile('image')) {
+            $event->image_path = $request->file('image')->store('events', 'public');
+        }
+
+        $event->save();
+
+        // --- Sync Admin Assignments ---
+        if ($request->has('admin_ids')) {
+            $event->admins()->sync($request->admin_ids);
+        } else {
+            $event->admins()->detach();
+        }
+
+        // Handle Ticket Types
+        if ($request->has('tickets')) {
+            foreach ($request->tickets as $index => $ticketData) {
+                
+                $ticketType = isset($ticketData['id']) 
+                    ? \App\Models\EventTicketType::find($ticketData['id']) 
+                    : new \App\Models\EventTicketType();
+
+                $ticketType->event_id            = $event->id;
+                $ticketType->name                = $ticketData['name'];
+                $ticketType->type                = $ticketData['type'];
+                $ticketType->national_price      = $ticketData['national_price'];
+                $ticketType->foreign_price       = $ticketData['foreign_price'];
+                $ticketType->max_slots           = $ticketData['max_slots'] ?? null;
+                $ticketType->prefix              = $ticketData['prefix'] ?? null;
+                $ticketType->start_number        = $ticketData['start_number'] ?? 1;
+
+                $ticketType->has_gender_bib      = $ticketData['has_gender_bib'] ?? 0;
+                $ticketType->early_bird_limit    = $ticketData['early_bird_limit'] ?? null;
+                $ticketType->early_bird_discount = $ticketData['early_bird_discount'] ?? 0;
+
+                if ($request->hasFile("tickets.$index.national_image")) {
+                    $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets/display', 'public');
+                }
+                if ($request->hasFile("tickets.$index.foreign_image")) {
+                    $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets/display', 'public');
+                }
+                if ($request->hasFile("tickets.$index.ticket_png")) {
+                    $ticketType->ticket_png = $request->file("tickets.$index.ticket_png")->store('tickets/templates', 'public');
+                }
+
+                $ticketType->save();
+            }
+        }
+
+        $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
+        $statusKey = $statusMap[$request->is_active] ?? 'now';
+
+        return redirect()->route('events.index', $statusKey)
+                         ->with('success', 'Event and Ticket Types updated successfully!');
     }
-
-    $statusMap = [0 => 'past', 1 => 'now', 2 => 'coming'];
-    $statusKey = $statusMap[$request->is_active] ?? 'now';
-
-    return redirect()->route('events.index', $statusKey)
-                     ->with('success', 'Event and Ticket Types updated successfully!');
-}
 
     /**
      * Remove the specified resource from storage.

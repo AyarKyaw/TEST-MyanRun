@@ -115,6 +115,17 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group mb-3">
+    <label class="form-label font-w600">Update Assigned Admins</label>
+    <select name="admin_ids[]" class="form-control default-select" multiple>
+        @foreach($eventAdmins as $admin)
+            <option value="{{ $admin->id }}" 
+                {{ $event->admins->contains($admin->id) ? 'selected' : '' }}>
+                {{ $admin->email }}
+            </option>
+        @endforeach
+    </select>
+</div>
 
             <div class="card mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">

@@ -8,7 +8,10 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('event_ticket_types', function (Blueprint $table) {
-            $table->dropColumn('image');
+            // Check if the old column exists before trying to drop it
+            if (Schema::hasColumn('event_ticket_types', 'image')) {
+                $table->dropColumn('image');
+            }
 
             $table->string('national_image')->nullable();
             $table->string('foreign_image')->nullable();
@@ -20,8 +23,8 @@ return new class extends Migration {
         Schema::table('event_ticket_types', function (Blueprint $table) {
             $table->string('image')->nullable();
 
-            $table->dropColumn('national_image');
-            $table->dropColumn('foreign_image');
+            // Safe drop for the new columns as well
+            $table->dropColumn(['national_image', 'foreign_image']);
         });
     }
 };

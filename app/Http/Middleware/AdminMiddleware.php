@@ -11,19 +11,18 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // 1. Define allowed admin emails
-        $admins = [
-            'your-email@example.com', 
-            'admin@gmail.com'
-        ];
+        // 1. Check if the user is logged in via the 'admin' guard
+        if (Auth::guard('admin')->check()) {
+            
+            $user = Auth::guard('admin')->user();
 
-        // 2. Check the 'admin' guard specifically
-        // This ensures the person logged in via /admin/login is allowed
-        if (Auth::guard('admin')->check() && in_array(Auth::guard('admin')->user()->email, $admins)) {
-            return $next($request);
+            // 2. Allow access if they are either a Super Admin OR an Event Admin
+            if ($user->role === 'super_admin' || $user->role === 'event_admin') {
+                return $next($request);
+            }
         }
 
-        // 3. If not an admin, send them to the admin login page
-        return redirect()->route('admin.login')->with('error', 'Please login with admin credentials.');
+        // 3. If they aren't logged in OR don't have a valid role, kick them out
+        return redirect()->route('admin.login')->with('error', 'Unauthorized access.');
     }
 }

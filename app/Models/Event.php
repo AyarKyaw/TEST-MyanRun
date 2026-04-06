@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Event extends Model
 {
@@ -15,16 +16,22 @@ class Event extends Model
         'image_path',
         'date',
         'is_active',
-        'location',     // Added this
+        'location',
         'video_url', 
         'description', 
         'early_bird_limit', 
     ];
 
+    /**
+     * Relationship: The admins assigned to this event.
+     */
+    public function admins(): BelongsToMany
+    {
+        return $this->belongsToMany(Admin::class, 'admin_event');
+    }
+
     public function tickets()
     {
-        // Second parameter is the foreign key on tickets table
-        // Third parameter is the local key on events table
         return $this->hasMany(Ticket::class, 'event', 'name'); 
     }
 

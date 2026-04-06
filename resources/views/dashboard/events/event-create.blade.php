@@ -90,6 +90,16 @@
                                 </div>
                             </div>
 
+                            <div class="form-group mb-3">
+    <label class="form-label font-w600">Assign Event Admins</label>
+    <select name="admin_ids[]" class="form-control default-select" multiple>
+        @foreach($eventAdmins as $admin)
+            <option value="{{ $admin->id }}">{{ $admin->email }}</option>
+        @endforeach
+    </select>
+    <small class="text-muted">Selected admins will be able to view and download reports for this event.</small>
+</div>
+
                             <div class="mb-3 col-md-12">
                                 <label class="form-label text-black fw-bold">Event Description</label>
                                 <textarea name="description" class="form-control" rows="5" placeholder="Describe the event..."></textarea>

@@ -20,6 +20,7 @@ use App\Http\Controllers\DinnerController;
 use App\Http\Controllers\SponsorController;
 use App\Models\SponsorCode;
 use App\Http\Controllers\AgentController;
+use App\Http\Controllers\Admin\AdminManagementController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -290,6 +291,25 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     
 }); 
 
+Route::group(['prefix' => 'dashboard', 'middleware' => ['auth:admin']], function () {
+    
+    // Admin Management
+    Route::get('/admins', [AdminManagementController::class, 'index'])
+        ->name('admin.admins.index');
+        
+    Route::get('/admins/create', [AdminManagementController::class, 'create'])
+        ->name('admin.admins.create');
+        
+    // CHANGE THIS NAME TO MATCH YOUR BLADE FORM
+    Route::post('/admins/store', [AdminManagementController::class, 'store'])
+        ->name('admin.store'); 
+
+        Route::delete('/admins/{id}', [AdminManagementController::class, 'destroy'])->name('admin.admins.destroy');
+
+        Route::get('/admins/{id}/edit', [AdminManagementController::class, 'edit'])->name('admin.admins.edit');
+Route::put('/admins/{id}/update', [AdminManagementController::class, 'update'])->name('admin.admins.update');
+    
+});
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
 // Route::get('/test-kbz/{id}', function($id) {
 //     // Fake session for testing
