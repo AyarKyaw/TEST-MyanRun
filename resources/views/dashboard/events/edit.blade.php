@@ -72,6 +72,14 @@
                                         placeholder="Enter total slots (e.g. 500)">
                                 </div>
 
+                                <div class="mb-3 col-md-6">
+                                    <label class="form-label text-warning fw-bold">Global Early Bird Limit (Total Event)</label>
+                                    <input type="number" name="early_bird_limit" class="form-control border-warning" 
+                                        value="{{ old('early_bird_limit', $event->early_bird_limit) }}" 
+                                        placeholder="e.g. 200 (First 200 runners get discount)">
+                                    <small class="text-muted">This limit applies to the sum of all ticket types for this event.</small>
+                                </div>
+
                                 <div class="mb-3 col-md-12">
                                     <label class="form-label text-black fw-bold">Event Description</label>
                                     <textarea name="description" class="form-control" rows="5">{{ old('description', $event->description) }}</textarea>

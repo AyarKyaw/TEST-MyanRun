@@ -188,30 +188,33 @@ class EventController extends Controller
         return view('dashboard.events.edit', compact('event'));
     }
 
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
 {
     $event = \App\Models\Event::findOrFail($id);
 
     $request->validate([
-        'name'        => 'required|string|max:255',
-        'date'        => 'nullable|date',
-        'is_active'   => 'required',
-        'company'     => 'nullable|string', // Added company
-        'location'    => 'nullable|string',
-        'video_url'   => 'nullable|string',
-        'description' => 'nullable|string',
-        'image'       => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        'tickets'     => 'nullable|array', // Validate tickets array
+        'name'             => 'required|string|max:255',
+        'date'             => 'nullable|date',
+        'is_active'        => 'required',
+        'company'          => 'nullable|string',
+        'location'         => 'nullable|string',
+        'video_url'        => 'nullable|string',
+        'description'      => 'nullable|string',
+        'early_bird_limit' => 'nullable|integer|min:0', // 1. Added validation
+        'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'tickets'          => 'nullable|array',
     ]);
 
-    // 1. Update Event Details
-    $event->name        = $request->name;
-    $event->company     = $request->company;
-    $event->date        = $request->date;
-    $event->is_active   = $request->is_active;
-    $event->location    = $request->location;
-    $event->video_url   = $request->video_url;
-    $event->description = $request->description;
+    // 2. Update Event Details
+    $event->name             = $request->name;
+    $event->company          = $request->company;
+    $event->date             = $request->date;
+    $event->is_active        = $request->is_active;
+    $event->location         = $request->location;
+    $event->video_url        = $request->video_url;
+    $event->description      = $request->description;
+    $event->early_bird_limit = $request->early_bird_limit ?? 0; // 3. Save Global Limit
+
     if ($request->ticket_limit_type === 'unlimited') {
         $event->total_max_slots = null;
     } else {
@@ -224,7 +227,7 @@ class EventController extends Controller
 
     $event->save();
 
-    // 2. Handle Ticket Types
+    // 4. Handle Ticket Types
     if ($request->has('tickets')) {
         foreach ($request->tickets as $index => $ticketData) {
             
@@ -240,22 +243,19 @@ class EventController extends Controller
             $ticketType->max_slots           = $ticketData['max_slots'] ?? null;
             $ticketType->prefix              = $ticketData['prefix'] ?? null;
             $ticketType->start_number        = $ticketData['start_number'] ?? 1;
-            // $ticketType->category            = $ticketData['category'] ?? null;
 
-            // New Logic for Gender and Early Bird
+            // Maintain legacy ticket-level EB data
             $ticketType->has_gender_bib      = $ticketData['has_gender_bib'] ?? 0;
             $ticketType->early_bird_limit    = $ticketData['early_bird_limit'] ?? null;
             $ticketType->early_bird_discount = $ticketData['early_bird_discount'] ?? 0;
 
-            // Handle Display Images
+            // Handle Files (Remains the same...)
             if ($request->hasFile("tickets.$index.national_image")) {
                 $ticketType->national_image = $request->file("tickets.$index.national_image")->store('tickets/display', 'public');
             }
             if ($request->hasFile("tickets.$index.foreign_image")) {
                 $ticketType->foreign_image = $request->file("tickets.$index.foreign_image")->store('tickets/display', 'public');
             }
-
-            // Handle THE TICKET PNG Template
             if ($request->hasFile("tickets.$index.ticket_png")) {
                 $ticketType->ticket_png = $request->file("tickets.$index.ticket_png")->store('tickets/templates', 'public');
             }

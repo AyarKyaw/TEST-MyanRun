@@ -18,6 +18,7 @@ class Event extends Model
         'location',     // Added this
         'video_url', 
         'description', 
+        'early_bird_limit', 
     ];
 
     public function tickets()
