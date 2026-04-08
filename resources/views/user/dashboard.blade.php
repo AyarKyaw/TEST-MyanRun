@@ -121,7 +121,9 @@
                         <span class="bg-white/10 backdrop-blur-md text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-[3px] border border-white/20">Verified Runner</span>
                     </div>
                     <h1 class="text-5xl md:text-7xl font-black text-white italic uppercase tracking-tighter leading-none">
-                        {{ $user->first_name }} <span class="text-brand">{{ $user->last_name }}</span>
+                        {{ $user->first_name }} 
+                        @if($user->middle_name) {{ $user->middle_name }} @endif 
+                        <span class="text-brand">{{ $user->last_name }}</span>
                     </h1>
                     <div class="flex items-center gap-6 mt-4">
                         <div class="flex items-center text-white/70 font-bold uppercase text-xs tracking-widest">

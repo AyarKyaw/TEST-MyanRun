@@ -10,12 +10,19 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {
-        Schema::create('tickets', function (Blueprint $table) {
+        {
+            Schema::create('tickets', function (Blueprint $table) {
             $table->id();
-            $table->string('runner_id'); // <--- Ensure this is exactly 'runner_id'
+            $table->foreignId('athlete_id')->constrained();
+            
+            // New fields from your code:
+            $table->string('bib_name')->nullable();
+            $table->string('bib_number')->nullable();
             $table->string('category');
-            $table->string('price');
+            $table->integer('price'); // Changed to integer for your (int) cast
+            $table->string('t_shirt_size')->default('M');
+            $table->string('experience_level')->default('Beginner');
+            
             $table->string('status')->default('pending');
             $table->timestamps();
         });

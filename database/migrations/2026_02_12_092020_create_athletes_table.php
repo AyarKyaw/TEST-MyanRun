@@ -29,8 +29,13 @@ return new class extends Migration
         $table->string('father_name');
         $table->date('dob');
         $table->string('gender');
+        $table->string('blood_type');
         
         // Contact & Misc
+        $table->string('contact')->nullable();
+        $table->string('state')->nullable();
+        $table->string('viber')->nullable();
+        $table->boolean('has_medical_condition')->default(0);
         $table->string('nationality')->default('Myanmar');
         $table->text('address')->nullable();
         $table->string('phone_2')->nullable();

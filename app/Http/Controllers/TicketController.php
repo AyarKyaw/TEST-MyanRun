@@ -367,57 +367,81 @@ class TicketController extends Controller
 
     public function initiatePayment($id)
     {
+        // 1. Session Safety Check
         $order = session('pending_registration');
-        if (!$order) {
+    
+        // 1. Updated Safety Check (Check for event_id)
+        if (!$order || !isset($order['athlete_id']) || !isset($order['event_id'])) {
             return redirect()->route('athlete.register')
-                ->with('error', 'Session expired.');
+                ->with('error', 'Session expired or registration data is missing.');
         }
 
-        // --- ENFORCE LIMIT FROM DATABASE ---
-        $eventModel = Event::where('name', $order['event'])->first();
-        $totalLimit = $eventModel?->total_max_slots;
+        // 2. Fetch Event using ID from session
+        $eventModel = \App\Models\Event::find($order['event_id']);
 
-        // Fix 3: Use distinct bib_number for counting sold slots during payment initiation
-        $soldCount = Ticket::where('event', $order['event'])
+        if (!$eventModel) {
+            return redirect()->route('public.events')
+                ->with('error', 'The event could not be found.');
+        }
+
+        $eventName = $eventModel->name; // Now we have the name for the Ticket record
+        $totalLimit = $eventModel->total_max_slots;
+
+        // 3. ENFORCE LIMIT
+        $soldCount = \App\Models\Ticket::where('event', $eventName)
             ->whereIn('status', ['pending', 'confirmed', 'approved'])
             ->distinct('bib_number')
             ->count('bib_number');
 
         if (!is_null($totalLimit) && $soldCount >= $totalLimit) {
-            return redirect()->route('public.events')->with('error', "Sorry, this event has reached its maximum limit of {$totalLimit} participants.");
+            return redirect()->route('public.events')
+                ->with('error', "Sorry, this event has reached its maximum limit of {$totalLimit} participants.");
         }
-        // -------------------------
 
-        $exists = Ticket::where('athlete_id', $order['athlete_id'])
-            ->where('event', $order['event'])
+        // 3. Duplicate Registration Check
+        $exists = \App\Models\Ticket::where('athlete_id', $order['athlete_id'])
+            ->where('event', $eventName)
             ->whereIn('status', ['pending', 'confirmed', 'approved'])
             ->exists();
 
         if ($exists) {
             return redirect()->route('public.events')
-                ->with('error', 'You already registered for this event.');
+                ->with('error', 'You are already registered for this event.');
         }
 
+        // 4. Athlete Data & BIB Generation
         $athlete = \App\Models\Athlete::find($order['athlete_id']);
-        $gender = $athlete ? $athlete->gender : 'male';
-        $generatedBib = $this->generateBib($gender, $order['category']);
-    
-        $ticket = Ticket::create([
+        if (!$athlete) {
+            return redirect()->route('athlete.register')->with('error', 'Athlete record not found.');
+        }
+
+        $gender = $athlete->gender ?? 'male';
+        $generatedBib = $this->generateBib(
+            $order['event_id'],
+            $order['ticket_type_id'],
+            $athlete->gender
+        );
+
+        // 5. Create the Ticket (Database Entry)
+        $ticket = \App\Models\Ticket::create([
             'athlete_id'       => $order['athlete_id'], 
+            'event_id'         => $order['event_id'], 
+            'ticket_type_id'   => $order['ticket_type_id'],
             'bib_name'         => $order['bib_name'],
             'bib_number'       => $generatedBib, 
-            'category'         => $order['category'] ?? $request->category,
+            'category'         => $order['category'],
             'price'            => (int)str_replace(',', '', $order['price']),
-            'event'            => $order['event'], 
+            'event'            => $eventName, 
             't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
             'experience_level' => $order['exp_level'] ?? 'Beginner',
             'transaction_id'   => null, 
             'status'           => 'pending', 
         ]);
 
+        // 6. KBZPay Pre-create Preparation
         $price = (string) $ticket->price;
         $timestamp = (string) time();
-        $nonce     = Str::random(32);
+        $nonce     = \Illuminate\Support\Str::random(32);
         $orderId   = $ticket->id . '_' . $timestamp;
 
         $signParams = [
@@ -434,8 +458,8 @@ class TicketController extends Controller
             'version'        => '1.0',
         ];
 
+        // Sort and Sign for KBZ Security
         ksort($signParams);
-
         $stringA = '';
         foreach ($signParams as $key => $value) {
             if ($value !== "" && $value !== null) {
@@ -443,12 +467,10 @@ class TicketController extends Controller
             }
         }
         $stringA = rtrim($stringA, "&");
-
         $stringToSign = $stringA . "&key=" . env('KBZ_PAY_APP_KEY');
         $sign = strtoupper(hash('sha256', $stringToSign));
 
-        Log::info('KBZ STRING TO SIGN: ' . $stringToSign);
-
+        // 7. Request to KBZPay API
         $payload = [
             'Request' => [
                 'timestamp'   => $timestamp,
@@ -470,20 +492,15 @@ class TicketController extends Controller
         ];
 
         try {
-            $response = Http::withBody(
+            $response = \Illuminate\Support\Facades\Http::withBody(
                 json_encode($payload, JSON_UNESCAPED_SLASHES),
                 'application/json'
             )->post(env('KBZ_PAY_URL'));
 
             $result = $response->json();
 
-            Log::info('KBZ RESPONSE:', $result);
-
-            if (isset($result['Response']['result']) 
-                && $result['Response']['result'] === 'SUCCESS') {
-
+            if (isset($result['Response']['result']) && $result['Response']['result'] === 'SUCCESS') {
                 $qrString = $result['Response']['qrCode'];
-
                 return view('payment.kbz_qr', compact('qrString', 'ticket'));
             }
 
@@ -492,34 +509,53 @@ class TicketController extends Controller
             );
 
         } catch (\Exception $e) {
-            return back()->with('error', 'Connection Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('KBZ connection error: ' . $e->getMessage());
+            return back()->with('error', 'Connection Error: Unable to reach payment gateway.');
         }
     }
 
-    private function generateBib($gender, $category)
+    private function generateBib($eventId, $ticketTypeId, $gender = 'male')
     {
-        $prefix = (strtolower($gender) === 'female') ? 'F' : 'M';
-        
-        preg_match('/\d+/', $category, $matches);
-        $distance = $matches[0] ?? '00';
-        $searchPattern = $prefix . $distance;
+        $ticketType = \App\Models\EventTicketType::find($ticketTypeId);
 
-        $usedBibs = Ticket::where('bib_number', 'LIKE', $searchPattern . '%')
+        if (!$ticketType) {
+            return 'UNK000';
+        }
+
+        $basePrefix = strtoupper($ticketType->prefix); 
+        $start = $ticketType->start_number ?? 1;
+        
+        // 1. Gender Prefix First Logic (No Hyphens)
+        // Result: "M10K" or "F10K"
+        $genderCode = (strtolower($gender) === 'female') ? 'F' : 'M';
+        $fullPrefix = $ticketType->has_gender_bib ? $genderCode . $basePrefix : $basePrefix;
+
+        // 2. Get existing BIBs starting with this prefix
+        $usedBibs = \App\Models\Ticket::where('event_id', $eventId)
+            ->where('ticket_type_id', $ticketTypeId)
+            ->where('bib_number', 'LIKE', $fullPrefix . '%')
+            ->where('status', '!=', 'rejected')
             ->pluck('bib_number')
             ->toArray();
 
         $usedNumbers = [];
         foreach ($usedBibs as $bib) {
-            $usedNumbers[] = (int) substr($bib, -4);
+            // Strip the prefix string (e.g., 'M10K001' becomes '001')
+            $numericPart = str_replace($fullPrefix, '', $bib);
+            
+            if (is_numeric($numericPart)) {
+                $usedNumbers[] = (int) $numericPart;
+            }
         }
 
-        $number = 11;
-
+        // 3. Find the first available gap starting from your start_number
+        $number = $start;
         while (in_array($number, $usedNumbers)) {
             $number++;
         }
 
-        return $searchPattern . str_pad($number, 4, '0', STR_PAD_LEFT);
+        // Returns format: M10K001 or F10K001
+        return $fullPrefix . str_pad($number, 3, '0', STR_PAD_LEFT);
     }
 
     public function getNewBib(Request $request)
@@ -726,30 +762,35 @@ class TicketController extends Controller
     }
 
     public function updateId(Request $request)
-    {
-        $ticket = Ticket::with('athlete')->find($request->id);
-        
-        if (!$ticket || !$ticket->athlete) {
-            return redirect()->back()->with('error', 'Athlete not found');
-        }
-
-        $ticket->update([
-            'bib_name'     => $request->bib_name,
-            't_shirt_size' => $request->t_shirt_size,
-        ]);
-
-        $idNumber = '';
-
-        if ($request->has(['nrc_state', 'nrc_district', 'nrc_type', 'nrc_number'])) {
-            $idNumber = "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_type}){$request->nrc_number}";
-        } else {
-            $idNumber = $request->id_number;
-        }
-
-        $ticket->athlete->update([
-            'id_number' => $idNumber
-        ]);
-
-        return redirect()->back()->with('success', 'Information Updated Successfully');
+{
+    $ticket = Ticket::with('athlete')->find($request->id);
+    
+    if (!$ticket || !$ticket->athlete) {
+        return redirect()->back()->with('error', 'Athlete not found');
     }
+
+    // 1. Update Ticket specific info
+    $ticket->update([
+        'bib_name'     => $request->bib_name,
+        't_shirt_size' => $request->t_shirt_size,
+    ]);
+
+    // 2. Format NRC / ID Number
+    $idNumber = '';
+    if ($request->has(['nrc_state', 'nrc_district', 'nrc_type', 'nrc_number'])) {
+        $idNumber = "{$request->nrc_state}/{$request->nrc_district}({$request->nrc_type}){$request->nrc_number}";
+    } else {
+        $idNumber = $request->id_number;
+    }
+
+    // 3. Update Athlete info (including ITRA)
+    $ticket->athlete->update([
+        'id_number'    => $idNumber,
+        // Using boolean() handles 'on'/1 as true and missing as false
+        'has_itra'     => $request->boolean('has_itra'), 
+        'itra_details' => $request->itra_details,
+    ]);
+
+    return redirect()->back()->with('success', 'Information Updated Successfully');
+}
 }
