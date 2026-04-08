@@ -289,7 +289,7 @@
                             <div class="info-section">
                                 <span class="section-title"><i class="fa fa-user-circle me-1"></i> Identity Info</span>
                                 <table class="table table-sm custom-table mb-0">
-                                    <tr><td>Full Name</td> <td id="modal-name" class="fw-bold text-black"></td></tr>
+                                    <tr><td>Full Name</td> <td id="modal-name-container"></td></tr>
                                     <tr><td>Bib Name</td> <td id="modal-bib-container"></td></tr>
                                     <tr><td>BIB Number</td> <td id="modal-bib-number" class="text-primary fw-bold"></td></tr>
                                     <tr><td>T-Shirt</td> <td id="modal-tshirt-container"></td></tr>
@@ -324,7 +324,7 @@
                         <div class="col-md-6">
                             <div class="p-3 bg-light rounded-3 h-100">
                                 <small class="text-muted d-block mb-1 text-uppercase fw-bold fs-10">ITRA Details</small>
-                                <div id="modal-itra" class="text-dark small"></div>
+                                <div id="modal-itra-container" class="text-dark small"></div>
                             </div>
                         </div>
                     </div>
@@ -422,10 +422,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = JSON.parse(this.getAttribute('data-info'));
             const transactionImageUrl = this.getAttribute('data-image');
             const athlete = data.athlete || {};
+            const fullName = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
             
             document.getElementById('modal-ticket-id-input').value = data.id;
-            document.getElementById('modal-name').innerText = [athlete.first_name, athlete.middle_name, athlete.last_name].filter(Boolean).join(' ') || 'Guest Runner';
-            document.getElementById('modal-itra').innerText = athlete.itra_details || 'None';
             document.getElementById('modal-bib-number').innerText = data.bib_number || 'Not Assigned';
             document.getElementById('modal-category').innerText = data.category || 'N/A';
             document.getElementById('modal-event').innerText = data.event || 'N/A';
@@ -452,6 +451,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (isEditable) {
                 saveBtnContainer.classList.remove('d-none');
+                
+                // Editable Full Name (Sends as full_name)
+                document.getElementById('modal-name-container').innerHTML = `
+                    <input type="text" name="full_name" class="form-control form-control-sm border-primary" value="${fullName}" placeholder="Enter Full Name">
+                `;
+
+                // Editable ITRA Details
+                document.getElementById('modal-itra-container').innerHTML = `
+                    <textarea name="itra_details" class="form-control form-control-sm border-primary" rows="2" placeholder="ITRA Score or Link">${athlete.itra_details || ''}</textarea>
+                `;
+
                 document.getElementById('modal-bib-container').innerHTML = `
                     <input type="text" name="bib_name" class="form-control form-control-sm border-primary" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
                 `;
@@ -494,6 +504,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 saveBtnContainer.classList.add('d-none');
+                document.getElementById('modal-name-container').innerHTML = `<span class="fw-bold text-black">${fullName}</span>`;
+                document.getElementById('modal-itra-container').innerHTML = athlete.itra_details || 'None';
                 document.getElementById('modal-bib-container').innerHTML = `<span class="fw-bold text-black">${data.bib_name || 'N/A'}</span>`;
                 document.getElementById('modal-tshirt-container').innerHTML = `<span class="badge light badge-primary">${data.t_shirt_size || 'N/A'}</span>`;
                 document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold text-black">${athlete.id_number || 'None'}</span>`;
