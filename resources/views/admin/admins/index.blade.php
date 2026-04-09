@@ -38,6 +38,22 @@
                 </div>
             @endforelse
         </div>
+
+        <h3 class="font-weight-bold text-warning mb-4">
+            <i class="fas fa-user-shield mr-2"></i> Support Agents
+        </h3>
+        <div class="row">
+            @forelse($agents as $agent)
+                <div class="col-xl-4 col-md-6 mb-4">
+                    {{-- We pass $agent into the 'admin' variable slot for the partial --}}
+                    @include('admin.admins.partials.admin-card', ['admin' => $agent, 'type' => 'agent'])
+                </div>
+            @empty
+                <div class="col-12">
+                    <p class="text-muted">No support agents created yet.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 </div>
 @endsection

@@ -346,6 +346,7 @@ class TicketController extends Controller
     public function exportExcel(Request $request) 
     {
         $admin = Auth::guard('admin')->user();
+        $agent = Auth::guard('agent')->user();
         $eventId = $request->get('event'); 
         
         $category = $request->get('category', 'all');
@@ -355,8 +356,13 @@ class TicketController extends Controller
         $event = \App\Models\Event::findOrFail($eventId);
 
         // --- Role Based Security ---
-        if ($admin->role === 'event_admin' && !$event->admins->contains($admin->id)) {
-            abort(403, 'You are not assigned to export data for this event.');
+        $isAuthorizedAdmin = Auth::guard('admin')->check() && 
+                     (Auth::guard('admin')->user()->role !== 'event_admin' || $event->admins->contains(Auth::guard('admin')->id()));
+
+        $isAuthorizedAgent = Auth::guard('agent')->check();
+
+        if (!$isAuthorizedAdmin && !$isAuthorizedAgent) {
+            abort(403, 'You do not have permission to export data for this event.');
         }
 
         $eventPrefix = str_replace(' ', '_', $event->name);

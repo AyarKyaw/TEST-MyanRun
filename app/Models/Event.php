@@ -40,6 +40,11 @@ class Event extends Model
         return $this->hasMany(EventTicketType::class);
     }
 
+    public function agents()
+    {
+        return $this->belongsToMany(\App\Models\Agent::class, 'agent_event');
+    }
+
     protected $casts = [
         'date' => 'date',
     ];

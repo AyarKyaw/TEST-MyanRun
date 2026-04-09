@@ -126,6 +126,20 @@
         @endforeach
     </select>
 </div>
+{{-- New Agent Selection --}}
+    <div class="col-md-6">
+        <div class="form-group mb-3">
+            <label class="form-label font-w600 text-warning">Assign Support Agents</label>
+            <select name="agent_ids[]" class="form-control default-select" multiple>
+                @foreach($agents as $agent)
+                    <option value="{{ $agent->id }}" 
+                        {{ $event->agents->contains($agent->id) ? 'selected' : '' }}>
+                        {{ $agent->email }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+    </div>
 
             <div class="card mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">

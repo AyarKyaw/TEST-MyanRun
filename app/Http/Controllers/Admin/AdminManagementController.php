@@ -4,33 +4,21 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
+use App\Models\Agent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AdminManagementController extends Controller
 {
-    // List all admins
+    // List all admins and agents
     public function index()
-{
-    // Split admins into two collections
-    $superAdmins = Admin::where('role', 'super_admin')->latest()->get();
-    $eventAdmins = Admin::where('role', 'event_admin')->latest()->get();
+    {
+        $superAdmins = Admin::where('role', 'super_admin')->latest()->get();
+        $eventAdmins = Admin::where('role', 'event_admin')->latest()->get();
+        $agents = Agent::latest()->get();
 
-    return view('admin.admins.index', compact('superAdmins', 'eventAdmins'));
-}
-
-public function destroy($id)
-{
-    $admin = Admin::findOrFail($id);
-
-    // Prevent self-deletion
-    if (auth()->guard('admin')->id() == $admin->id) {
-        return back()->with('error', 'You cannot delete yourself!');
+        return view('admin.admins.index', compact('superAdmins', 'eventAdmins', 'agents'));
     }
-
-    $admin->delete();
-    return back()->with('success', 'Admin removed successfully.');
-}
 
     // Show create form
     public function create()
@@ -38,51 +26,98 @@ public function destroy($id)
         return view('admin.admins.create');
     }
 
-    // Store new admin
+    // Store new admin OR agent
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|unique:admins,email',
+            'email' => 'required|email', // Unique check handled manually below
             'password' => 'required|min:6',
             'role' => 'required'
         ]);
 
-        Admin::create([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
+        if ($request->role === 'agent') {
+            // Check uniqueness in agents table
+            if (Agent::where('email', $request->email)->exists()) {
+                return back()->withErrors(['email' => 'This email is already registered as an agent.']);
+            }
 
-        return redirect('/dashboard/admins')->with('success', 'New Admin Created!');
+            Agent::create([
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+            $msg = 'New Support Agent Created!';
+        } else {
+            // Check uniqueness in admins table
+            if (Admin::where('email', $request->email)->exists()) {
+                return back()->withErrors(['email' => 'This email is already registered as an admin.']);
+            }
+
+            Admin::create([
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role,
+            ]);
+            $msg = 'New Admin Created!';
+        }
+
+        return redirect('/dashboard/admins')->with('success', $msg);
     }
 
-    // Show the edit form
-public function edit($id)
-{
-    $admin = Admin::findOrFail($id);
-    return view('admin.admins.edit', compact('admin'));
-}
-
-// Update the database
-public function update(Request $request, $id)
-{
-    $admin = Admin::findOrFail($id);
-
-    $request->validate([
-        'email' => 'required|email|unique:admins,email,' . $admin->id,
-        'role'  => 'required',
-    ]);
-
-    $admin->email = $request->email;
-    $admin->role  = $request->role;
-
-    // Only update password if a new one is provided
-    if ($request->filled('password')) {
-        $admin->password = Hash::make($request->password);
+    // Show the edit form (Detects if it's an Agent or Admin via a query param)
+    public function edit(Request $request, $id)
+    {
+        if ($request->query('type') === 'agent') {
+            $admin = Agent::findOrFail($id);
+            $type = 'agent';
+        } else {
+            $admin = Admin::findOrFail($id);
+            $type = 'admin';
+        }
+        
+        return view('admin.admins.edit', compact('admin', 'type'));
     }
 
-    $admin->save();
+    // Update the database
+    public function update(Request $request, $id)
+    {
+        $role = $request->input('role');
 
-    return redirect('/dashboard/admins')->with('success', 'Admin updated successfully!');
-}
+        if ($role === 'agent') {
+            $user = Agent::findOrFail($id);
+            $request->validate(['email' => 'required|email|unique:agents,email,' . $id]);
+        } else {
+            $user = Admin::findOrFail($id);
+            $request->validate([
+                'email' => 'required|email|unique:admins,email,' . $id,
+                'role'  => 'required',
+            ]);
+            $user->role = $request->role;
+        }
+
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+        return redirect('/dashboard/admins')->with('success', 'Account updated successfully!');
+    }
+
+    // Delete record
+    public function destroy(Request $request, $id)
+    {
+        if ($request->query('type') === 'agent') {
+            Agent::findOrFail($id)->delete();
+            return back()->with('success', 'Agent removed successfully.');
+        }
+
+        $admin = Admin::findOrFail($id);
+        if (auth()->guard('admin')->id() == $admin->id) {
+            return back()->with('error', 'You cannot delete yourself!');
+        }
+
+        $admin->delete();
+        return back()->with('success', 'Admin removed successfully.');
+    }
 }

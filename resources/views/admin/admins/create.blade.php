@@ -3,11 +3,10 @@
 @section('content')
 <div class="content-body">
     <div class="container-fluid">
-        {{-- Page Header --}}
         <div class="page-title mb-5 d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="font-weight-bold text-dark">Create New Admin</h1>
-                <p class="text-muted">Register a new team member and define their system permissions.</p>
+                <h1 class="font-weight-bold text-dark">Create Team Member</h1>
+                <p class="text-muted">Register a new Admin or Support Agent.</p>
             </div>
             <a href="{{ route('admin.admins.index') }}" class="btn btn-light shadow-sm" style="border-radius: 10px; font-weight: 700;">
                 <i class="fas fa-arrow-left mr-2"></i> BACK TO LIST
@@ -30,35 +29,24 @@
                                 <div class="col-md-6">
                                     <div class="form-group mb-4">
                                         <label class="text-dark font-weight-bold">Email Address</label>
-                                        <input type="email" name="email" class="form-control" 
-                                               placeholder="e.g. brother@gmail.com" 
-                                               style="border-radius: 8px; padding: 12px;" required>
-                                        <small class="text-muted">Used for dashboard login.</small>
+                                        <input type="email" name="email" class="form-control" placeholder="e.g. member@gmail.com" style="border-radius: 8px; padding: 12px;" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-4">
                                         <label class="text-dark font-weight-bold">Initial Password</label>
-                                        <input type="password" name="password" class="form-control" 
-                                               placeholder="Minimum 6 characters"
-                                               style="border-radius: 8px; padding: 12px;" required>
+                                        <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" style="border-radius: 8px; padding: 12px;" required>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-group mb-4">
                                 <label class="text-dark font-weight-bold">Access Level / Role</label>
-                                <select name="role" class="form-control default-select" 
-                                        style="border-radius: 8px; height: 50px;">
-                                    <option value="event_admin">Event Admin (Restricted to specific modules)</option>
-                                    <option value="super_admin">Super Admin (Full System Access)</option>
+                                <select name="role" class="form-control default-select" style="border-radius: 8px; height: 50px;">
+                                    <option value="event_admin">Event Admin (Dashboard Access)</option>
+                                    <option value="super_admin">Super Admin (Full Access)</option>
+                                    <option value="agent">Support Agent</option>
                                 </select>
-                                <div class="mt-2 p-3 bg-light rounded" style="border-left: 4px solid #3a7afe;">
-                                    <small class="text-muted d-block">
-                                        <i class="fas fa-info-circle mr-1"></i> 
-                                        <strong>Super Admins</strong> can manage other admins, view financial reports, and edit system settings.
-                                    </small>
-                                </div>
                             </div>
 
                             <hr class="my-4">

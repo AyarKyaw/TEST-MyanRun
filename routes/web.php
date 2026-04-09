@@ -307,8 +307,12 @@ Route::group(['prefix' => 'dashboard', 'middleware' => ['auth:admin']], function
         Route::delete('/admins/{id}', [AdminManagementController::class, 'destroy'])->name('admin.admins.destroy');
 
         Route::get('/admins/{id}/edit', [AdminManagementController::class, 'edit'])->name('admin.admins.edit');
-Route::put('/admins/{id}/update', [AdminManagementController::class, 'update'])->name('admin.admins.update');
-    
+    Route::put('/admins/{id}/update', [AdminManagementController::class, 'update'])->name('admin.admins.update');
+    Route::get('/agents/create', [AgentController::class, 'create'])->name('admin.agents.create');
+    Route::post('/agents/store', [AgentController::class, 'store'])->name('admin.agents.store');
+    Route::get('/agents/{id}/edit', [AgentController::class, 'edit'])->name('admin.agents.edit');
+    Route::put('/agents/{id}/update', [AgentController::class, 'update'])->name('admin.agents.update');
+    Route::delete('/agents/{id}', [AgentController::class, 'destroy'])->name('admin.agents.destroy');
 });
 Route::post('/api/verify-ticket', [DinnerController::class, 'publicVerify'])->name('dinner.verify');
 // Route::get('/test-kbz/{id}', function($id) {
