@@ -14,7 +14,7 @@
         </div>
 
         {{-- Section 1: Super Admins --}}
-        <h3 class="font-weight-bold text-primary mb-4"><i class="fas fa-crown mr-2"></i> Super Administrators</h3>
+        <h3 class="font-weight-bold text-primary mb-4"><i class="fas fa-crown mr-2"></i> Super Administrator</h3>
         <div class="row mb-5">
             @foreach($superAdmins as $admin)
                 <div class="col-xl-4 col-md-6 mb-4">

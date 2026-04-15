@@ -61,6 +61,30 @@
     /* Stats Card Styling */
     .stat-widget { background: #fff; padding: 20px; border-radius: 15px; height: 100%; }
     .progress-thin { height: 6px; border-radius: 10px; background: #eee; }
+
+    @media print {
+    /* Hide everything else */
+    body * {
+        visibility: hidden;
+    }
+    /* Show only the active slip */
+    .print-active, .print-active * {
+        visibility: visible;
+    }
+    .print-active {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        display: block !important;
+    }
+    
+    /* Printer Settings */
+    @page {
+        size: auto;
+        margin: 0mm;
+    }
+}
 </style>       
 
 <main class="content-body">
@@ -166,22 +190,22 @@
     <ul class="nav nav-tabs" role="tablist">
         <li class="nav-item">
             <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
-               href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName, 'search' => request('search')]) }}">
+            href="{{ route('agent.ticket.view', ['id' => $event->id, 'status' => 'all', 'search' => request('search')]) }}">
                 All 
-                <span class="badge rounded-pill bg-secondary ms-2 fs-10" style="vertical-align: middle;">
+                <span class="badge rounded-pill bg-secondary ms-2">
                     {{ $counts['all'] ?? 0 }}
                 </span>
             </a>
         </li>
 
-        @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $status => $color)
+        @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $stat => $color)
             <li class="nav-item">
-                <a class="nav-link {{ request('status', 'pending') == $status && request('status') != 'all' ? 'active' : '' }}" 
-                   href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
-                   {{ ucfirst($status) }} 
-                   <span class="badge rounded-pill bg-{{ $color }} ms-2 fs-10" style="vertical-align: middle;">
-                       {{ $counts[$status] ?? 0 }}
-                   </span>
+                <a class="nav-link {{ request('status', 'pending') == $stat && request('status') != 'all' ? 'active' : '' }}" 
+                href="{{ route('agent.ticket.view', ['id' => $event->id, 'status' => $stat, 'search' => request('search')]) }}">
+                {{ ucfirst($stat) }} 
+                <span class="badge rounded-pill bg-{{ $color }} ms-2">
+                    {{ $counts[$stat] ?? 0 }}
+                </span>
                 </a>
             </li>
         @endforeach
@@ -205,6 +229,52 @@
                                 <tbody>
                                     @forelse($customers as $customer)
                                     <tr>
+                                        <td>
+    <button type="button" 
+            class="btn btn-sm btn-primary d-print-none" 
+            onclick="printAthleteSlip('slip-{{ $customer->id }}')">
+        <i class="fas fa-print"></i> Print Slip
+    </button>
+
+    <div id="slip-{{ $customer->id }}" class="d-none d-print-block">
+        <div style="width: 80mm; padding: 5mm; font-family: Arial, sans-serif; color: #000; line-height: 1.2;">
+            
+            <div style="text-align: right; border-bottom: 1px solid #000; padding-bottom: 5px;">
+                <span style="font-size: 24px; font-weight: bold;">#{{ $customer->bib_number ?? '160001' }}</span>
+            </div>
+
+            <div style="text-align: center; padding: 20px 0;">
+                <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">T-Shirt Size</div>
+                <div style="font-size: 80px; font-weight: 900; line-height: 1;">
+                    {{ $customer->tshirt_size ?? 'XL' }}
+                </div>
+            </div>
+
+            <div style="border-top: 2px solid #000; padding-top: 10px;">
+                <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">
+                    {{ $customer->category ?? 'Run Type' }}
+                </div>
+                
+                <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
+                    {{ $customer->bib_name ?? 'Felix Kyaw' }}
+                </div>
+
+                <div style="font-size: 16px; margin-bottom: 2px;">
+                    {{ $customer->athlete->nrc ?? 'NRC Number' }}
+                </div>
+
+                <div style="font-size: 14px; color: #333;">
+                    {{ $customer->athlete->address ?? 'Address' }}
+                </div>
+            </div>
+
+            <div style="margin-top: 25px; border-top: 1px dashed #000; padding-top: 8px; font-size: 10px; text-align: center; text-transform: uppercase;">
+                {{ $eventName }} <br> 
+                Authorized Agent Copy - {{ now()->format('d/m/Y H:i') }}
+            </div>
+        </div>
+    </div>
+</td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
                                                 data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" 
@@ -432,5 +502,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+function printAthleteSlip(divId) {
+    var printContents = document.getElementById(divId);
+    
+    // Add a temporary class to identify what to print
+    printContents.classList.add('print-active');
+    printContents.classList.remove('d-none');
+
+    window.print();
+
+    // Clean up after printing
+    printContents.classList.remove('print-active');
+    printContents.classList.add('d-none');
+}
 </script>
 @endsection

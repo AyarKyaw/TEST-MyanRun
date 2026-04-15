@@ -239,6 +239,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::middleware(['auth:admin,agent'])->group(function () {
 Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('dashboard.tickets.export');
+Route::get('/events/ticket/{event}', [TicketController::class, 'dashboard'])->name('dashboard.events.ticket');
 });
 /*
 |--------------------------------------------------------------------------
@@ -252,7 +253,7 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/register/1', [UserController::class, 'dashboard'])->name('dashboard.register-level-1');
     Route::get('/register/2', [AthleteController::class, 'dashboard'])->name('dashboard.register-level-2');
-    Route::get('/events/ticket/{event}', [TicketController::class, 'dashboard'])->name('dashboard.events.ticket');
+    
     Route::get('/ticket-management', [TicketController::class, 'index'])->name('dashboard.tickets.index');
     Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');
     Route::get('/events/{status}', [EventController::class, 'index'])
