@@ -69,6 +69,11 @@
         margin: 0 !important;
     }
 
+    html, body {
+        height: auto !important;
+        overflow: hidden !important;
+    }
+
     body {
         margin: 0 !important;
         padding: 0 !important;
@@ -83,18 +88,13 @@
     }
 
     .print-active {
-        position: fixed;
-
-        top: 50%;
-        left: 50%;
-
-        transform: translate(-50%, -50%) scale(1.4);
-        transform-origin: center;
+        position: static;
+        transform: scale(1.2);
+        transform-origin: top center;
 
         width: 80mm !important;
         margin: 0 !important;
         padding: 0 !important;
-
         text-align: center !important;
     }
 
@@ -307,7 +307,7 @@
     </button>
 
     <div id="slip-{{ $customer->id }}" class="d-none">
-        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;" id="slip-{{ $customer->id }}">
+        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
 
     <div class="bib-number">
         {{ $customer->bib_number ?? '0000' }}
