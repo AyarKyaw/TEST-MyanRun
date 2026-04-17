@@ -73,7 +73,7 @@
         height: auto !important;
         overflow: hidden !important;
     }
-
+    
     body {
         margin: 0 !important;
         padding: 0 !important;
@@ -88,13 +88,18 @@
     }
 
     .print-active {
-        position: static;
-        transform: scale(1.2);
-        transform-origin: top center;
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%) scale(1.4);
+        transform-origin: center;
 
         width: 80mm !important;
         margin: 0 !important;
         padding: 0 !important;
+        page-break-inside: avoid !important;
         text-align: center !important;
     }
 
