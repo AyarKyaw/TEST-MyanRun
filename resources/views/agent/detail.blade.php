@@ -68,7 +68,11 @@
         size: 80mm auto;
         margin: 0 !important;
     }
-
+    * {
+        page-break-before: avoid !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+    }
     html, body {
         height: auto !important;
         overflow: hidden !important;
@@ -99,7 +103,6 @@
         width: 80mm !important;
         margin: 0 !important;
         padding: 0 !important;
-        page-break-inside: avoid !important;
         text-align: center !important;
     }
 
