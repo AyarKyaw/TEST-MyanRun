@@ -669,26 +669,17 @@ document.addEventListener('change', function(e) {
     }
 });
 function printAthleteSlip(divId) {
-    // 1. Force remove 'print-active' from ANY other element first
-    document.querySelectorAll('.print-active').forEach(el => {
-        el.classList.remove('print-active');
-        el.classList.add('d-none');
-    });
-
-    const printContents = document.getElementById(divId);
+    var printContents = document.getElementById(divId);
     
-    // 2. Add the active classes
+    // Add a temporary class to identify what to print
     printContents.classList.add('print-active');
     printContents.classList.remove('d-none');
 
-    // 3. Tiny delay to let the browser's layout engine update
-    setTimeout(function() {
-        window.print();
+    window.print();
 
-        // 4. Clean up AFTER the print dialog is closed
-        printContents.classList.remove('print-active');
-        printContents.classList.add('d-none');
-    }, 100); 
+    // Clean up after printing
+    printContents.classList.remove('print-active');
+    printContents.classList.add('d-none');
 }
 </script>
 @endsection
