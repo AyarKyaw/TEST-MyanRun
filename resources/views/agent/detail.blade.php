@@ -306,8 +306,8 @@
         <i class="fas fa-print"></i> Print Slip
     </button>
 
-    <div id="slip-{{ $customer->id }}" class="d-none d-print-block">
-        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
+    <div id="slip-{{ $customer->id }}" class="d-none">
+        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;" id="slip-{{ $customer->id }}">
 
     <div class="bib-number">
         {{ $customer->bib_number ?? '0000' }}
@@ -575,6 +575,8 @@ function printAthleteSlip(divId) {
     // Add a temporary class to identify what to print
     printContents.classList.add('print-active');
     printContents.classList.remove('d-none');
+
+    console.log(divId, printContents.classList)  
 
     window.print();
 

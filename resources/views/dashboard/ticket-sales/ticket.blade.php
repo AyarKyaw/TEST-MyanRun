@@ -310,7 +310,7 @@
                                                 <i class="fas fa-print"></i> Print Slip
                                             </button>
 
-                                            <div id="slip-{{ $customer->id }}" class="d-none d-print-block">
+                                            <div id="slip-{{ $customer->id }}" class="d-none">
                                                 <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
 
                                             <div class="bib-number">
