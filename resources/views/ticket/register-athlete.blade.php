@@ -581,7 +581,7 @@
                         
                         {{-- ITRA Details Input --}}
                         <div id="itra_details_container" class="{{ old('itra_details', $athlete->itra_details ?? '') ? '' : 'hidden' }}">
-                            <label class="label-text text-[#C3E92D]">ITRA Index or Profile Link</label>
+                            <label class="label-text text-[#C3E92D]">ITRA ID</label>
                             <input type="text" name="itra_details" id="itra_details" 
                                 value=""
                                 class="input-field border-lime-100 focus:border-[#C3E92D]" 

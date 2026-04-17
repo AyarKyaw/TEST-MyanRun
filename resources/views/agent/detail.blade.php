@@ -63,26 +63,95 @@
     .progress-thin { height: 6px; border-radius: 10px; background: #eee; }
 
     @media print {
-    /* Hide everything else */
-    body * {
-        visibility: hidden;
-    }
-    /* Show only the active slip */
-    .print-active, .print-active * {
-        visibility: visible;
-    }
-    .print-active {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        display: block !important;
-    }
-    
-    /* Printer Settings */
+
     @page {
-        size: auto;
-        margin: 0mm;
+        size: 80mm auto;
+        margin: 0 !important;
+    }
+
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .print-active, .print-active * {
+        visibility: visible !important;
+    }
+
+    .print-active {
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%) scale(1.4);
+        transform-origin: center;
+
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+
+        text-align: center !important;
+    }
+
+    /* ✅ Force all inner elements to center */
+    .print-active div,
+    .print-active span {
+        text-align: center !important;
+    }
+
+    .print-header {
+        text-align: center !important;
+    }
+
+    .bib-number {
+        font-size: 35pt;
+        font-weight: 900;
+        padding-bottom: 8mm;
+        border-bottom: 3px solid #000;
+        margin-bottom: 8mm;
+    }
+
+    .tshirt-size {
+        font-size: 80pt;
+        font-weight: 900;
+        line-height: 1;
+        margin: 8mm 0;
+    }
+
+    .category {
+        font-size: 14pt;
+        font-weight: 900;
+        margin-bottom: 5mm;
+    }
+
+    .runner-name {
+        font-size: 14pt;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 6mm;
+        word-break: break-word;
+    }
+
+    .nrc {
+        font-size: 14pt;
+        margin-top: 4mm;
+    }
+
+    .address {
+        font-size: 12pt;
+        margin-top: 3mm;
+    }
+
+    .event-footer {
+        margin-top: 10mm;
+        border-top: 2px dashed #000;
+        padding-top: 5mm;
+        font-size: 10pt;
     }
 }
 </style>       
@@ -217,6 +286,7 @@
                             <table class="table table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
                                 <thead>
                                     <tr>
+                                        <th class="text-center" width="80">Print</th>
                                         <th class="text-center" width="80">View</th>
                                         <th>Athlete Details</th>
                                         <th>BIB Number</th>
@@ -237,42 +307,38 @@
     </button>
 
     <div id="slip-{{ $customer->id }}" class="d-none d-print-block">
-        <div style="width: 80mm; padding: 5mm; font-family: Arial, sans-serif; color: #000; line-height: 1.2;">
-            
-            <div style="text-align: right; border-bottom: 1px solid #000; padding-bottom: 5px;">
-                <span style="font-size: 24px; font-weight: bold;">#{{ $customer->bib_number ?? '160001' }}</span>
-            </div>
+        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
 
-            <div style="text-align: center; padding: 20px 0;">
-                <div style="font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">T-Shirt Size</div>
-                <div style="font-size: 80px; font-weight: 900; line-height: 1;">
-                    {{ $customer->tshirt_size ?? 'XL' }}
-                </div>
-            </div>
+    <div class="bib-number">
+        {{ $customer->bib_number ?? '0000' }}
+    </div>
 
-            <div style="border-top: 2px solid #000; padding-top: 10px;">
-                <div style="font-size: 18px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px;">
-                    {{ $customer->category ?? 'Run Type' }}
-                </div>
-                
-                <div style="font-size: 22px; font-weight: bold; margin-bottom: 2px;">
-                    {{ $customer->bib_name ?? 'Felix Kyaw' }}
-                </div>
+    <div class="tshirt-size">
+        {{ $customer->tshirt_size ?? 'XL' }}
+    </div>
 
-                <div style="font-size: 16px; margin-bottom: 2px;">
-                    {{ $customer->athlete->nrc ?? 'NRC Number' }}
-                </div>
+    <div class="category">
+        {{ $customer->category ?? 'RUN TYPE' }}
+    </div>
 
-                <div style="font-size: 14px; color: #333;">
-                    {{ $customer->athlete->address ?? 'Address' }}
-                </div>
-            </div>
+    <div class="runner-name">
+        {{ strtoupper($customer->bib_name ?? 'RUNNER NAME') }}
+    </div>
 
-            <div style="margin-top: 25px; border-top: 1px dashed #000; padding-top: 8px; font-size: 10px; text-align: center; text-transform: uppercase;">
-                {{ $eventName }} <br> 
-                Authorized Agent Copy - {{ now()->format('d/m/Y H:i') }}
-            </div>
-        </div>
+    <div class="nrc">
+        NRC: {{ $customer->athlete->id_number ?? '---' }}
+    </div>
+
+    <div class="address">
+        {{ $customer->athlete->address ?? '' }}
+    </div>
+
+    <div class="event-footer">
+        {{ strtoupper($event->name ?? 'EVENT') }} <br>
+        {{ now()->format('d/m/Y H:i A') }}
+    </div>
+
+</div>
     </div>
 </td>
                                         <td class="text-center">

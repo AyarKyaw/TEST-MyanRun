@@ -61,6 +61,99 @@
     /* Stats Card Styling */
     .stat-widget { background: #fff; padding: 20px; border-radius: 15px; height: 100%; }
     .progress-thin { height: 6px; border-radius: 10px; background: #eee; }
+
+    @media print {
+
+    @page {
+        size: 80mm auto;
+        margin: 0 !important;
+    }
+
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    body * {
+        visibility: hidden !important;
+    }
+
+    .print-active, .print-active * {
+        visibility: visible !important;
+    }
+
+    .print-active {
+        position: fixed;
+
+        top: 50%;
+        left: 50%;
+
+        transform: translate(-50%, -50%) scale(1.4);
+        transform-origin: center;
+
+        width: 80mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+
+        text-align: center !important;
+    }
+
+    /* ✅ Force all inner elements to center */
+    .print-active div,
+    .print-active span {
+        text-align: center !important;
+    }
+
+    .print-header {
+        text-align: center !important;
+    }
+
+    .bib-number {
+        font-size: 35pt;
+        font-weight: 900;
+        padding-bottom: 8mm;
+        border-bottom: 3px solid #000;
+        margin-bottom: 8mm;
+    }
+
+    .tshirt-size {
+        font-size: 80pt;
+        font-weight: 900;
+        line-height: 1;
+        margin: 8mm 0;
+    }
+
+    .category {
+        font-size: 14pt;
+        font-weight: 900;
+        margin-bottom: 5mm;
+    }
+
+    .runner-name {
+        font-size: 14pt;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin-bottom: 6mm;
+        word-break: break-word;
+    }
+
+    .nrc {
+        font-size: 14pt;
+        margin-top: 4mm;
+    }
+
+    .address {
+        font-size: 12pt;
+        margin-top: 3mm;
+    }
+
+    .event-footer {
+        margin-top: 10mm;
+        border-top: 2px dashed #000;
+        padding-top: 5mm;
+        font-size: 10pt;
+    }
+}
 </style>       
 
 <main class="content-body">
@@ -197,6 +290,7 @@
                             <table class="table table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
                                 <thead>
                                     <tr>
+                                        <th class="text-center" width="80">Print</th>
                                         <th class="text-center" width="80">View</th>
                                         <th>Athlete Details</th>
                                         <th>BIB Number</th>
@@ -209,6 +303,48 @@
                                 <tbody>
                                     @forelse($customers as $customer)
                                     <tr>
+                                        <td>
+                                            <button type="button" 
+                                                    class="btn btn-sm btn-primary d-print-none" 
+                                                    onclick="printAthleteSlip('slip-{{ $customer->id }}')">
+                                                <i class="fas fa-print"></i> Print Slip
+                                            </button>
+
+                                            <div id="slip-{{ $customer->id }}" class="d-none d-print-block">
+                                                <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
+
+                                            <div class="bib-number">
+                                                {{ $customer->bib_number ?? '0000' }}
+                                            </div>
+
+                                            <div class="tshirt-size">
+                                                {{ $customer->tshirt_size ?? 'XL' }}
+                                            </div>
+
+                                            <div class="category">
+                                                {{ $customer->category ?? 'RUN TYPE' }}
+                                            </div>
+
+                                            <div class="runner-name">
+                                                {{ strtoupper($customer->bib_name ?? 'RUNNER NAME') }}
+                                            </div>
+
+                                            <div class="nrc">
+                                                NRC: {{ $customer->athlete->id_number ?? '---' }}
+                                            </div>
+
+                                            <div class="address">
+                                                {{ $customer->athlete->address ?? '' }}
+                                            </div>
+
+                                            <div class="event-footer">
+                                                {{ strtoupper($event->name ?? 'EVENT') }} <br>
+                                                {{ now()->format('d/m/Y H:i A') }}
+                                            </div>
+
+                                        </div>
+                                            </div>
+                                        </td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
                                                 data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" 
@@ -532,5 +668,18 @@ document.addEventListener('change', function(e) {
         }
     }
 });
+function printAthleteSlip(divId) {
+    var printContents = document.getElementById(divId);
+    
+    // Add a temporary class to identify what to print
+    printContents.classList.add('print-active');
+    printContents.classList.remove('d-none');
+
+    window.print();
+
+    // Clean up after printing
+    printContents.classList.remove('print-active');
+    printContents.classList.add('d-none');
+}
 </script>
 @endsection
