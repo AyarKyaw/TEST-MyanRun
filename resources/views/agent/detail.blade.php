@@ -94,10 +94,10 @@
     .print-active {
         position: fixed;
 
-        top: 50%;
+        top: 30%;
         left: 50%;
 
-        transform: translate(-50%, -50%) scale(1.4);
+        transform: translate(-50%, -50%) scale(1.8);
         transform-origin: center;
 
         width: 80mm !important;
