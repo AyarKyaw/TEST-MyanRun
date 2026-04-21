@@ -25,9 +25,25 @@
 
         <hr class="my-5">
 
-        {{-- Section 2: Event Admins --}}
+        {{-- Section 2: Finance Admins --}}
+        <h3 class="font-weight-bold mb-4" style="color: #2dce89;"><i class="fas fa-file-invoice-dollar mr-2"></i> Finance Administrators</h3>
+        <div class="row mb-5">
+            @forelse($financeAdmins ?? [] as $admin)
+                <div class="col-xl-4 col-md-6 mb-4">
+                    @include('admin.admins.partials.admin-card', ['admin' => $admin, 'type' => 'finance'])
+                </div>
+            @empty
+                <div class="col-12">
+                    <p class="text-muted">No finance admins assigned yet.</p>
+                </div>
+            @endforelse
+        </div>
+
+        <hr class="my-5">
+
+        {{-- Section 3: Event Admins --}}
         <h3 class="font-weight-bold text-info mb-4"><i class="fas fa-user-cog mr-2"></i> Event Administrators</h3>
-        <div class="row">
+        <div class="row mb-5">
             @forelse($eventAdmins as $admin)
                 <div class="col-xl-4 col-md-6 mb-4">
                     @include('admin.admins.partials.admin-card', ['admin' => $admin, 'type' => 'event'])
@@ -45,7 +61,6 @@
         <div class="row">
             @forelse($agents as $agent)
                 <div class="col-xl-4 col-md-6 mb-4">
-                    {{-- We pass $agent into the 'admin' variable slot for the partial --}}
                     @include('admin.admins.partials.admin-card', ['admin' => $agent, 'type' => 'agent'])
                 </div>
             @empty

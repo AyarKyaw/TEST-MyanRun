@@ -7,7 +7,12 @@
         <div class="page-title mb-5 d-flex justify-content-between align-items-center">
             <div>
                 {{-- Dynamic Title based on type --}}
-                <h1 class="font-weight-bold text-dark">Edit {{ $type === 'agent' ? 'Support Agent' : 'Administrator' }}</h1>
+                @php
+                    $roleLabel = 'Administrator';
+                    if ($type === 'agent') { $roleLabel = 'Support Agent'; }
+                    elseif ($admin->role === 'finance_admin') { $roleLabel = 'Finance Admin'; }
+                @endphp
+                <h1 class="font-weight-bold text-dark">Edit {{ $roleLabel }}</h1>
                 <p class="text-muted">Updating access for: <strong>{{ $admin->email }}</strong></p>
             </div>
             <a href="{{ route('admin.admins.index') }}" class="btn btn-light shadow-sm" style="border-radius: 10px;">
@@ -50,6 +55,9 @@
                                     <select name="role" class="form-control" style="border-radius: 8px;">
                                         <option value="event_admin" {{ $admin->role == 'event_admin' ? 'selected' : '' }}>
                                             Event Admin (Restricted)
+                                        </option>
+                                        <option value="finance_admin" {{ $admin->role == 'finance_admin' ? 'selected' : '' }}>
+                                            Finance Admin (Revenue & Payments)
                                         </option>
                                         <option value="super_admin" {{ $admin->role == 'super_admin' ? 'selected' : '' }}>
                                             Super Admin (Full Access)

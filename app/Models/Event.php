@@ -48,4 +48,10 @@ class Event extends Model
     protected $casts = [
         'date' => 'date',
     ];
+
+    public function registrations()
+{
+    // Pointing to the event_id foreign key for better database indexing
+    return $this->hasMany(Ticket::class, 'event_id'); 
+}
 }

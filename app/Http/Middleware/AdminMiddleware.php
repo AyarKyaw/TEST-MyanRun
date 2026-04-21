@@ -16,8 +16,11 @@ class AdminMiddleware
             
             $user = Auth::guard('admin')->user();
 
-            // 2. Allow access if they are either a Super Admin OR an Event Admin
-            if ($user->role === 'super_admin' || $user->role === 'event_admin') {
+            // 2. Allow access if they are Super Admin, Event Admin, OR Finance Admin
+            // Added the finance_admin check here
+            if ($user->role === 'super_admin' || 
+                $user->role === 'event_admin' || 
+                $user->role === 'finance_admin') {
                 return $next($request);
             }
         }

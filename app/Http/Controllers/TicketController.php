@@ -149,26 +149,41 @@ class TicketController extends Controller
         ));
     }
 
-    public function index()
-    {
-        $admin = Auth::guard('admin')->user();
-        $query = Event::query();
+  public function index()
+{
+    $admin = Auth::guard('admin')->user();
+    $query = Event::query();
 
-        // If event admin, only show events they are assigned to in the list
-        if ($admin->role === 'event_admin') {
-            $query->whereHas('admins', function($q) use ($admin) {
-                $q->where('admin_id', $admin->id);
-            });
-        }
-
-        $events = $query->orderBy('date', 'desc')->get()->groupBy('is_active');
-
-        $nowEvents = $events->get(1, collect());  // Status 1 = Live
-        $pastEvents = $events->get(0, collect()); // Status 0 = Past
-
-        return view('dashboard.ticket-sales.index', compact('nowEvents', 'pastEvents'));
+    /**
+     * ROLE ACCESS LOGIC
+     * Super Admin & Finance Admin: Can see ALL events.
+     * Event Admin: Only assigned events.
+     */
+    if ($admin->role === 'event_admin') {
+        $query->whereHas('admins', function($q) use ($admin) {
+            $q->where('admin_id', $admin->id);
+        });
     }
 
+    // Fetch Events
+    $events = $query->withSum(['registrations as approved_revenue' => function($q) {
+                $q->where('status', 'approved');
+            }], 'price')
+            ->withCount(['registrations as approved_ticket_count' => function($q) {
+                $q->where('status', 'approved');
+            }])
+            ->orderBy('date', 'desc')
+            ->get();
+
+    // Group by status (assuming is_active 1 for live, 0 for past)
+    $nowEvents = $events->where('is_active', 1);
+    $pastEvents = $events->where('is_active', 0);
+
+    // Calculate Grand Total for Live Events
+    $grandTotalRevenue = $nowEvents->sum('approved_revenue');
+
+    return view('dashboard.ticket-sales.index', compact('nowEvents', 'pastEvents', 'grandTotalRevenue'));
+}
     public function approve($id)
     {
         $ticket = \App\Models\Ticket::findOrFail($id);

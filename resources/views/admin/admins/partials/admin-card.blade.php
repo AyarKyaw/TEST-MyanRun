@@ -12,6 +12,10 @@
                         $icon = 'fa-user-shield text-primary';
                         $badgeClass = 'badge-success';
                         $label = 'SUPER ADMIN';
+                    } elseif ($type == 'finance') {
+                        $icon = 'fa-file-invoice-dollar text-success';
+                        $badgeClass = 'badge-success';
+                        $label = 'FINANCE ADMIN';
                     } elseif ($type == 'agent') {
                         $icon = 'fa-headset text-warning';
                         $badgeClass = 'badge-warning text-white';
@@ -25,7 +29,6 @@
             </span>
         </div>
 
-        {{-- Since you mentioned actually no name, we show email as the primary title --}}
         <h5 class="font-weight-bold text-dark mb-1">{{ $admin->email }}</h5>
         <p class="text-muted small mb-3">Joined: {{ $admin->created_at->format('d M Y') }}</p>
 
@@ -36,7 +39,6 @@
                 $currentUser = Auth::guard('admin')->user();
                 $isSuperAdmin = $currentUser->role === 'super_admin';
                 
-                // Pointing to the unified AdminManagementController with the 'type' parameter
                 if ($type == 'agent') {
                     $editUrl   = route('admin.admins.edit', [$admin->id, 'type' => 'agent']);
                     $deleteUrl = route('admin.admins.destroy', [$admin->id, 'type' => 'agent']);
@@ -46,7 +48,6 @@
                 }
             @endphp
 
-            {{-- 1. Edit Button Logic --}}
             @if($isSuperAdmin || (Auth::guard('admin')->id() === $admin->id))
                 <a href="{{ $editUrl }}" class="btn btn-outline-primary btn-sm px-4" style="border-radius: 8px;">
                     <i class="fas fa-edit mr-1"></i> Edit
@@ -55,8 +56,6 @@
                 <span class="text-muted small"><i class="fas fa-lock mr-1"></i> Locked</span>
             @endif
 
-            {{-- 2. Delete Button Logic --}}
-            {{-- Prevent self-deletion --}}
             @if(Auth::guard('admin')->id() !== $admin->id)
                 @if($isSuperAdmin)
                     <form action="{{ $deleteUrl }}" method="POST" onsubmit="return confirm('Are you sure you want to remove this {{ $type }} account?');">

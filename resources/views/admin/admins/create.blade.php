@@ -6,7 +6,7 @@
         <div class="page-title mb-5 d-flex justify-content-between align-items-center">
             <div>
                 <h1 class="font-weight-bold text-dark">Create Team Member</h1>
-                <p class="text-muted">Register a new Admin or Support Agent.</p>
+                <p class="text-muted">Register a new Admin, Finance Officer, or Support Agent.</p>
             </div>
             <a href="{{ route('admin.admins.index') }}" class="btn btn-light shadow-sm" style="border-radius: 10px; font-weight: 700;">
                 <i class="fas fa-arrow-left mr-2"></i> BACK TO LIST
@@ -44,6 +44,7 @@
                                 <label class="text-dark font-weight-bold">Access Level / Role</label>
                                 <select name="role" class="form-control default-select" style="border-radius: 8px; height: 50px;">
                                     <option value="event_admin">Event Admin (Dashboard Access)</option>
+                                    <option value="finance_admin">Finance Admin (Revenue & Payments)</option>
                                     <option value="super_admin">Super Admin (Full Access)</option>
                                     <option value="agent">Support Agent</option>
                                 </select>

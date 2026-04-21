@@ -14,10 +14,11 @@ class AdminManagementController extends Controller
     public function index()
     {
         $superAdmins = Admin::where('role', 'super_admin')->latest()->get();
+        $financeAdmins = Admin::where('role', 'finance_admin')->latest()->get(); // Added Finance Admins
         $eventAdmins = Admin::where('role', 'event_admin')->latest()->get();
         $agents = Agent::latest()->get();
 
-        return view('admin.admins.index', compact('superAdmins', 'eventAdmins', 'agents'));
+        return view('admin.admins.index', compact('superAdmins', 'financeAdmins', 'eventAdmins', 'agents'));
     }
 
     // Show create form
@@ -30,13 +31,12 @@ class AdminManagementController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email', // Unique check handled manually below
+            'email' => 'required|email',
             'password' => 'required|min:6',
             'role' => 'required'
         ]);
 
         if ($request->role === 'agent') {
-            // Check uniqueness in agents table
             if (Agent::where('email', $request->email)->exists()) {
                 return back()->withErrors(['email' => 'This email is already registered as an agent.']);
             }
@@ -47,7 +47,6 @@ class AdminManagementController extends Controller
             ]);
             $msg = 'New Support Agent Created!';
         } else {
-            // Check uniqueness in admins table
             if (Admin::where('email', $request->email)->exists()) {
                 return back()->withErrors(['email' => 'This email is already registered as an admin.']);
             }
@@ -55,15 +54,22 @@ class AdminManagementController extends Controller
             Admin::create([
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => $request->role,
+                'role' => $request->role, // Stores 'finance_admin', 'super_admin', or 'event_admin'
             ]);
-            $msg = 'New Admin Created!';
+            
+            // Custom message based on role
+            $roleNames = [
+                'finance_admin' => 'Finance Admin',
+                'super_admin' => 'Super Admin',
+                'event_admin' => 'Event Admin'
+            ];
+            $msg = 'New ' . ($roleNames[$request->role] ?? 'Admin') . ' Created!';
         }
 
         return redirect('/dashboard/admins')->with('success', $msg);
     }
 
-    // Show the edit form (Detects if it's an Agent or Admin via a query param)
+    // Show the edit form
     public function edit(Request $request, $id)
     {
         if ($request->query('type') === 'agent') {
@@ -71,7 +77,8 @@ class AdminManagementController extends Controller
             $type = 'agent';
         } else {
             $admin = Admin::findOrFail($id);
-            $type = 'admin';
+            // Pass the specific role type to the view for dynamic headers
+            $type = $admin->role === 'finance_admin' ? 'finance' : 'admin';
         }
         
         return view('admin.admins.edit', compact('admin', 'type'));
@@ -80,9 +87,9 @@ class AdminManagementController extends Controller
     // Update the database
     public function update(Request $request, $id)
     {
-        $role = $request->input('role');
+        $type = $request->input('type');
 
-        if ($role === 'agent') {
+        if ($type === 'agent') {
             $user = Agent::findOrFail($id);
             $request->validate(['email' => 'required|email|unique:agents,email,' . $id]);
         } else {
@@ -113,11 +120,12 @@ class AdminManagementController extends Controller
         }
 
         $admin = Admin::findOrFail($id);
+        
         if (auth()->guard('admin')->id() == $admin->id) {
             return back()->with('error', 'You cannot delete yourself!');
         }
 
         $admin->delete();
-        return back()->with('success', 'Admin removed successfully.');
+        return back()->with('success', 'Account removed successfully.');
     }
 }
