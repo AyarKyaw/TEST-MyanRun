@@ -482,25 +482,28 @@
             </form>
             <div class="modal-footer border-0 bg-light p-4">
     <button type="button" class="btn btn-outline-secondary px-4 py-2" data-bs-dismiss="modal">Close</button>
-    
-    {{-- Check the role directly from the guard --}}
-    @if(Auth::guard('admin')->check() && Auth::guard('admin')->user()->role === 'super_admin')
-    <div class="ms-auto d-flex gap-2" id="modal-action-buttons">
-        <form id="reject-form" action="" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-danger px-4 py-2 rounded-2">
-                <i class="fa fa-times me-1"></i> Reject
-            </button>
-        </form>
-        <form id="approve-form" action="" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-success px-4 py-2 rounded-2">
-                <i class="fa fa-check me-1"></i> Approve Payment
-            </button>
-        </form>
-    </div>
-    @endif
-</div>
+    @php
+    // Get the user from the guard within the view
+    $user = Auth::guard('admin')->user();
+@endphp
+    <div class="ms-auto d-flex gap-2">
+        {{-- Container 1: Only for Super Admin (Approve/Reject) --}}
+        @if($user && $user->role === 'super_admin')
+            <div id="modal-action-buttons" class="d-flex gap-2">
+                <form id="reject-form" action="" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-danger px-4 py-2 rounded-2">Reject</button>
+                </form>
+                <form id="approve-form" action="" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-success px-4 py-2 rounded-2">Approve</button>
+                </form>
+            </div>
+        @endif
+
+        {{-- Container 2: For both (Save Button) --}}
+        <div id="modal-save-button-container" class="d-none">
+            <button type="submit" form="edit-ticket-form" class="btn btn-primary px-4 py-2">Save Changes</button>
         </div>
     </div>
 </div>
@@ -571,44 +574,41 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-state').innerText = athlete.state || 'None';
             document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
-
-            document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
-            document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
             
+            console.log("hello");
+            
+            // --- MOVED ALL OF THIS INSIDE THE CLICK FUNCTION ---
             const actionContainer = document.getElementById('modal-action-buttons');
             const saveBtnContainer = document.getElementById('modal-save-button-container');
             const isEditable = ['pending', 'approved'].includes(data.status);
-
-            if (data.status === 'pending') {
-                actionContainer.classList.remove('d-none');
-            } else {
-                actionContainer.classList.add('d-none');
+            
+            if (actionContainer) {
+                if (data.status === 'pending') {
+                    actionContainer.classList.remove('d-none');
+                } else {
+                    actionContainer.classList.add('d-none');
+                }
             }
-
             if (isEditable) {
                 saveBtnContainer.classList.remove('d-none');
                 
-                // Editable Full Name (Sends as full_name)
                 document.getElementById('modal-name-container').innerHTML = `
-                    <input type="text" name="full_name" class="form-control form-control-sm border-primary" value="${fullName}" placeholder="Enter Full Name">
+                <input type="text" name="full_name" class="form-control form-control-sm border-primary" value="${fullName}" placeholder="Enter Full Name">
                 `;
-
-                // Editable ITRA Details
                 document.getElementById('modal-itra-container').innerHTML = `
-                    <textarea name="itra_details" class="form-control form-control-sm border-primary" rows="2" placeholder="ITRA Score or Link">${athlete.itra_details || ''}</textarea>
+                <textarea name="itra_details" class="form-control form-control-sm border-primary" rows="2" placeholder="ITRA Score or Link">${athlete.itra_details || ''}</textarea>
                 `;
-
                 document.getElementById('modal-bib-container').innerHTML = `
-                    <input type="text" name="bib_name" class="form-control form-control-sm border-primary" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
+                <input type="text" name="bib_name" class="form-control form-control-sm border-primary" value="${data.bib_name || ''}" placeholder="Enter BIB Name">
                 `;
                 const sizes = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "5XL"];
                 let sizeOptions = sizes.map(s => `<option value="${s}" ${data.t_shirt_size === s ? 'selected' : ''}>${s}</option>`).join('');
                 document.getElementById('modal-tshirt-container').innerHTML = `
-                    <select name="t_shirt_size" class="form-control form-control-sm border-primary">
-                        ${sizeOptions}
-                    </select>
+                <select name="t_shirt_size" class="form-control form-control-sm border-primary">
+                ${sizeOptions}
+                </select>
                 `;
-
+                
                 const idContainer = document.getElementById('modal-id-container');
                 const currentId = athlete.id_number || '';
                 if (athlete.nat_type === 'national') {
@@ -616,23 +616,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     const match = currentId.match(/^(\d+)\/([^\(]+)\(([^)]+)\)(\d+)$/);
                     if(match) { state = match[1]; district = match[2]; type = match[3]; num = match[4]; }
                     idContainer.innerHTML = `
-                        <div class="d-flex gap-1 flex-wrap">
-                            <select name="nrc_state" id="edit_nrc_state" class="form-control" style="width: 55px;" required>
-                                <option value="">St</option>
-                                ${[...Array(14)].map((_,i)=>`<option value="${i+1}" ${state == i+1 ? 'selected':''}>${i+1}/</option>`).join('')}
-                            </select>
-                            <select name="nrc_district" id="edit_nrc_district" class="form-control" style="width: 85px;" required>
-                                <option value="${district}">${district || 'Dist'}</option>
-                            </select>
-                            <select name="nrc_type" id="edit_nrc_type" class="form-control" style="width: 65px;">
-                                ${['နိုင်','ဧည့်','စ','ပြု','သ','သီ'].map(t => `<option value="${t}" ${type == t ? 'selected':''}>${t}</option>`).join('')}
-                            </select>
-                            <input type="text" name="nrc_number" id="edit_nrc_number" class="form-control" style="flex: 1; min-width: 80px;" value="${num}" placeholder="123456" maxlength="6" required>
-                        </div>
+                    <div class="d-flex gap-1 flex-wrap">
+                    <select name="nrc_state" id="edit_nrc_state" class="form-control" style="width: 55px;" required>
+                    <option value="">St</option>
+                    ${[...Array(14)].map((_,i)=>`<option value="${i+1}" ${state == i+1 ? 'selected':''}>${i+1}/</option>`).join('')}
+                    </select>
+                    <select name="nrc_district" id="edit_nrc_district" class="form-control" style="width: 85px;" required>
+                    <option value="${district}">${district || 'Dist'}</option>
+                    </select>
+                    <select name="nrc_type" id="edit_nrc_type" class="form-control" style="width: 65px;">
+                    ${['နိုင်','ဧည့်','စ','ပြု','သ','သီ'].map(t => `<option value="${t}" ${type == t ? 'selected':''}>${t}</option>`).join('')}
+                    </select>
+                    <input type="text" name="nrc_number" id="edit_nrc_number" class="form-control" style="flex: 1; min-width: 80px;" value="${num}" placeholder="123456" maxlength="6" required>
+                    </div>
                     `;
                 } else {
                     idContainer.innerHTML = `
-                        <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm border-primary" value="${currentId}" placeholder="Passport Number" required>
+                    <input type="text" name="id_number" id="edit_passport" class="form-control form-control-sm border-primary" value="${currentId}" placeholder="Passport Number" required>
                     `;
                 }
                 if(athlete.nat_type === 'national' && state) {
@@ -645,6 +645,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modal-bib-container').innerHTML = `<span class="fw-bold text-black">${data.bib_name || 'N/A'}</span>`;
                 document.getElementById('modal-tshirt-container').innerHTML = `<span class="badge light badge-primary">${data.t_shirt_size || 'N/A'}</span>`;
                 document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold text-black">${athlete.id_number || 'None'}</span>`;
+                document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
+                document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
             }
         });
     });

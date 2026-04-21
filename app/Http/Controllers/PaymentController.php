@@ -138,7 +138,7 @@ class PaymentController extends Controller
                     'bib_number'       => $generatedBib, 
                     'category'         => $order['category'],
                     'ticket_type_id'   => $order['ticket_type_id'],
-                    'price'            => $amount, // Usually 0 because Captain paid the full discounted/regular amount
+                    'price'            => 0, // Usually 0 because Captain paid the full discounted/regular amount
                     'event_id'         => $order['event_id'],
                     'event'            => $event->name, 
                     't_shirt_size'     => $friendReg['t_shirt_size'] ?? 'M', 
