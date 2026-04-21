@@ -488,7 +488,7 @@
 @endphp
     <div class="ms-auto d-flex gap-2">
         {{-- Container 1: Only for Super Admin (Approve/Reject) --}}
-        @if($user && $user->role === 'super_admin')
+        @if($user && ($user->role === 'super_admin' || $user->role === 'finance_admin'))
             <div id="modal-action-buttons" class="d-flex gap-2">
                 <form id="reject-form" action="" method="POST">
                     @csrf
@@ -575,12 +575,13 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-nat').innerText = athlete.nat_type || 'None';
             document.getElementById('modal-transaction-img').src = transactionImageUrl;
             
-            console.log("hello");
             
             // --- MOVED ALL OF THIS INSIDE THE CLICK FUNCTION ---
             const actionContainer = document.getElementById('modal-action-buttons');
             const saveBtnContainer = document.getElementById('modal-save-button-container');
-            const isEditable = ['pending', 'approved'].includes(data.status);
+            const restrictedRoles = ['finance_admin', 'agent'];
+            const userRole = "{{ auth()->user()->role ?? 'guest' }}";
+            const isEditable = ['pending', 'approved'].includes(data.status) && !restrictedRoles.includes(userRole);
             
             if (actionContainer) {
                 if (data.status === 'pending') {
@@ -640,13 +641,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 saveBtnContainer.classList.add('d-none');
-                document.getElementById('modal-name-container').innerHTML = `<span class="fw-bold text-black">${fullName}</span>`;
-                document.getElementById('modal-itra-container').innerHTML = athlete.itra_details || 'None';
-                document.getElementById('modal-bib-container').innerHTML = `<span class="fw-bold text-black">${data.bib_name || 'N/A'}</span>`;
+                // Explicitly set the text for everyone, regardless of role
+                document.getElementById('modal-name-container').innerText = fullName;
+                document.getElementById('modal-itra-container').innerText = athlete.itra_details || 'None';
+                document.getElementById('modal-bib-container').innerText = data.bib_name || 'N/A';
                 document.getElementById('modal-tshirt-container').innerHTML = `<span class="badge light badge-primary">${data.t_shirt_size || 'N/A'}</span>`;
-                document.getElementById('modal-id-container').innerHTML = `<span class="fw-bold text-black">${athlete.id_number || 'None'}</span>`;
-                document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
-                document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
+                document.getElementById('modal-id-container').innerText = athlete.id_number || 'None';
+                
+                // Update button actions
+                if(document.getElementById('approve-form')) document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
+                if(document.getElementById('reject-form')) document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
             }
         });
     });

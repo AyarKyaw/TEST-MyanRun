@@ -229,6 +229,8 @@ Route::middleware(['auth'])->group(function () {
    Route::get('/register-friend', [AthleteController::class, 'showFriendRegisterForm'])->name('friend.register');
     Route::get('/checkout/review', [TicketController::class, 'showReviewPage'])->name('checkout.review');
     Route::post('/checkout/process', [TicketController::class, 'processPayment'])->name('tickets.process-payment');
+    Route::post('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('user.password.update');
+    Route::get('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'showChangePasswordForm'])->name('user.password.change');
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');

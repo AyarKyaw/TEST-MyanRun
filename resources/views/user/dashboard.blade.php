@@ -53,6 +53,12 @@
                     <span class="font-bold text-sm tracking-tight">Dashboard</span>
                 </a>
 
+                <a href="{{ route('user.password.change') }}" 
+                    class="{{ request()->routeIs('user.password.change') ? 'sidebar-active' : 'sidebar-item text-slate-500' }} flex items-center p-3.5 rounded-2xl group">
+                        <div class="w-8"><i class="fas fa-lock text-lg"></i></div>
+                        <span class="font-bold text-sm tracking-tight">Change Password</span>
+                </a>
+
                 <!-- <a href="#" class="sidebar-item flex items-center p-3.5 rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 group">
                     <div class="w-8"><i class="fas fa-running text-lg group-hover:text-brandDark transition-colors"></i></div>
                     <span class="font-semibold text-sm">My Races</span>
