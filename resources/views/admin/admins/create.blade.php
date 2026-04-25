@@ -47,6 +47,7 @@
                                     <option value="finance_admin">Finance Admin (Revenue & Payments)</option>
                                     <option value="super_admin">Super Admin (Full Access)</option>
                                     <option value="agent">Support Agent</option>
+                                    <option value="supporter">Supporter (Ticket Printing Access)</option>
                                 </select>
                             </div>
 

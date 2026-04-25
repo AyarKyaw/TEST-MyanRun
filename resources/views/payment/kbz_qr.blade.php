@@ -1,10 +1,17 @@
 <title>MyanRun || QR CODE</title>
+@php
+    $paymentMethod = session('payment_method', 'kbz'); // Default to 'kbz'
+    
+    // Set variables based on choice
+    $qrImage = ($paymentMethod === 'kbz') ? 'KBZ_Bank_logo.png' : 'MMQR.jpg';
+    $methodName = ($paymentMethod === 'kbz') ? 'KBZPay' : 'MMQR';
+@endphp
 <link rel="icon" type="image/x-icon" href="{{ asset('images/icon/Myan Run icon.png') }}">
 
 <div class="payment-container" style="max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #fff; position: relative;">
     
     <div style="margin-bottom: 20px;">
-        <h3 style="color: #1a1a1a; margin-bottom: 5px;">Scan to Pay</h3>
+        <h3 style="color: #1a1a1a; margin-bottom: 5px;">Scan to Pay ({{ $methodName }})</h3>
         <div style="font-size: 28px; font-weight: bold; color: #f9a01b; margin: 10px 0;">
             {{ number_format($ticket->price) }} MMK
         </div>
@@ -15,12 +22,13 @@
             color: #333;
             margin-bottom: 10px;
         ">
-            MM<span style="color:#f9a01b;">QR</span>
+            {{ $methodName }}</span>
         </h1>
-        <div style="margin: 15px 0;">
-        <img src="{{ asset('images/MMQR.jpg') }}"
-             style="width: 250px; height: 250px;">
-    </div>
+        <div style="margin: 20px 0; height: 150px; display: flex; align-items: center; justify-content: center;">
+            <img src="{{ asset('images/' . $qrImage) }}" 
+                alt="{{ $methodName }} Logo" 
+                style="max-width: 100%; max-height: 100%; object-fit: contain;">
+        </div>
 
         <p style="color: #666; font-size: 14px;">Please use your <strong>Payment App</strong> to scan</p>
     </div>

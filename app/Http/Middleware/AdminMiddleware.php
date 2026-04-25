@@ -20,7 +20,8 @@ class AdminMiddleware
             // Added the finance_admin check here
             if ($user->role === 'super_admin' || 
                 $user->role === 'event_admin' || 
-                $user->role === 'finance_admin') {
+                $user->role === 'finance_admin' ||
+                $user->role === 'supporter') {
                 return $next($request);
             }
         }

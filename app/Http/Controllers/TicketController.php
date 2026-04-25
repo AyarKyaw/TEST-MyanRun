@@ -67,26 +67,24 @@ class TicketController extends Controller
     {
         $admin = Auth::guard('admin')->user();
         $event = \App\Models\Event::where('name', $eventName)->firstOrFail();
+        $isSupporter = ($admin->role === 'supporter');
 
-        // --- Role Based Security ---
-        // If the user is an event_admin, check if they are assigned to this event
-        if ($admin->role === 'event_admin') {
-            if (!$event->admins->contains($admin->id)) {
-                abort(403, 'You are not assigned to manage this event.');
-            }
+        // 1. Determine status
+        $status = $request->query('status', 'pending');
+        if ($isSupporter) {
+            $status = 'approved';
         }
-
-        $search = $request->query('search');
-        $status = $request->query('status', 'pending'); 
 
         $query = \App\Models\Ticket::where('event', $eventName)->with(['athlete.user']);
 
-        // 1. Filter by status
+        // 2. Apply status filter correctly
+        // If 'all', don't filter by status. Otherwise, apply the specific status.
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
-        // 2. Filter by Search
+        // 3. Filter by Search (You were missing the $search variable definition)
+        $search = $request->query('search');
         if (!empty($search)) {
             $request->merge(['page' => 1]);
             $searchTerm = trim($search);
@@ -94,58 +92,37 @@ class TicketController extends Controller
             $query->where(function($q) use ($searchTerm) {
                 $q->where('bib_number', 'LIKE', "%{$searchTerm}%")
                 ->orWhere('bib_name', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('id', 'LIKE', "%{$searchTerm}%")
                 ->orWhereHas('athlete.user', function($userQuery) use ($searchTerm) {
                     $userQuery->where(\DB::raw("CONCAT_WS(' ', first_name, middle_name, last_name)"), 'LIKE', "%{$searchTerm}%")
-                                ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
-                                ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
-                                ->orWhere(\DB::raw("CONCAT_WS(' ', first_name, last_name)"), 'LIKE', "%{$searchTerm}%");
+                            ->orWhere('first_name', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere('last_name', 'LIKE', "%{$searchTerm}%")
+                            ->orWhere(\DB::raw("CONCAT_WS(' ', first_name, last_name)"), 'LIKE', "%{$searchTerm}%");
                 });
             });
         }
 
-        // 3. Final Execution
-        $customers = $query->orderBy('created_at', 'desc')
-                           ->paginate(10) 
-                           ->withQueryString();
+        $customers = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
-        // Define the variable so compact() can find it
-        $eventLimit = $event?->total_max_slots;
-
-        // ✅ Updated to count UNIQUE bib_numbers
+        // 4. Stats
+        $baseQuery = \App\Models\Ticket::where('event', $eventName)->whereNotNull('bib_number');
+        
         $counts = [
-            'all' => \App\Models\Ticket::where('event', $eventName)
-                ->whereNotNull('bib_number')
-                ->distinct()
-                ->count('bib_number'),
-
-            'pending' => \App\Models\Ticket::where('event', $eventName)
-                ->where('status', 'pending')
-                ->whereNotNull('bib_number')
-                ->distinct()
-                ->count('bib_number'),
-
-            'approved' => \App\Models\Ticket::where('event', $eventName)
-                ->where('status', 'approved')
-                ->whereNotNull('bib_number')
-                ->distinct()
-                ->count('bib_number'),
-
-            'rejected' => \App\Models\Ticket::where('event', $eventName)
-                ->where('status', 'rejected')
-                ->whereNotNull('bib_number')
-                ->distinct()
-                ->count('bib_number'),
-
-            'max_slots' => $eventLimit,
+            'approved' => (clone $baseQuery)->where('status', 'approved')->distinct()->count('bib_number'),
         ];
 
+        if (!$isSupporter) {
+            $counts['all'] = (clone $baseQuery)->distinct()->count('bib_number');
+            $counts['pending'] = (clone $baseQuery)->where('status', 'pending')->distinct()->count('bib_number');
+            $counts['rejected'] = (clone $baseQuery)->where('status', 'rejected')->distinct()->count('bib_number');
+        }
+
+        // Adjust these to be event-specific if necessary!
+        $totalTickets = \App\Models\Ticket::where('event', $eventName)->count(); 
+        $totalPrinted = \App\Models\Ticket::where('event', $eventName)->where('is_printed', true)->count();
+
         return view('dashboard.ticket-sales.ticket', compact(
-            'customers',
-            'counts',
-            'status',
-            'eventName',
-            'eventLimit', 
-            'event'
+            'customers', 'counts', 'status', 'eventName', 'event', 'totalTickets', 'totalPrinted'
         ));
     }
 
@@ -390,12 +367,21 @@ class TicketController extends Controller
     {
         // 1. Session Safety Check
         $order = session('pending_registration');
+        $method = session('payment_method');
     
         // 1. Updated Safety Check (Check for event_id)
         if (!$order || !isset($order['athlete_id']) || !isset($order['event_id'])) {
             return redirect()->route('athlete.register')
                 ->with('error', 'Session expired or registration data is missing.');
         }
+        $ticketType = \App\Models\EventTicketType::with('event')->find($order['ticket_type_id']);
+        $event = $ticketType->event;
+        $totalEventRegistrations = \App\Models\Ticket::whereHas('ticketType', function($query) use ($event) {
+                $query->where('event_id', $event->id);
+            })
+            ->where('status', '!=', 'rejected')
+            ->count();
+
 
         // 2. Fetch Event using ID from session
         $eventModel = \App\Models\Event::find($order['event_id']);
@@ -443,6 +429,16 @@ class TicketController extends Controller
             $athlete->gender
         );
 
+        $isEarlyBird = false;
+        $discountAmount = 0;
+
+        if ($event->early_bird_limit > 0 && $totalEventRegistrations < $event->early_bird_limit) {
+            $isEarlyBird = true;
+            $discountAmount = $ticketType->early_bird_discount ?? 0;
+        }
+
+        $finalAmount = (int)str_replace(',', '', $order['price']) - $discountAmount;
+
         // 5. Create the Ticket (Database Entry)
         $ticket = \App\Models\Ticket::create([
             'athlete_id'       => $order['athlete_id'], 
@@ -451,11 +447,12 @@ class TicketController extends Controller
             'bib_name'         => $order['bib_name'],
             'bib_number'       => $generatedBib, 
             'category'         => $order['category'],
-            'price'            => (int)str_replace(',', '', $order['price']),
+            'price'            => $finalAmount,
             'event'            => $eventName, 
             't_shirt_size'     => $order['t_shirt_size'] ?? 'M',
             'experience_level' => $order['exp_level'] ?? 'Beginner',
             'transaction_id'   => null, 
+            'payment_method'   => $method,
             'status'           => 'pending', 
         ]);
 
@@ -506,7 +503,7 @@ class TicketController extends Controller
                     'merch_code'     => env('KBZ_PAY_MERCHANT_CODE'),
                     'appid'          => env('KBZ_PAY_APP_ID'),
                     'trade_type'     => 'PAY_BY_QRCODE',
-                    'total_amount'   => $price,
+                    'total_amount'   => $finalAmount,
                     'trans_currency' => 'MMK'
                 ]
             ]
@@ -658,7 +655,8 @@ class TicketController extends Controller
     public function initiatePayment_s(Request $request, $id) 
     {
         $order = session('pending_registration');
-        if (!$order) {
+        $method = session('payment_method');
+        if (!$order || !$method) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
@@ -813,5 +811,71 @@ class TicketController extends Controller
     ]);
 
     return redirect()->back()->with('success', 'Information Updated Successfully');
+}
+
+public function showPaymentMethod()
+{
+    // Make sure the user has a selected ticket in the session/database first
+    if (!session()->has('pending_registration')) {
+        return redirect()->route('checkout.review')->with('error', 'Please select a ticket first.');
+    }
+    return view('ticket.payment_method'); // Ensure this view exists
+}
+
+public function selectPaymentMethod(Request $request)
+{
+    $request->validate([
+        'payment_method' => 'required|in:kbz,mmqr',
+    ]);
+
+    // 1. Save payment method to session
+    session(['payment_method' => $request->payment_method]);
+
+    // 2. We need the runner_id for your initiatePayment_s route
+    $runnerId = Auth::user()->runner_id;
+
+    // 3. Redirect to the initiation route as requested
+    return redirect()->route('initiatePayment', ['id' => Auth::user()->runner_id]);
+}
+
+public function markPrinted($id) {
+    $user = auth('admin')->user();
+
+    if (!$user || !in_array($user->role, ['admin', 'printer'])) {
+        return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
+    }
+    try {
+        $ticket = \App\Models\Ticket::findOrFail($id); // Ensure your Model path is correct
+
+        if ($ticket->is_printed) {
+            return response()->json(['success' => false, 'message' => 'Already printed!'], 403);
+        }
+        
+        $ticket->update(['is_printed' => true]);
+        return response()->json(['success' => true]);
+
+    } catch (\Exception $e) {
+        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+    }
+}
+
+public function reprint(Request $request, $id) 
+{
+    // 1. Get the authenticated admin
+    $admin = auth('admin')->user();
+
+    // 2. Verify: Does the password they just typed match their OWN password?
+    // Hash::check safely compares the input to the hashed version in your DB
+    if (!\Illuminate\Support\Facades\Hash::check($request->password, $admin->password)) {
+        return response()->json(['success' => false, 'message' => 'Incorrect password'], 403);
+    }
+    
+    // 3. Optional: Role check (Ensure only supporters/admins can do this)
+    if (!in_array($admin->role, ['super_admin', 'supporter'])) {
+        return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+    }
+
+    // 4. Everything matches! Proceed with print
+    return response()->json(['success' => true]);
 }
 }

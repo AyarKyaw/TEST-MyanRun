@@ -69,6 +69,23 @@
                 </div>
             @endforelse
         </div>
+
+        <hr class="my-5">
+
+        <h3 class="font-weight-bold text-secondary mb-4">
+            <i class="fas fa-print mr-2"></i> Supporters
+        </h3>
+        <div class="row">
+            @forelse($supporters as $supporter)
+                <div class="col-xl-4 col-md-6 mb-4">
+                    @include('admin.admins.partials.admin-card', ['admin' => $supporter, 'type' => 'supporter'])
+                </div>
+            @empty
+                <div class="col-12">
+                    <p class="text-muted">No supporter staff assigned yet.</p>
+                </div>
+            @endforelse
+        </div>
     </div>
 </div>
 @endsection

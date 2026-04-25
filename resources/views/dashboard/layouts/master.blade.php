@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta http-equiv="Cache-Control" content="max-age=31536000, public">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Myanrun - Dashboard</title>
 
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/icon/Myan Run icon.png') }}">

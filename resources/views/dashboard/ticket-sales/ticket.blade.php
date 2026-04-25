@@ -85,13 +85,13 @@
     .print-active {
         position: fixed;
 
-        top: 30%;
+        top: 40%;
         left: 50%;
 
-        transform: translate(-50%, -50%) scale(1.8);
+        transform: translate(-50%, -50%) scale(1.4);
         transform-origin: center;
 
-        width: 80mm !important;
+        width: 90mm !important;
         margin: 0 !important;
         padding: 0 !important;
 
@@ -173,9 +173,9 @@
         <div class="row mb-4">
             <div class="col-xl-4 col-md-5 mb-3">
                 <div class="d-flex flex-column gap-2">
-                    <a href="#" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center rounded-3 shadow-sm py-3">
+                    <!-- <a href="#" class="btn btn-primary btn-lg d-flex align-items-center justify-content-center rounded-3 shadow-sm py-3">
                         <i class="fa fa-plus-circle me-2 fs-20"></i> <span class="fw-bold">New Customer Registration</span>
-                    </a>
+                    </a> -->
 
                     <div class="dropdown">
                         <button type="button" class="btn btn-light border btn-lg w-100 rounded-3 dropdown-toggle d-flex align-items-center justify-content-between" data-bs-toggle="dropdown">
@@ -213,26 +213,34 @@
                         <div class="row align-items-center">
                             <div class="col-md-7">
                                 <div class="d-flex align-items-center gap-4 mb-3">
+                                    {{-- Total Printed --}}
                                     <div>
-                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
-                                        <h2 class="mb-0 text-black fw-bold">{{ number_format($counts['approved'] ?? 0) }}</h2>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Printed</p>
+                                        <h2 class="mb-0 text-success fw-bold">{{ number_format($totalPrinted ?? 0) }}</h2>
                                     </div>
+                                    
                                     <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+                                    
+                                    {{-- Total Tickets --}}
                                     <div>
-                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Remaining</p>
-                                        @if(!is_null($eventLimit))
-                                            <h2 class="mb-0 text-danger fw-bold">{{ number_format(max(0, $eventLimit - ($counts['approved'] ?? 0))) }}</h2>
-                                        @else
-                                            <h2 class="mb-0 text-success fw-bold">Unlimited</h2>
-                                        @endif
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Total Tickets</p>
+                                        <h2 class="mb-0 text-black fw-bold">{{ number_format($totalTickets ?? 0) }}</h2>
                                     </div>
                                 </div>
-                                @if(!is_null($eventLimit))
+
+                                {{-- Progress Bar --}}
+                                @if(($totalTickets ?? 0) > 0)
                                     <div class="progress progress-thin">
-                                        @php $percent = (($counts['approved'] ?? 0) / $eventLimit) * 100; @endphp
-                                        <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
+                                        @php 
+                                            $percent = (($totalPrinted ?? 0) / $totalTickets) * 100; 
+                                        @endphp
+                                        <div class="progress-bar bg-success" style="width: {{ $percent }}%"></div>
                                     </div>
-                                    <p class="fs-12 text-muted mt-2 mb-0">Event Capacity: {{ number_format($eventLimit) }} total spots</p>
+                                    <p class="fs-12 text-muted mt-2 mb-0">
+                                        {{ number_format($percent, 1) }}% of tickets issued
+                                    </p>
+                                @else
+                                    <p class="fs-12 text-muted mt-2 mb-0">No tickets generated yet.</p>
                                 @endif
                             </div>
                             
@@ -261,28 +269,38 @@
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-header bg-white pt-4 px-4 border-0">
     <ul class="nav nav-tabs" role="tablist">
+    @if(auth('admin')->user()->role === 'supporter')
+        {{-- SUPPORTER VIEW: ONLY APPROVED TAB --}}
         <li class="nav-item">
-            <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
-               href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName, 'search' => request('search')]) }}">
-                All 
-                <span class="badge rounded-pill bg-secondary ms-2 fs-10" style="vertical-align: middle;">
-                    {{ $counts['all'] ?? 0 }}
-                </span>
+            <a class="nav-link active" href="#">
+                Approved Tickets <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
             </a>
         </li>
-
-        @foreach(['pending' => 'warning', 'approved' => 'success', 'rejected' => 'danger'] as $status => $color)
+    @else
+        {{-- ADMIN VIEW: ALL TABS --}}
+        <li class="nav-item">
+            <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
+               href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName]) }}">
+                All <span class="badge rounded-pill bg-secondary ms-2">{{ $counts['all'] ?? 0 }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request('status', 'pending') == 'approved' ? 'active' : '' }}" 
+               href="{{ route('dashboard.events.ticket', ['status' => 'approved', 'event' => $eventName]) }}">
+                Approved <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
+            </a>
+        </li>
+        @foreach(['pending' => 'warning', 'rejected' => 'danger'] as $status => $color)
             <li class="nav-item">
-                <a class="nav-link {{ request('status', 'pending') == $status && request('status') != 'all' ? 'active' : '' }}" 
-                   href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName, 'search' => request('search')]) }}">
-                   {{ ucfirst($status) }} 
-                   <span class="badge rounded-pill bg-{{ $color }} ms-2 fs-10" style="vertical-align: middle;">
-                       {{ $counts[$status] ?? 0 }}
-                   </span>
+                <a class="nav-link {{ request('status') == $status ? 'active' : '' }}" 
+                   href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName]) }}">
+                    {{ ucfirst($status) }} 
+                    <span class="badge rounded-pill bg-{{ $color }} ms-2">{{ $counts[$status] ?? 0 }}</span>
                 </a>
             </li>
         @endforeach
-    </ul>
+    @endif
+</ul>
 </div>
                     
                     <div class="card-body p-0">
@@ -290,7 +308,10 @@
                             <table class="table table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
                                 <thead>
                                     <tr>
+                                        <th class="text-center" width="80">ID</th>
+                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['super_admin', 'supporter']))
                                         <th class="text-center" width="80">Print</th>
+                                        @endif
                                         <th class="text-center" width="80">View</th>
                                         <th>Athlete Details</th>
                                         <th>BIB Number</th>
@@ -303,11 +324,14 @@
                                 <tbody>
                                     @forelse($customers as $customer)
                                     <tr>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->id }}</span></td>
+                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['super_admin', 'supporter']))
                                         <td>
                                             <button type="button" 
-                                                    class="btn btn-sm btn-primary d-print-none" 
-                                                    onclick="printAthleteSlip('slip-{{ $customer->id }}')">
-                                                <i class="fas fa-print"></i> Print Slip
+                                                    class="btn btn-sm {{ $customer->is_printed ? 'btn-warning' : 'btn-primary' }}" 
+                                                    onclick="printAthleteSlip('slip-{{ $customer->id }}', {{ $customer->id }}, {{ $customer->is_printed ? 'true' : 'false' }})">
+                                                <i class="fas fa-{{ $customer->is_printed ? 'exclamation-triangle' : 'print' }}"></i> 
+                                                {{ $customer->is_printed ? 'Reprint' : 'Print Slip' }}
                                             </button>
 
                                             <div id="slip-{{ $customer->id }}" class="d-none">
@@ -345,6 +369,7 @@
                                         </div>
                                             </div>
                                         </td>
+                                        @endif
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
                                                 data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" 
@@ -407,7 +432,25 @@
         </div>
     </div>
 </main>
-
+<div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Printer Override</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>This slip was already printed. Enter password to reprint:</p>
+                <input type="password" id="printerPassword" class="form-control" placeholder="Enter password">
+                <input type="hidden" id="modalTicketId">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" onclick="verifyAndPrint()">Unlock & Print</button>
+            </div>
+        </div>
+    </div>
+</div>
 {{-- Ticket Details Modal --}}
 <div class="modal fade" id="ticketDetailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -674,18 +717,90 @@ document.addEventListener('change', function(e) {
         }
     }
 });
-function printAthleteSlip(divId) {
-    var printContents = document.getElementById(divId);
+// 1. Initial trigger
+async function printAthleteSlip(divId, ticketId, isPrinted) {
+    console.log("Triggered print for ID:", ticketId, "isPrinted:", isPrinted);
+    if (isPrinted) {
+        // Already printed: Open Modal
+        console.log("Attempting to open modal...");
+        document.getElementById('modalTicketId').value = ticketId;
+        new bootstrap.Modal(document.getElementById('passwordModal')).show();
+    } else {
+        // Not printed: Print immediately
+        executePrint(divId, ticketId, '');
+    }
+}
+
+// 2. Verified reprint
+async function verifyAndPrint() {
+    const ticketId = document.getElementById('modalTicketId').value;
+    const password = document.getElementById('printerPassword').value;
     
-    // Add a temporary class to identify what to print
+    // Get token from meta tag for security
+    const token = document.querySelector('meta[name="csrf-token"]').content;
+
+    try {
+        const response = await fetch(`/dashboard/tickets/${ticketId}/reprint`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': token,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ password: password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            // Success: Close Modal
+            const modalEl = document.getElementById('passwordModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+
+            // Clear password and trigger print
+            document.getElementById('printerPassword').value = '';
+            executePrint('slip-' + ticketId, ticketId, true);
+        } else {
+            alert(data.message || "Invalid Password!");
+        }
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        alert("Server error. Please check your connection.");
+    }
+}
+
+// 3. The shared printer logic
+async function executePrint(divId, ticketId, isReprint) {
+    // 1. If it's a new print, mark it in the database first
+    if (!isReprint) {
+        const response = await fetch(`/dashboard/tickets/${ticketId}/mark-printed`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        if (!data.success) {
+            alert("Error saving print status. Please try again.");
+            return;
+        }
+    }
+
+    // 2. Perform the printing
+    var printContents = document.getElementById(divId);
     printContents.classList.add('print-active');
     printContents.classList.remove('d-none');
-
+    
     window.print();
-
-    // Clean up after printing
+    
     printContents.classList.remove('print-active');
     printContents.classList.add('d-none');
+    
+    // 3. Finalize
+    window.location.reload();
 }
 </script>
 @endsection

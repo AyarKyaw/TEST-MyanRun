@@ -215,46 +215,44 @@
                 <div class="card border-0 shadow-sm rounded-4">
                     <div class="card-body p-4">
                         <div class="row align-items-center">
-                            <div class="col-md-7">
-                                <div class="d-flex align-items-center gap-4 mb-3">
-                                    <div>
-                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
-                                        <h2 class="mb-0 text-black fw-bold">{{ number_format($counts['approved'] ?? 0) }}</h2>
-                                    </div>
-                                    <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
-                                    <div>
-                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Remaining</p>
-                                        @if(!is_null($eventLimit))
-                                            <h2 class="mb-0 text-danger fw-bold">{{ number_format(max(0, $eventLimit - ($counts['approved'] ?? 0))) }}</h2>
-                                        @else
-                                            <h2 class="mb-0 text-success fw-bold">Unlimited</h2>
-                                        @endif
-                                    </div>
-                                </div>
-                                @if(!is_null($eventLimit))
-                                    <div class="progress progress-thin">
-                                        @php $percent = (($counts['approved'] ?? 0) / $eventLimit) * 100; @endphp
-                                        <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
-                                    </div>
-                                    <p class="fs-12 text-muted mt-2 mb-0">Event Capacity: {{ number_format($eventLimit) }} total spots</p>
-                                @endif
-                            </div>
-                            
-                            <div class="col-md-5 mt-3 mt-md-0">
-                                <form action="{{ URL::current() }}" method="GET">
-                                    <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
-                                    <div class="input-group shadow-sm">
-                                        <input type="text" id="tableSearch" name="search" class="form-control border-0" placeholder="Name or BIB..." value="{{ request('search') }}">
-                                        <button class="btn btn-primary px-3" type="submit"><i class="fa fa-search"></i></button>
-                                        @if(request('search'))
-                                            <a href="{{ route('dashboard.events.ticket', ['event' => $eventName, 'status' => request('status', 'pending')]) }}" class="btn btn-dark d-flex align-items-center">
-                                                <i class="fa fa-times"></i>
-                                            </a>
-                                        @endif
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
+    <div class="col-md-7">
+        <div class="d-flex align-items-center gap-4 mb-3">
+            <div>
+                <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Total Registrations</p>
+                <h2 class="mb-0 text-black fw-bold">
+                    {{ number_format(($counts['approved'] ?? 0) + ($counts['pending'] ?? 0) + ($counts['rejected'] ?? 0)) }}
+                </h2>
+            </div>
+            @if(!is_null($eventLimit))
+                <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+                <div>
+                    <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Remaining Capacity</p>
+                    <h2 class="mb-0 text-danger fw-bold">
+                        {{ number_format(max(0, $eventLimit - ($counts['approved'] ?? 0))) }}
+                    </h2>
+                </div>
+            @endif
+        </div>
+        
+        @if(!is_null($eventLimit))
+            <div class="progress progress-thin">
+                @php $percent = (($counts['approved'] ?? 0) / $eventLimit) * 100; @endphp
+                <div class="progress-bar bg-primary" style="width: {{ $percent }}%"></div>
+            </div>
+            <p class="fs-12 text-muted mt-2 mb-0">Event Capacity: {{ number_format($eventLimit) }} total spots</p>
+        @endif
+    </div>
+    
+    <div class="col-md-5 mt-3 mt-md-0">
+        <form action="{{ URL::current() }}" method="GET">
+            <input type="hidden" name="status" value="{{ request('status', 'pending') }}">
+            <div class="input-group shadow-sm">
+                <input type="text" id="tableSearch" name="search" class="form-control border-0" placeholder="Name or BIB..." value="{{ request('search') }}">
+                <button class="btn btn-primary px-3" type="submit"><i class="fa fa-search"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
                     </div>
                 </div>
             </div>

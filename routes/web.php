@@ -220,14 +220,16 @@ Route::get('/get-new-bib', [TicketController::class, 'getNewBib']);
 Route::middleware(['auth'])->group(function () {
     Route::get('/ticket', [TicketController::class, 'showTicket'])->name('ticket');
     Route::post('/select-race', [AthleteController::class, 'handleSelection'])->name('athlete.selection.handle');
-    // Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment'])->name('initiatePayment');
-    Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
+    Route::match(['get', 'post'], '/payment/initiate/{id}', [App\Http\Controllers\TicketController::class, 'initiatePayment'])->name('initiatePayment');
+    // Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
     Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
     Route::get('/register-athlete', [AthleteController::class, 'showAthleteForm'])->name('athlete.register');
     Route::post('/register-athlete', [AthleteController::class, 'submit'])->name('athlete.register.submit');
    Route::post('/register-friend', [AthleteController::class, 'submitFriend'])->name('friend.register.submit');
    Route::get('/register-friend', [AthleteController::class, 'showFriendRegisterForm'])->name('friend.register');
     Route::get('/checkout/review', [TicketController::class, 'showReviewPage'])->name('checkout.review');
+    Route::get('/payment/method', [TicketController::class, 'showPaymentMethod'])->name('payment.method');
+    Route::post('/payment/select', [TicketController::class, 'selectPaymentMethod'])->name('payment.method.post');
     Route::post('/checkout/process', [TicketController::class, 'processPayment'])->name('tickets.process-payment');
     Route::post('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('user.password.update');
     Route::get('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'showChangePasswordForm'])->name('user.password.change');
@@ -262,37 +264,39 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
           ->where('status', 'now|past|coming')
           ->name('events.index');
 
-    Route::resource('events', EventController::class)->except(['index', 'show']);
-    Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
-
-    // Dinner Management
-    Route::get('/dinner-management/{timeframe}', [DinnerController::class, 'manageDinners'])->name('admin.dinner.manage');
-    Route::get('/dinner/create', [DinnerController::class, 'create'])->name('admin.dinner.create');
-    Route::post('/dinner/store', [DinnerController::class, 'store'])->name('admin.dinner.store');
-    Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
-    Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
-    Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
-    Route::post('/dinner/{id}/toggle-scan', [App\Http\Controllers\DinnerController::class, 'toggleScanning'])
-    ->name('admin.dinner.toggle-scan');
-    
-    // Dinner Tickets (Master/Detail)
-    Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
-    Route::get('/dinner-tickets/{id}', [DinnerController::class, 'showDinnerTickets'])->name('admin.dinner.tickets.show');
-    Route::post('/dinner-tickets/{id}/approve', [DinnerController::class, 'adminApprove'])->name('admin.dinner.approve');
-    Route::post('/dinner-tickets/reject/{id}', [DinnerController::class, 'adminReject'])->name('admin.dinner.reject');
-
-    Route::get('/sponsors/{status}', [SponsorController::class, 'index'])
-    ->where('status', 'now|past') // Only allow these two words
-    ->name('admin.sponsor.index');
-    Route::get('/sponsors/create', [SponsorController::class, 'create'])->name('admin.sponsor.create');
-    Route::post('/sponsors/store', [SponsorController::class, 'store'])->name('admin.sponsor.store');
-    Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
-    Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
-    Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
-    Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
-    Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
-    
-}); 
+          
+          Route::resource('events', EventController::class)->except(['index', 'show']);
+          Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
+          
+          // Dinner Management
+          Route::get('/dinner-management/{timeframe}', [DinnerController::class, 'manageDinners'])->name('admin.dinner.manage');
+          Route::get('/dinner/create', [DinnerController::class, 'create'])->name('admin.dinner.create');
+          Route::post('/dinner/store', [DinnerController::class, 'store'])->name('admin.dinner.store');
+          Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
+          Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
+          Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
+          Route::post('/dinner/{id}/toggle-scan', [App\Http\Controllers\DinnerController::class, 'toggleScanning'])
+          ->name('admin.dinner.toggle-scan');
+          
+          // Dinner Tickets (Master/Detail)
+          Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
+          Route::get('/dinner-tickets/{id}', [DinnerController::class, 'showDinnerTickets'])->name('admin.dinner.tickets.show');
+          Route::post('/dinner-tickets/{id}/approve', [DinnerController::class, 'adminApprove'])->name('admin.dinner.approve');
+          Route::post('/dinner-tickets/reject/{id}', [DinnerController::class, 'adminReject'])->name('admin.dinner.reject');
+          
+          Route::get('/sponsors/{status}', [SponsorController::class, 'index'])
+          ->where('status', 'now|past') // Only allow these two words
+          ->name('admin.sponsor.index');
+          Route::get('/sponsors/create', [SponsorController::class, 'create'])->name('admin.sponsor.create');
+          Route::post('/sponsors/store', [SponsorController::class, 'store'])->name('admin.sponsor.store');
+          Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
+          Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
+          Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
+          Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
+          Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
+          Route::post('/tickets/{id}/mark-printed', [TicketController::class, 'markPrinted'])->name('tickets.markPrinted');
+          Route::post('/tickets/{id}/reprint', [TicketController::class, 'reprint']);
+          }); 
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth:admin']], function () {
     

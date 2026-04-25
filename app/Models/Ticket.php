@@ -24,6 +24,7 @@ class Ticket extends Model
     'status',
     'ticket_no',
     'relay_team_id',
+    'is_printed'
 ];
 
     /**

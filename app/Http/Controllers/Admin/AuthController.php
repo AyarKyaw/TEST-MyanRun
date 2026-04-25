@@ -34,14 +34,18 @@ class AuthController extends Controller
                 return redirect()->route('admin.admins.index');
             }
 
+            if ($admin->isSupporter()) {
+                return redirect()->route('dashboard.tickets.index');
+            }
+
             // 2. Finance Admins -> Dashboard (They will see all events + money)
             if ($admin->isFinanceAdmin()) {
-                return redirect()->route('dashboard.register-level-1');
+                return redirect()->route('dashboard.tickets.index');
             }
 
             // 3. Event Admins -> Dashboard (They will see assigned events only)
             if ($admin->isEventAdmin()) {
-                return redirect()->route('dashboard.register-level-1');
+                return redirect()->route('dashboard.tickets.index');
             }
 
             // Fallback for any other admin roles

@@ -17,8 +17,9 @@ class AdminManagementController extends Controller
         $financeAdmins = Admin::where('role', 'finance_admin')->latest()->get(); // Added Finance Admins
         $eventAdmins = Admin::where('role', 'event_admin')->latest()->get();
         $agents = Agent::latest()->get();
+        $supporters = Admin::where('role', 'supporter')->latest()->get();
 
-        return view('admin.admins.index', compact('superAdmins', 'financeAdmins', 'eventAdmins', 'agents'));
+        return view('admin.admins.index', compact('superAdmins', 'financeAdmins', 'eventAdmins', 'agents', 'supporters'));
     }
 
     // Show create form
@@ -61,7 +62,8 @@ class AdminManagementController extends Controller
             $roleNames = [
                 'finance_admin' => 'Finance Admin',
                 'super_admin' => 'Super Admin',
-                'event_admin' => 'Event Admin'
+                'event_admin' => 'Event Admin',
+                'supporter'       => 'Supporter'
             ];
             $msg = 'New ' . ($roleNames[$request->role] ?? 'Admin') . ' Created!';
         }
@@ -78,7 +80,7 @@ class AdminManagementController extends Controller
         } else {
             $admin = Admin::findOrFail($id);
             // Pass the specific role type to the view for dynamic headers
-            $type = $admin->role === 'finance_admin' ? 'finance' : 'admin';
+            $type = $admin->role;
         }
         
         return view('admin.admins.edit', compact('admin', 'type'));

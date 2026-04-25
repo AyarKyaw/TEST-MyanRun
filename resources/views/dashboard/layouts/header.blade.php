@@ -138,34 +138,46 @@
                                 <span class="ms-2">Profile </span>
                             </a> -->
 
-                            {{-- ADMIN LOGOUT --}}
+                            {{-- DYNAMIC ADMIN LOGOUT --}}
                             @if(Auth::guard('admin')->check())
+                                @php
+                                    $admin = Auth::guard('admin')->user();
+                                    $roleLabels = [
+                                        'super_admin'   => 'Super Admin',
+                                        'finance_admin' => 'Finance Admin',
+                                        'event_admin'   => 'Event Admin',
+                                        'supporter'       => 'Supporter'
+                                    ];
+                                    $label = $roleLabels[$admin->role] ?? 'Admin';
+                                @endphp
+
                                 <a href="javascript:void(0);" 
                                 class="dropdown-item ai-icon" 
                                 onclick="event.preventDefault(); document.getElementById('admin-logout-form').submit();">
-                                    <svg id="icon-logout-admin" xmlns="http://www.w3.org/2000/svg" class="text-danger" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="text-danger" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                         <polyline points="16 17 21 12 16 7"></polyline>
                                         <line x1="21" y1="12" x2="9" y2="12"></line>
                                     </svg>
-                                    <span class="ms-2 text-danger">Logout (Admin)</span>
+                                    <span class="ms-2 text-danger">Logout ({{ $label }})</span>
                                 </a>
+                                
                                 <form id="admin-logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
                                     @csrf
                                 </form>
                             @endif
 
-                            {{-- AGENT LOGOUT --}}
+                            {{-- AGENT LOGOUT (Stays the same) --}}
                             @if(Auth::guard('agent')->check())
                                 <a href="javascript:void(0);" 
                                 class="dropdown-item ai-icon" 
                                 onclick="event.preventDefault(); document.getElementById('agent-logout-form').submit();">
-                                    <svg id="icon-logout-agent" xmlns="http://www.w3.org/2000/svg" class="text-warning" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="text-warning" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                                         <polyline points="16 17 21 12 16 7"></polyline>
-                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                        <polyline points="21 12 9 12"></polyline> {{-- Simplified icon path --}}
                                     </svg>
-                                    <span class="ms-2 text-warning">Logout (Agent)</span>
+                                    <span class="ms-2 text-warning">Logout (Support)</span>
                                 </a>
                                 <form id="agent-logout-form" action="{{ route('agent.logout') }}" method="POST" style="display: none;">
                                     @csrf

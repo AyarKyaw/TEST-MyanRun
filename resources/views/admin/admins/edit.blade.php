@@ -62,6 +62,9 @@
                                         <option value="super_admin" {{ $admin->role == 'super_admin' ? 'selected' : '' }}>
                                             Super Admin (Full Access)
                                         </option>
+                                        <option value="supporter" {{ $admin->role == 'supporter' ? 'selected' : '' }}>
+                                            Supporter (Ticket Printing Access)
+                                        </option>
                                     </select>
                                 </div>
                             @else
