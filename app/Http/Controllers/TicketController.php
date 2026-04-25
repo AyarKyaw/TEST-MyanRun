@@ -117,12 +117,20 @@ class TicketController extends Controller
             $counts['rejected'] = (clone $baseQuery)->where('status', 'rejected')->distinct()->count('bib_number');
         }
 
-        // Adjust these to be event-specific if necessary!
-        $totalTickets = \App\Models\Ticket::where('event', $eventName)->count(); 
-        $totalPrinted = \App\Models\Ticket::where('event', $eventName)->where('is_printed', true)->count();
+        $eventTickets = \App\Models\Ticket::where('event', $eventName);
+        // 1. Total Approved
+        $totalApproved = (clone $eventTickets)->where('status', 'approved')->count();
+
+        // 2. Total Printed (is_printed should be 1 or true)
+        $totalPrinted = (clone $eventTickets)->where('status', 'approved')->where('is_printed', 1)->count();
+
+        // 3. To-Print (Approved but not yet printed, is_printed should be 0 or false)
+        $toPrint = (clone $eventTickets)->where('status', 'approved')->where('is_printed', 0)->count();
+        $totalTickets = \App\Models\Ticket::where('event', $eventName)->count();
+        $eventLimit = $event->total_max_slots ?? 0;
 
         return view('dashboard.ticket-sales.ticket', compact(
-            'customers', 'counts', 'status', 'eventName', 'event', 'totalTickets', 'totalPrinted'
+            'customers', 'counts', 'status', 'eventName', 'event', 'totalApproved', 'totalPrinted', 'toPrint', 'totalTickets', 'eventLimit'
         ));
     }
 
@@ -343,14 +351,14 @@ class TicketController extends Controller
         
         $category = $request->get('category', 'all');
         $status = $request->get('status', 'all'); 
+        // Capture print_status
+        $printStatus = $request->get('print_status', 'all'); 
         
-        // Fetch event
         $event = \App\Models\Event::findOrFail($eventId);
 
-        // --- Role Based Security ---
+        // --- Role Based Security (unchanged) ---
         $isAuthorizedAdmin = Auth::guard('admin')->check() && 
-                     (Auth::guard('admin')->user()->role !== 'event_admin' || $event->admins->contains(Auth::guard('admin')->id()));
-
+                (Auth::guard('admin')->user()->role !== 'event_admin' || $event->admins->contains(Auth::guard('admin')->id()));
         $isAuthorizedAgent = Auth::guard('agent')->check();
 
         if (!$isAuthorizedAdmin && !$isAuthorizedAgent) {
@@ -358,9 +366,11 @@ class TicketController extends Controller
         }
 
         $eventPrefix = str_replace(' ', '_', $event->name);
-        $fileName = $eventPrefix . '_' . $status . '_' . $category . '_' . date('d-m-Y') . '.xlsx';
+        // Update filename to reflect print status
+        $fileName = $eventPrefix . '_' . $status . '_' . $category . '_' . $printStatus . '_' . date('d-m-Y') . '.xlsx';
         
-        return Excel::download(new TicketExport($category, $status, $eventId), $fileName);
+        // Pass $printStatus as the 3rd argument
+        return Excel::download(new TicketExport($category, $status, $printStatus, $eventId), $fileName);
     }
 
     public function initiatePayment($id)

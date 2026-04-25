@@ -8,25 +8,24 @@ class TicketExport implements WithMultipleSheets
 {
     protected $category;
     protected $status;
-    protected $eventId; // New property
+    protected $printStatus; // New property
+    protected $eventId;
 
-    public function __construct($category, $status = 'all', $eventId = null)
+    public function __construct($category, $status = 'all', $printStatus = 'all', $eventId = null)
     {
         $this->category = $category;
         $this->status = $status;
+        $this->printStatus = $printStatus; // Initialize
         $this->eventId = $eventId;
     }
 
-    /**
-     * This creates the 3 tabs at the bottom of the Excel file
-     */
     public function sheets(): array
     {
+        // Pass the new $this->printStatus parameter down to the sheets
         return [
-            // Pass $this->eventId as the 5th parameter to each sheet
-            new TicketSheetExport($this->category, $this->status, 'all', 'All Runners', $this->eventId),
-            new TicketSheetExport($this->category, $this->status, 'female', 'Female Only', $this->eventId),
-            new TicketSheetExport($this->category, $this->status, 'male', 'Male Only', $this->eventId),
+            new TicketSheetExport($this->category, $this->status, $this->printStatus, 'all', 'All Runners', $this->eventId),
+            new TicketSheetExport($this->category, $this->status, $this->printStatus, 'female', 'Female Only', $this->eventId),
+            new TicketSheetExport($this->category, $this->status, $this->printStatus, 'male', 'Male Only', $this->eventId),
         ];
     }
 }

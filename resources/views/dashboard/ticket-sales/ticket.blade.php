@@ -182,23 +182,47 @@
                             <span><i class="fa fa-file-excel me-2 text-success"></i>Export {{ ucfirst(request('status', 'all')) }}</span>
                         </button>
                         <ul class="dropdown-menu w-100 shadow-lg border-0 mt-2">
+                            {{-- Status Filters --}}
+                            <li><h6 class="dropdown-header">Status</h6></li>
                             <li>
-                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['status' => 'all', 'event' => $event->id, 'category' => 'all']) }}">
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['status' => 'all', 'event' => $event->id, 'category' => request('category', 'all'), 'print_status' => request('print_status', 'all')]) }}">
                                     All Status
                                 </a>
                             </li>
+                            @if(auth('admin')->user()->role === 'supporter')
+                            <div class="dropdown-divider"></div>
+                            
+                            {{-- Print Status Filters --}}
+                            <li><h6 class="dropdown-header">Print Status</h6></li>
                             <li>
-                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'status' => request('status', 'all')]) }}">
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'print_status' => 'all', 'category' => request('category', 'all'), 'status' => request('status', 'all')]) }}">
+                                    All (Printed & Not Printed)
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'print_status' => 'printed', 'category' => request('category', 'all'), 'status' => request('status', 'all')]) }}">
+                                    Only Printed
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'print_status' => 'not_printed', 'category' => request('category', 'all'), 'status' => request('status', 'all')]) }}">
+                                    Only Not Printed
+                                </a>
+                            </li>
+                            @endif
+                            <div class="dropdown-divider"></div>
+                            
+                            {{-- Category Filters --}}
+                            <li><h6 class="dropdown-header">Categories</h6></li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'print_status' => request('print_status', 'all'), 'status' => request('status', 'all')]) }}">
                                     All Categories
                                 </a>
                             </li>
-                            
-                            <div class="dropdown-divider"></div>
-
                             @foreach($event->ticketTypes as $type)
                                 <li>
-                                    <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => $type->name, 'status' => request('status', 'all')]) }}">
-                                        {{ $type->name }} Category
+                                    <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => $type->name, 'print_status' => request('print_status', 'all'), 'status' => request('status', 'all')]) }}">
+                                        {{ $type->name }}
                                     </a>
                                 </li>
                             @endforeach
@@ -213,34 +237,56 @@
                         <div class="row align-items-center">
                             <div class="col-md-7">
                                 <div class="d-flex align-items-center gap-4 mb-3">
+                                    <div class="d-flex gap-4 mb-4">
+                                        <div>
+                                            <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Total Registered</p>
+                                            <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalTickets) }}</h5>
+                                        </div>
+                                        <div class="vr" style="opacity: 0.1;"></div>
+                                        <div>
+                                            <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Event Capacity</p>
+                                            <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalApproved ?? 0) }} / 
+                                                {{ $eventLimit > 0 ? number_format($eventLimit) : 'Unlimited' }}</h5>
+                                        </div>
+                                    </div>
+                                    {{-- Total Approved --}}
+                                    <div>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
+                                        <h2 class="mb-0 text-primary fw-bold">{{ number_format($totalApproved ?? 0) }}</h2>
+                                    </div>
+                                    
+                                    <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+
                                     {{-- Total Printed --}}
+                                    @if(auth('admin')->user()->role === 'supporter')
                                     <div>
                                         <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Printed</p>
                                         <h2 class="mb-0 text-success fw-bold">{{ number_format($totalPrinted ?? 0) }}</h2>
                                     </div>
                                     
                                     <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
-                                    
-                                    {{-- Total Tickets --}}
+
+                                    {{-- To Print --}}
                                     <div>
-                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Total Tickets</p>
-                                        <h2 class="mb-0 text-black fw-bold">{{ number_format($totalTickets ?? 0) }}</h2>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">To Print</p>
+                                        <h2 class="mb-0 text-warning fw-bold">{{ number_format($toPrint ?? 0) }}</h2>
                                     </div>
+                                    @endif
                                 </div>
 
-                                {{-- Progress Bar --}}
-                                @if(($totalTickets ?? 0) > 0)
+                                {{-- Progress Bar (Percentage of Approved tickets that are printed) --}}
+                                @if(($totalApproved ?? 0) > 0)
                                     <div class="progress progress-thin">
                                         @php 
-                                            $percent = (($totalPrinted ?? 0) / $totalTickets) * 100; 
+                                            $percent = (($totalPrinted ?? 0) / $totalApproved) * 100; 
                                         @endphp
                                         <div class="progress-bar bg-success" style="width: {{ $percent }}%"></div>
                                     </div>
                                     <p class="fs-12 text-muted mt-2 mb-0">
-                                        {{ number_format($percent, 1) }}% of tickets issued
+                                        {{ number_format($percent, 1) }}% of approved tickets printed
                                     </p>
                                 @else
-                                    <p class="fs-12 text-muted mt-2 mb-0">No tickets generated yet.</p>
+                                    <p class="fs-12 text-muted mt-2 mb-0">No approved tickets yet.</p>
                                 @endif
                             </div>
                             
@@ -268,40 +314,40 @@
             <div class="col-lg-12">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
                     <div class="card-header bg-white pt-4 px-4 border-0">
-    <ul class="nav nav-tabs" role="tablist">
-    @if(auth('admin')->user()->role === 'supporter')
-        {{-- SUPPORTER VIEW: ONLY APPROVED TAB --}}
-        <li class="nav-item">
-            <a class="nav-link active" href="#">
-                Approved Tickets <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
-            </a>
-        </li>
-    @else
-        {{-- ADMIN VIEW: ALL TABS --}}
-        <li class="nav-item">
-            <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
-               href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName]) }}">
-                All <span class="badge rounded-pill bg-secondary ms-2">{{ $counts['all'] ?? 0 }}</span>
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link {{ request('status', 'pending') == 'approved' ? 'active' : '' }}" 
-               href="{{ route('dashboard.events.ticket', ['status' => 'approved', 'event' => $eventName]) }}">
-                Approved <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
-            </a>
-        </li>
-        @foreach(['pending' => 'warning', 'rejected' => 'danger'] as $status => $color)
-            <li class="nav-item">
-                <a class="nav-link {{ request('status') == $status ? 'active' : '' }}" 
-                   href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName]) }}">
-                    {{ ucfirst($status) }} 
-                    <span class="badge rounded-pill bg-{{ $color }} ms-2">{{ $counts[$status] ?? 0 }}</span>
-                </a>
-            </li>
-        @endforeach
-    @endif
-</ul>
-</div>
+                        <ul class="nav nav-tabs" role="tablist">
+                        @if(auth('admin')->user()->role === 'supporter')
+                            {{-- SUPPORTER VIEW: ONLY APPROVED TAB --}}
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">
+                                    Approved Tickets <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
+                                </a>
+                            </li>
+                        @else
+                            {{-- ADMIN VIEW: ALL TABS --}}
+                            <li class="nav-item">
+                                <a class="nav-link {{ request('status') == 'all' ? 'active' : '' }}" 
+                                href="{{ route('dashboard.events.ticket', ['status' => 'all', 'event' => $eventName]) }}">
+                                    All <span class="badge rounded-pill bg-secondary ms-2">{{ $counts['all'] ?? 0 }}</span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ request('status', 'pending') == 'approved' ? 'active' : '' }}" 
+                                href="{{ route('dashboard.events.ticket', ['status' => 'approved', 'event' => $eventName]) }}">
+                                    Approved <span class="badge rounded-pill bg-success ms-2">{{ $counts['approved'] ?? 0 }}</span>
+                                </a>
+                            </li>
+                            @foreach(['pending' => 'warning', 'rejected' => 'danger'] as $status => $color)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ request('status') == $status ? 'active' : '' }}" 
+                                    href="{{ route('dashboard.events.ticket', ['status' => $status, 'event' => $eventName]) }}">
+                                        {{ ucfirst($status) }} 
+                                        <span class="badge rounded-pill bg-{{ $color }} ms-2">{{ $counts[$status] ?? 0 }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        @endif
+                    </ul>
+                </div>
                     
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -309,7 +355,7 @@
                                 <thead>
                                     <tr>
                                         <th class="text-center" width="80">ID</th>
-                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['super_admin', 'supporter']))
+                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['supporter']))
                                         <th class="text-center" width="80">Print</th>
                                         @endif
                                         <th class="text-center" width="80">View</th>
@@ -325,7 +371,7 @@
                                     @forelse($customers as $customer)
                                     <tr>
                                         <td><span class="badge badge-outline-dark fs-14">{{ $customer->id }}</span></td>
-                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['super_admin', 'supporter']))
+                                        @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['supporter']))
                                         <td>
                                             <button type="button" 
                                                     class="btn btn-sm {{ $customer->is_printed ? 'btn-warning' : 'btn-primary' }}" 
@@ -533,14 +579,8 @@
         {{-- Container 1: Only for Super Admin (Approve/Reject) --}}
         @if($user && ($user->role === 'super_admin' || $user->role === 'finance_admin'))
             <div id="modal-action-buttons" class="d-flex gap-2">
-                <form id="reject-form" action="" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-danger px-4 py-2 rounded-2">Reject</button>
-                </form>
-                <form id="approve-form" action="" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-success px-4 py-2 rounded-2">Approve</button>
-                </form>
+                <button type="submit" class="btn btn-danger px-4 py-2 rounded-2" onclick="submitAction('reject')">Reject</button>
+                <button type="submit" class="btn btn-success px-4 py-2 rounded-2" onclick="submitAction('approve')">Approve</button>
             </div>
         @endif
 
@@ -691,9 +731,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('modal-tshirt-container').innerHTML = `<span class="badge light badge-primary">${data.t_shirt_size || 'N/A'}</span>`;
                 document.getElementById('modal-id-container').innerText = athlete.id_number || 'None';
                 
-                // Update button actions
-                if(document.getElementById('approve-form')) document.getElementById('approve-form').action = `/dashboard/tickets/approve/${data.id}`;
-                if(document.getElementById('reject-form')) document.getElementById('reject-form').action = `/dashboard/tickets/reject/${data.id}`;
+            }
+            const approveForm = document.getElementById('approve-form');
+            const rejectForm = document.getElementById('reject-form');
+
+            if (approveForm) {
+                approveForm.action = `/dashboard/tickets/approve/${data.id}`;
+            }
+            if (rejectForm) {
+                rejectForm.action = `/dashboard/tickets/reject/${data.id}`;
             }
         });
     });
@@ -801,6 +847,23 @@ async function executePrint(divId, ticketId, isReprint) {
     
     // 3. Finalize
     window.location.reload();
+}
+
+function submitAction(type) {
+    const ticketId = document.getElementById('modal-ticket-id-input').value;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = (type === 'approve') ? `dashboard/tickets/approve/${ticketId}` : `dashboard/tickets/reject/${ticketId}`;
+    
+    // Add CSRF Token
+    const csrf = document.createElement('input');
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+    
+    form.appendChild(csrf);
+    document.body.appendChild(form);
+    form.submit();
 }
 </script>
 @endsection

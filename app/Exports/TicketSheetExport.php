@@ -14,47 +14,52 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
 {
     protected $category;
     protected $status;
+    protected $printStatus; // 1. Added property
     protected $gender;
     protected $title;
-    protected $eventId; // Added property
+    protected $eventId;
 
-    public function __construct($category, $status, $gender, $title, $eventId = null)
+    // 2. Updated Constructor to accept printStatus
+    public function __construct($category, $status, $printStatus, $gender, $title, $eventId = null)
     {
         $this->category = $category;
-        $this->status   = $status;
-        $this->gender   = $gender;
-        $this->title    = $title;
-        $this->eventId  = $eventId; // Store the event ID
+        $this->status = $status;
+        $this->printStatus = $printStatus;
+        $this->gender = $gender;
+        $this->title = $title;
+        $this->eventId = $eventId;
     }
 
     public function title(): string { return $this->title; }
 
     public function headings(): array
     {
-        return ['Full Name','First Name','Middle Name','Last Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Purchase Date', 'Division', 'Nationality', 'Address'];
+        return ['Full Name','First Name','Middle Name','Last Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Is Printed', 'Purchase Date', 'Division', 'Nationality', 'Address'];
     }
 
     public function collection()
     {
-        // 1. Start with Event filtering
         $query = Ticket::query()->with(['athlete.user']);
 
         if ($this->eventId) {
             $query->where('event_id', $this->eventId);
         }
 
-        // 2. Filter Category
         if ($this->category !== 'all') {
-            // Updated: Search for specific category name to support non-numeric event names like "Duathlon"
             $query->where('category', 'LIKE', '%' . $this->category . '%');
         }
 
-        // 3. Filter Status
         if ($this->status !== 'all') {
             $query->where('status', $this->status);
         }
 
-        // 4. Filter Gender
+        // 3. NEW: Filter by Print Status
+        if ($this->printStatus === 'printed') {
+            $query->where('is_printed', true);
+        } elseif ($this->printStatus === 'not_printed') {
+            $query->where('is_printed', false);
+        }
+
         if ($this->gender !== 'all') {
             $query->whereHas('athlete', function($q) {
                 $q->where('gender', $this->gender);
@@ -65,7 +70,6 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
             $athlete = $t->athlete;
             $user = $athlete?->user;
             
-            // Clean up name formatting
             $fullName = $user ? trim("{$user->first_name} {$user->mid_name} {$user->last_name}") : 'Guest';
 
             return [
@@ -84,6 +88,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
                 $athlete?->blood_type ?? 'N/A',
                 number_format((float)$t->price) . ' MMK',
                 ucfirst($t->status),
+                $t->is_printed ? 'Printed' : 'Not Printed', // Export column for clarity
                 $t->created_at ? $t->created_at->format('d/m/Y H:i') : 'N/A',
                 $athlete?->state ?? 'N/A',
                 $athlete?->nationality ?? 'N/A',
