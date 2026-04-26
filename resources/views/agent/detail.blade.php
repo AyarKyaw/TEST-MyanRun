@@ -186,23 +186,27 @@
                             <span><i class="fa fa-file-excel me-2 text-success"></i>Export {{ ucfirst(request('status', 'all')) }}</span>
                         </button>
                         <ul class="dropdown-menu w-100 shadow-lg border-0 mt-2">
+                            {{-- Status Filters --}}
+                            <li><h6 class="dropdown-header">Status</h6></li>
                             <li>
-                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['status' => 'all', 'event' => $event->id, 'category' => 'all']) }}">
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['status' => 'all', 'event' => $event->id, 'category' => request('category', 'all'), 'print_status' => request('print_status', 'all')]) }}">
                                     All Status
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'status' => request('status', 'all')]) }}">
-                                    All Categories
                                 </a>
                             </li>
                             
                             <div class="dropdown-divider"></div>
-
+                            
+                            {{-- Category Filters --}}
+                            <li><h6 class="dropdown-header">Categories</h6></li>
+                            <li>
+                                <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => 'all', 'print_status' => request('print_status', 'all'), 'status' => request('status', 'all')]) }}">
+                                    All Categories
+                                </a>
+                            </li>
                             @foreach($event->ticketTypes as $type)
                                 <li>
-                                    <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => $type->name, 'status' => request('status', 'all')]) }}">
-                                        {{ $type->name }} Category
+                                    <a class="dropdown-item py-2" href="{{ route('dashboard.tickets.export', ['event' => $event->id, 'category' => $type->name, 'print_status' => request('print_status', 'all'), 'status' => request('status', 'all')]) }}">
+                                        {{ $type->name }}
                                     </a>
                                 </li>
                             @endforeach
@@ -292,7 +296,6 @@
                             <table class="table table-hover mb-0" id="ticketTable" style="min-width: 1200px;">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" width="80">Print</th>
                                         <th class="text-center" width="80">View</th>
                                         <th>Athlete Details</th>
                                         <th>BIB Number</th>
@@ -305,48 +308,6 @@
                                 <tbody>
                                     @forelse($customers as $customer)
                                     <tr>
-                                        <td>
-    <button type="button" 
-            class="btn btn-sm btn-primary d-print-none" 
-            onclick="printAthleteSlip('slip-{{ $customer->id }}')">
-        <i class="fas fa-print"></i> Print Slip
-    </button>
-
-    <div id="slip-{{ $customer->id }}" class="d-none">
-        <div class="print-active" style="width:70mm; font-family:Arial Black; line-height:1.1;">
-
-    <div class="bib-number">
-        {{ $customer->bib_number ?? '0000' }}
-    </div>
-
-    <div class="tshirt-size">
-        {{ $customer->tshirt_size ?? 'XL' }}
-    </div>
-
-    <div class="category">
-        {{ $customer->category ?? 'RUN TYPE' }}
-    </div>
-
-    <div class="runner-name">
-        {{ strtoupper($customer->bib_name ?? 'RUNNER NAME') }}
-    </div>
-
-    <div class="nrc">
-        NRC: {{ $customer->athlete->id_number ?? '---' }}
-    </div>
-
-    <div class="address">
-        {{ $customer->athlete->address ?? '' }}
-    </div>
-
-    <div class="event-footer">
-        {{ strtoupper($event->name ?? 'EVENT') }} <br>
-        {{ now()->format('d/m/Y H:i A') }}
-    </div>
-
-</div>
-    </div>
-</td>
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
                                                 data-bs-toggle="modal" data-bs-target="#ticketDetailsModal" 
