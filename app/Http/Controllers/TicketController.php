@@ -851,7 +851,6 @@ public function selectPaymentMethod(Request $request)
 public function markPrinted($id) {
     $user = auth('admin')->user();
 
-    // ADD 'supporter' TO THIS ARRAY
     if (!$user || !in_array($user->role, ['admin', 'printer', 'supporter'])) {
         return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
     }
@@ -863,11 +862,15 @@ public function markPrinted($id) {
             return response()->json(['success' => false, 'message' => 'Already printed!'], 403);
         }
         
-        $ticket->update(['is_printed' => true]);
+        // Update status AND set the current time
+        $ticket->update([
+            'is_printed' => true,
+            'printed_at' => now() // Captures current date and time
+        ]);
+        
         return response()->json(['success' => true]);
 
     } catch (\Exception $e) {
-        // Log the actual error for debugging
         \Log::error("Print Error: " . $e->getMessage());
         return response()->json(['success' => false, 'message' => 'Error saving print status'], 500);
     }
@@ -875,21 +878,20 @@ public function markPrinted($id) {
 
 public function reprint(Request $request, $id) 
 {
-    // 1. Get the authenticated admin
     $admin = auth('admin')->user();
 
-    // 2. Verify: Does the password they just typed match their OWN password?
-    // Hash::check safely compares the input to the hashed version in your DB
     if (!\Illuminate\Support\Facades\Hash::check($request->password, $admin->password)) {
         return response()->json(['success' => false, 'message' => 'Incorrect password'], 403);
     }
     
-    // 3. Optional: Role check (Ensure only supporters/admins can do this)
     if (!in_array($admin->role, ['super_admin', 'supporter'])) {
         return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
     }
 
-    // 4. Everything matches! Proceed with print
+    // Update the print time for the reprint as well
+    $ticket = \App\Models\Ticket::findOrFail($id);
+    $ticket->update(['printed_at' => now()]);
+
     return response()->json(['success' => true]);
 }
 }
