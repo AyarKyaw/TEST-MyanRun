@@ -425,7 +425,7 @@
                                         </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->printed_at ? $customer->printed_at->format('d M, H:i') : 'Not Printed' }}</span></td>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->printed_at ? \Carbon\Carbon::parse($customer->printed_at)->format('d M, H:i') : 'Not Printed' }}</span></td>
                                         @endif
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
