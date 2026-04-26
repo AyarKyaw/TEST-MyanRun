@@ -425,7 +425,7 @@
                                         </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->bib_number }}</span></td>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->printed_at }}</span></td>
                                         @endif
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
