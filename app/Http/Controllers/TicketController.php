@@ -851,11 +851,13 @@ public function selectPaymentMethod(Request $request)
 public function markPrinted($id) {
     $user = auth('admin')->user();
 
-    if (!$user || !in_array($user->role, ['admin', 'printer'])) {
+    // ADD 'supporter' TO THIS ARRAY
+    if (!$user || !in_array($user->role, ['admin', 'printer', 'supporter'])) {
         return response()->json(['success' => false, 'message' => 'Unauthorized access'], 403);
     }
+
     try {
-        $ticket = \App\Models\Ticket::findOrFail($id); // Ensure your Model path is correct
+        $ticket = \App\Models\Ticket::findOrFail($id);
 
         if ($ticket->is_printed) {
             return response()->json(['success' => false, 'message' => 'Already printed!'], 403);
@@ -865,7 +867,9 @@ public function markPrinted($id) {
         return response()->json(['success' => true]);
 
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        // Log the actual error for debugging
+        \Log::error("Print Error: " . $e->getMessage());
+        return response()->json(['success' => false, 'message' => 'Error saving print status'], 500);
     }
 }
 
