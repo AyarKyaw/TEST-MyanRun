@@ -425,7 +425,7 @@
                                         </div>
                                             </div>
                                         </td>
-                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->printed_at }}</span></td>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->printed_at ? $customer->printed_at->format('d M, H:i') : 'Not Printed' }}</span></td>
                                         @endif
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
@@ -673,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // --- MOVED ALL OF THIS INSIDE THE CLICK FUNCTION ---
             const actionContainer = document.getElementById('modal-action-buttons');
             const saveBtnContainer = document.getElementById('modal-save-button-container');
-            const restrictedRoles = ['finance_admin', 'agent'];
+            const restrictedRoles = ['finance_admin', 'agent', 'supporter', 'printer'];
             const userRole = "{{ auth()->user()->role ?? 'guest' }}";
             const isEditable = ['pending', 'approved'].includes(data.status) && !restrictedRoles.includes(userRole);
             
