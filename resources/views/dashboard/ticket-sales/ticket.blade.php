@@ -366,6 +366,7 @@
                                         <th class="text-center" width="80">ID</th>
                                         @if(auth('admin')->check() && in_array(auth('admin')->user()->role, ['supporter']))
                                         <th class="text-center" width="80">Print</th>
+                                        <th class="text-center" width="80">Print At</th>
                                         @endif
                                         <th class="text-center" width="80">View</th>
                                         <th>Athlete Details</th>
@@ -424,6 +425,7 @@
                                         </div>
                                             </div>
                                         </td>
+                                        <td><span class="badge badge-outline-dark fs-14">{{ $customer->bib_number }}</span></td>
                                         @endif
                                         <td class="text-center">
                                             <button type="button" class="btn btn-light btn-sm border view-details" 
