@@ -234,12 +234,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'updatePassword'])->name('user.password.update');
     Route::get('/user/dashboard/change-password', [App\Http\Controllers\UserController::class, 'showChangePasswordForm'])->name('user.password.change');
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
-    Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
     Route::get('/ticket/preview/{id}', [TicketController::class, 'previewPDF'])->name('ticket.preview');
     Route::post('/athlete/verify-friend', [AthleteController::class, 'verifyFriend'])
     ->name('athlete.verify.friend');
-});
-
+    });
+    
+Route::get('/ticket/download/{id}', [TicketController::class, 'downloadPNG'])->name('ticket.download');
 
 Route::middleware(['auth:admin,agent'])->group(function () {
 Route::get('/tickets/export/excel', [TicketController::class, 'exportExcel'])->name('dashboard.tickets.export');

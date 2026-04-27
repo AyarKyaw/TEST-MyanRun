@@ -586,12 +586,19 @@
     // Get the user from the guard within the view
     $user = Auth::guard('admin')->user();
 @endphp
+    @if($customer->status === 'approved' && $user && ($user->role === 'super_admin'))
+        <a href="#" id="btn-download-ticket" class="btn btn-dark px-4 py-2">
+            <i class="fa fa-download me-2"></i>Download Ticket
+        </a>
+    @endif
     <div class="ms-auto d-flex gap-2">
         {{-- Container 1: Only for Super Admin (Approve/Reject) --}}
         @if($user && ($user->role === 'super_admin' || $user->role === 'finance_admin'))
+
             <div id="modal-action-buttons" class="d-flex gap-2">
                 <button type="submit" class="btn btn-danger px-4 py-2 rounded-2" onclick="submitAction('reject')">Reject</button>
                 <button type="submit" class="btn btn-success px-4 py-2 rounded-2" onclick="submitAction('approve')">Approve</button>
+                
             </div>
         @endif
 
@@ -684,6 +691,12 @@ document.addEventListener('DOMContentLoaded', function () {
                     actionContainer.classList.add('d-none');
                 }
             }
+
+            const downloadBtn = document.getElementById('btn-download-ticket');
+            if (downloadBtn) {
+                downloadBtn.href = `/ticket/download/${data.id}`;
+            }
+
             if (isEditable) {
                 saveBtnContainer.classList.remove('d-none');
                 
@@ -752,6 +765,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (rejectForm) {
                 rejectForm.action = `/dashboard/tickets/reject/${data.id}`;
             }
+            
+            
         });
     });
 });
