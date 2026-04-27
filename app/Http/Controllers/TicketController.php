@@ -665,8 +665,8 @@ class TicketController extends Controller
     public function initiatePayment_s(Request $request, $id) 
     {
         $order = session('pending_registration');
-        $method = session('payment_method');
-        if (!$order || !$method) {
+    
+        if (!$order) {
             return redirect()->route('athlete.register')->with('error', 'Session expired.');
         }
 
