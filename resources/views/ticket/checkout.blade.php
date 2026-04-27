@@ -147,7 +147,7 @@
             <h4 style="font-weight: 800; color: #000; margin: 0;">{{ number_format($total, 2) }} MMK</h4>
         </div>
 
-        <form action="{{ route('initiatePayment_s', ['id' => Auth::user()->runner_id]) }}" method="GET">
+        <form action="{{ route('initiatePayment_s', ['id' => Auth::user()->runner_id]) }}" method="POST">
             @csrf
             <button type="submit" class="tf-btn w-100 justify-content-center" 
                 style="background-color: #CEF531; color: #000; border: none; padding: 20px; font-weight: 800; font-size: 18px; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 4px; box-shadow: 0 4px 14px rgba(206, 245, 49, 0.4); transition: transform 0.2s;">
