@@ -221,7 +221,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/ticket', [TicketController::class, 'showTicket'])->name('ticket');
     Route::post('/select-race', [AthleteController::class, 'handleSelection'])->name('athlete.selection.handle');
     // Route::match(['get', 'post'], '/payment/initiate/{id}', [App\Http\Controllers\TicketController::class, 'initiatePayment'])->name('initiatePayment');
-    Route::post('/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
+    Route::match(['get', 'post'], '/payment/initiate/{id}', [TicketController::class, 'initiatePayment_s'])->name('initiatePayment_s');
     Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
     Route::get('/register-athlete', [AthleteController::class, 'showAthleteForm'])->name('athlete.register');
     Route::post('/register-athlete', [AthleteController::class, 'submit'])->name('athlete.register.submit');
