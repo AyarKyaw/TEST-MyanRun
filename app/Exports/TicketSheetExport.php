@@ -34,7 +34,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
 
     public function headings(): array
     {
-        return ['Full Name','First Name','Middle Name','Last Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Is Printed', 'Purchase Date', 'Division', 'Nationality', 'Address'];
+        return ['Full Name','First Name','Middle Name','Last Name', 'BIB Name', 'BIB Number', 'ID No.', 'Phone no.', "Date of Birth", 'Gender', 'Category', 'T-Shirt size', 'Blood Type', 'Price', 'Status', 'Is Printed', 'Purchase Date', 'Division', 'Nationality', 'Address', 'ITRA'];
     }
 
     public function collection()
@@ -93,6 +93,7 @@ class TicketSheetExport implements FromCollection, WithTitle, WithHeadings, Shou
                 $athlete?->state ?? 'N/A',
                 $athlete?->nationality ?? 'N/A',
                 $athlete?->address ?? 'N/A',
+                $athlete?->itra_details ?? 'N/A',
             ];
         });
     }

@@ -10,12 +10,12 @@
                 </div>
 
                 <ul class="navbar-nav header-right">
-                    <li class="nav-item dropdown notification_dropdown">
+                    <!-- <li class="nav-item dropdown notification_dropdown">
                         <div class="input-group search-area">
                             <input type="text" class="form-control" placeholder="Search here...">
                             <span class="input-group-text border-0"><a href="javascript:void(0)"><i class="flaticon-381-search-2"></i></a></span>
                         </div>
-                    </li>
+                    </li> -->
                     <li class="nav-item">
                         <select class="selectpicker form-select i18n-select" id="langSwitcher">
                             <option value="en_GB" title="English" data-content="<img src='../assets/images/flags/gb-eng.svg' alt=''> English">English</option>

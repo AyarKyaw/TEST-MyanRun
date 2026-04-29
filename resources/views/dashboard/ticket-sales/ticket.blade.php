@@ -2,6 +2,9 @@
 
 @section('content') 
 <style>
+    body {
+        height: 2000px;
+    }
     /* Table & Scrollbar Styling */
     .table-responsive {
         width: 100%;
@@ -61,6 +64,11 @@
     /* Stats Card Styling */
     .stat-widget { background: #fff; padding: 20px; border-radius: 15px; height: 100%; }
     .progress-thin { height: 6px; border-radius: 10px; background: #eee; }
+
+    .container, .container-fluid, .row {
+        /* If you find the parent has overflow: hidden, use this to override */
+        overflow: visible !important;
+    }
 
     @media print {
 
@@ -236,83 +244,64 @@
                     <div class="card-body p-4">
                         <div class="row align-items-center">
                             <div class="col-md-7">
-    {{-- Wrap this block so it only shows for Admins (not Supporters) --}}
-    @if(auth('admin')->user()->role !== 'supporter')
-        <div class="d-flex gap-4 mb-4">
-            <div>
-                <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Total Registered</p>
-                <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalTickets) }}</h5>
-            </div>
-            <div class="vr" style="opacity: 0.1;"></div>
-            <div>
-                <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Event Capacity</p>
-                <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalApproved ?? 0) }} / 
-                    {{ $eventLimit > 0 ? number_format($eventLimit) : 'Unlimited' }}</h5>
-            </div>
-        </div>
-    @endif
-
-    {{-- Operational Stats (Always visible or adjusted as per your logic) --}}
-    <div class="d-flex align-items-center gap-4 mb-3">
-        {{-- Total Approved --}}
-        <div>
-            <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
-            <h2 class="mb-0 text-primary fw-bold">{{ number_format($totalApproved ?? 0) }}</h2>
-        </div>
-        
-        <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
-
-        {{-- Total Printed --}}
-        @if(auth('admin')->user()->role === 'supporter')
-            <div>
-                <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Printed</p>
-                <h2 class="mb-0 text-success fw-bold">{{ number_format($totalPrinted ?? 0) }}</h2>
-            </div>
-            
-            <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
-
-            {{-- To Print --}}
-            <div>
-                <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">To Print</p>
-                <h2 class="mb-0 text-warning fw-bold">{{ number_format($toPrint ?? 0) }}</h2>
-            </div>
-        @endif
-    </div>
-
-    {{-- Progress Bar remains the same --}}
-    @if(($totalApproved ?? 0) > 0)
-        <div class="progress progress-thin">
-            @php 
-                $percent = (($totalPrinted ?? 0) / $totalApproved) * 100; 
-            @endphp
-            <div class="progress-bar bg-success" style="width: {{ $percent }}%"></div>
-        </div>
-        <p class="fs-12 text-muted mt-2 mb-0">
-            {{ number_format($percent, 1) }}% of approved tickets printed
-        </p>
-    @else
-        <p class="fs-12 text-muted mt-2 mb-0">No approved tickets yet.</p>
-    @endif
-</div>
-                            
-                            <div class="col-md-5 mt-3 mt-md-0">
-                                <form action="{{ URL::current() }}" method="GET">
-                                    {{-- Remove the 'pending' fallback so it carries over the current status --}}
-                                    <input type="hidden" name="status" value="{{ request('status') }}">
-                                    
-                                    <div class="input-group shadow-sm">
-                                        <input type="text" id="tableSearch" name="search" class="form-control border-0" placeholder="Name or BIB..." value="{{ request('search') }}">
-                                        <button class="btn btn-primary px-3" type="submit"><i class="fa fa-search"></i></button>
-                                        
-                                        @if(request('search'))
-                                            {{-- Keep the status here so the 'X' button returns to the correct tab --}}
-                                            <a href="{{ route('dashboard.events.ticket', ['event' => $eventName, 'status' => request('status')]) }}" class="btn btn-dark d-flex align-items-center">
-                                                <i class="fa fa-times"></i>
-                                            </a>
-                                        @endif
+                                {{-- Wrap this block so it only shows for Admins (not Supporters) --}}
+                                @if(auth('admin')->user()->role !== 'supporter')
+                                    <div class="d-flex gap-4 mb-4">
+                                        <div>
+                                            <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Total Registered</p>
+                                            <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalTickets) }}</h5>
+                                        </div>
+                                        <div class="vr" style="opacity: 0.1;"></div>
+                                        <div>
+                                            <p class="mb-0 fs-11 text-muted text-uppercase fw-bold">Event Capacity</p>
+                                            <h5 class="mb-0 text-dark fw-bold">{{ number_format($totalApproved ?? 0) }} / 
+                                                {{ $eventLimit > 0 ? number_format($eventLimit) : 'Unlimited' }}</h5>
+                                        </div>
                                     </div>
-                                </form>
-                            </div>
+                                @endif
+
+                                {{-- Operational Stats (Always visible or adjusted as per your logic) --}}
+                                <div class="d-flex align-items-center gap-4 mb-3">
+                                    {{-- Total Approved --}}
+                                    <div>
+                                        <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Approved</p>
+                                        <h2 class="mb-0 text-primary fw-bold">{{ number_format($totalApproved ?? 0) }}</h2>
+                                    </div>
+                                    
+                                    <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+
+                                    {{-- Total Printed --}}
+                                    @if(auth('admin')->user()->role === 'supporter')
+                                        <div>
+                                            <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">Printed</p>
+                                            <h2 class="mb-0 text-success fw-bold">{{ number_format($totalPrinted ?? 0) }}</h2>
+                                        </div>
+                                        
+                                        <div class="vr mx-2" style="height: 40px; opacity: 0.1;"></div>
+
+                                        {{-- To Print --}}
+                                        <div>
+                                            <p class="mb-0 fs-12 text-muted text-uppercase fw-bold">To Print</p>
+                                            <h2 class="mb-0 text-warning fw-bold">{{ number_format($toPrint ?? 0) }}</h2>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                {{-- Progress Bar remains the same --}}
+                                @if(($totalApproved ?? 0) > 0)
+                                    <div class="progress progress-thin">
+                                        @php 
+                                            $percent = (($totalPrinted ?? 0) / $totalApproved) * 100; 
+                                        @endphp
+                                        <div class="progress-bar bg-success" style="width: {{ $percent }}%"></div>
+                                    </div>
+                                    <p class="fs-12 text-muted mt-2 mb-0">
+                                        {{ number_format($percent, 1) }}% of approved tickets printed
+                                    </p>
+                                @else
+                                    <p class="fs-12 text-muted mt-2 mb-0">No approved tickets yet.</p>
+                                @endif
+                            </div>                          
                         </div>
                     </div>
                 </div>
@@ -489,6 +478,24 @@
         </div>
     </div>
 </main>
+<div style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; width: 600px;">
+    <form action="{{ URL::current() }}" method="GET" class="shadow-lg rounded-4 overflow-hidden">
+        <input type="hidden" name="status" value="{{ request('status') }}">
+        
+        <div class="input-group">
+            <input type="text" id="tableSearch" name="search" class="form-control border-0 p-3" 
+                   placeholder="Name or BIB..." value="{{ request('search') }}">
+            <button class="btn btn-primary px-4" type="submit"><i class="fa fa-search"></i></button>
+            
+            @if(request('search'))
+                <a href="{{ route('dashboard.events.ticket', ['event' => $eventName, 'status' => request('status')]) }}" 
+                   class="btn btn-dark d-flex align-items-center px-3">
+                    <i class="fa fa-times"></i>
+                </a>
+            @endif
+        </div>
+    </form>
+</div>
 <div class="modal fade" id="passwordModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -586,8 +593,8 @@
     // Get the user from the guard within the view
     $user = Auth::guard('admin')->user();
 @endphp
-    @if($customer->status === 'approved' && $user && ($user->role === 'super_admin'))
-        <a href="#" id="btn-download-ticket" class="btn btn-dark px-4 py-2">
+    @if(auth()->user()->role === 'super_admin')
+        <a href="#" id="btn-download-ticket" class="btn btn-dark px-4 py-2 d-none">
             <i class="fa fa-download me-2"></i>Download Ticket
         </a>
     @endif
@@ -693,8 +700,17 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const downloadBtn = document.getElementById('btn-download-ticket');
+            // 1. Check if the status is approved AND user is super_admin
+            const isApproved = data.status === 'approved';
+            const isAdmin = "{{ auth()->user()->role ?? '' }}" === 'super_admin';
+
             if (downloadBtn) {
-                downloadBtn.href = `/ticket/download/${data.id}`;
+                if (isApproved && isAdmin) {
+                    downloadBtn.classList.remove('d-none'); // Show button
+                    downloadBtn.href = `/dashboard/tickets/download/${data.id}`;
+                } else {
+                    downloadBtn.classList.add('d-none'); // Hide button
+                }
             }
 
             if (isEditable) {
