@@ -1,6 +1,6 @@
 <title>MyanRun || QR CODE</title>
 @php
-    $paymentMethod = session('payment_method', 'kbz'); // Default to 'kbz'
+    $paymentMethod = session('payment_method', 'mmqr'); // Default to 'kbz'
     
     // Set variables based on choice
     $qrImage = ($paymentMethod === 'kbz') ? 'KBZ_Bank_logo.png' : 'MMQR.jpg';

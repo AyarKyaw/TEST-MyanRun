@@ -256,6 +256,9 @@
                                         <span class="text-muted small"><i class="fas fa-lock mr-1"></i> Restricted</span>
                                     @endif
                                 </div>
+                                <a href="{{ route('dashboard.events.ticket', ['event' => $event->name]) }}" class="btn btn-manage">
+                                    Manage Race <i class="fas fa-chevron-right ml-2 small"></i>
+                                </a>
                             </div>
                         </div>
                     </div>

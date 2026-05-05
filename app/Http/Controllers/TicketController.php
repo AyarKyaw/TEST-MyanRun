@@ -119,7 +119,7 @@ class TicketController extends Controller
 
         $eventTickets = \App\Models\Ticket::where('event', $eventName);
         // 1. Total Approved
-        $totalApproved = (clone $eventTickets)->where('status', 'approved')->count();
+        $totalApproved = (clone $eventTickets)->where('status', 'approved')->distinct()->count('bib_number');
 
         // 2. Total Printed (is_printed should be 1 or true)
         $totalPrinted = (clone $eventTickets)->where('status', 'approved')->where('is_printed', 1)->count();
