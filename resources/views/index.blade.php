@@ -677,7 +677,7 @@
                                
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/local16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: 20% center;"alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/local/local16.jpg') }}" style="width:100%; height:500px; object-fit:cover; object-position: 20% center;"alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
@@ -730,7 +730,7 @@
                                
                             </p>
                         </div>
-                        <img decoding="async" src="{{ asset('images/local36.jpg') }}"style="width:100%; height:500px; object-fit:cover; object-position: 10% center;" alt="denpasar marathon event 2023">
+                        <img decoding="async" src="{{ asset('images/local/local36.jpg') }}"style="width:100%; height:500px; object-fit:cover; object-position: 10% center;" alt="denpasar marathon event 2023">
                     </div>
                     <div class="tf-info-price">
                         <h4>Ticket</h4>
@@ -878,16 +878,25 @@
                         <div class="contact">
     <span> Phone: </span>
     <div class="address">
-        <a href="tel:095405026" class="phone-link">09 540 5026</a><br>
-        <a href="tel:095135324" class="phone-link">09 513 5324</a>
-    </div>
+    {{-- Decode JSON phone numbers --}}
+    @php
+        $phones = json_decode($global_info->phone_numbers, true) ?: ['09 540 5026', '09 513 5324'];
+    @endphp
+
+    {{-- Loop through phone numbers --}}
+    @foreach($phones as $phone)
+        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="phone-link">
+            {{ $phone }}
+        </a><br>
+    @endforeach
+</div>
     </div>
 
                         <div class="contact">
         <span> Email: </span>
         <div class="address">
-            <a href="mailto:info@myanrun.com" class="contact-link">
-                info@myanrun.com
+            <a href="mailto:{{ $global_info->email ?? 'info@myanrun.com' }}" class="contact-link">
+                {{ $global_info->email ?? 'info@myanrun.com' }}
             </a>
         </div>
     </div>
@@ -1605,16 +1614,25 @@
                         <div class="contact">
     <span> Phone: </span>
     <div class="address">
-        <a href="tel:095405026" class="phone-link">09 540 5026</a><br>
-        <a href="tel:095135324" class="phone-link">09 513 5324</a>
-    </div>
+    {{-- Decode JSON phone numbers --}}
+    @php
+        $phones = json_decode($global_info->phone_numbers, true) ?: ['09 540 5026', '09 513 5324'];
+    @endphp
+
+    {{-- Loop through phone numbers --}}
+    @foreach($phones as $phone)
+        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="phone-link">
+            {{ $phone }}
+        </a><br>
+    @endforeach
+</div>
     </div>
 
                         <div class="contact">
         <span> Email: </span>
         <div class="address">
-            <a href="mailto:info@myanrun.com" class="contact-link">
-                info@myanrun.com
+            <a href="mailto:{{ $global_info->email ?? 'info@myanrun.com' }}" class="contact-link">
+                {{ $global_info->email ?? 'info@myanrun.com' }}
             </a>
         </div>
     </div>

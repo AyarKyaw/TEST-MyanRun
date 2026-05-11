@@ -111,15 +111,32 @@
             <div class="d-flex justify-content-between align-items-center border-top pt-3">
                 <span class="text-muted small"><i class="far fa-calendar-alt"></i> {{ $event->date->format('M d') }}</span>
 
+                @php
+                    $eventName = trim($event->name);
+                    $isRegistered = in_array($eventName, $userTickets);
+                    $isPending = array_key_exists($eventName, $pendingTickets);
+                @endphp
+
                 @if($isRegistered)
+                    {{-- Case 1: Payment complete --}}
                     <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
                         <i class="fas fa-check-circle mr-1"></i> SECURED
                     </button>
+                
+                @elseif($isPending)
+                    {{-- Case 2: Stuck in pending --}}
+                    <a href="{{ route('initiatePayment', ['id' => Auth::user()->runner_id]) }}" class="btn btn-warning btn-sm font-weight-bold px-3 py-2 text-dark">
+                        <i class="fas fa-redo mr-1"></i> RESUME PAY
+                    </a>
+
                 @elseif($event->is_full)
-                    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled style="cursor: not-allowed; opacity: 0.8;">
-                        <i class="fas fa-check-circle mr-1"></i> SECURED
+                    {{-- Case 3: No more slots --}}
+                    <button class="btn btn-secondary btn-sm font-weight-bold px-3 py-2 text-white" disabled>
+                        FULL
                     </button>
+
                 @else
+                    {{-- Case 4: New registration --}}
                     <a href="/ticket?event={{ urlencode($event->name) }}" class="btn btn-danger btn-sm font-weight-bold px-3 py-2 text-white">
                         ENTER NOW
                     </a>

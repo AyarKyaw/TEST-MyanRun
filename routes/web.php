@@ -257,6 +257,9 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/register/1', [UserController::class, 'dashboard'])->name('dashboard.register-level-1');
     Route::get('/register/2', [AthleteController::class, 'dashboard'])->name('dashboard.register-level-2');
+
+    Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings');
+    Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
     
     Route::get('/ticket-management', [TicketController::class, 'index'])->name('dashboard.tickets.index');
     Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');

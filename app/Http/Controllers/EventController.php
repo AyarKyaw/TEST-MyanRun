@@ -69,7 +69,6 @@ class EventController extends Controller
                 ->distinct()
                 ->count('bib_number');
 
-            // If total_max_slots is null, assume unlimited. Otherwise compare.
             $event->is_full = !is_null($event->total_max_slots) && ($soldSlots >= $event->total_max_slots);
         });
 
@@ -78,15 +77,29 @@ class EventController extends Controller
         $pastEvents = $allEvents->where('is_active', 0);
 
         $userTickets = [];
+        $pendingTickets = []; // NEW: To track tickets waiting for payment
+
         if (auth()->check()) {
-            $userTickets = auth()->user()->tickets()
-                ->whereIn('status', ['pending', 'confirmed', 'approved'])
-                ->pluck('event') 
-                ->map(fn($item) => trim($item))
-                ->toArray();
+            $athlete = \App\Models\Athlete::where('runner_id', auth()->user()->runner_id)->first();
+            
+            if ($athlete) {
+                // 1. Confirmed/Approved tickets (To show "SECURED")
+                $userTickets = \App\Models\Ticket::where('athlete_id', $athlete->id)
+                    ->whereIn('status', ['confirmed', 'approved'])
+                    ->pluck('event') 
+                    ->map(fn($item) => trim($item))
+                    ->toArray();
+
+                // 2. Pending tickets (To show "RESUME PAY")
+                // We map Event Name => Event ID so the Blade can easily find the ID to link to
+                $pendingTickets = \App\Models\Ticket::where('athlete_id', $athlete->id)
+                    ->where('status', 'pending')
+                    ->pluck('event_id', 'event') 
+                    ->toArray();
+            }
         }
 
-        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets'));
+        return view('events', compact('nowEvents', 'comingEvents', 'pastEvents', 'userTickets', 'pendingTickets'));
     }
 
     // Save the event

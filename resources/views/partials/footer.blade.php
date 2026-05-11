@@ -75,14 +75,24 @@
                                     </svg>
                                     
                                 </div><div class="address">
-    <div class="contact-numbers">
-        <a href="tel:095405026"><span class="elementor-icon-list-text">09 540 5026</span></a>
-          <a href="tel:095135324"><span class="elementor-icon-list-text">09 513 5324</span></a>
-    </div>
-    </div>
+                                <div class="contact-numbers">
+                                    @php
+                                        // Decode the JSON phone field. Fallback to defaults if empty.
+                                        $phones = json_decode($global_info->phone_numbers, true) ?: ['09 540 5026', '09 513 5324'];
+                                    @endphp
 
+                                    @foreach($phones as $phone)
+                                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}">
+                                            <span class="elementor-icon-list-text">{{ $phone }}</span>
+                                        </a>
+                                    @endforeach
+                                </div>
 
-                                <p><i class="icon-MapPin"></i>No.68, Htan Ta Pin Street, Aung Myay Thar Si Housing, No(1) Quarter ,Kamaryut, Yangon 11041</p>
+                                <p>
+                                    <i class="icon-MapPin"></i>
+                                    {{ $global_info->street_address ?? 'No.68, Htan Ta Pin Street, Aung Myay Thar Si Housing, No(1) Quarter, Kamaryut, Yangon 11041' }}
+                                </p>
+                            </div>
                                 <form action="#">
                                     <div class="input-new-letter">
                                         <input class="btn-email" name="email" id="email" type="email"

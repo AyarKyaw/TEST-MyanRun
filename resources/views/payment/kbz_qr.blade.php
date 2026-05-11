@@ -1,153 +1,136 @@
 <title>MyanRun || QR CODE</title>
 @php
-    $paymentMethod = session('payment_method', 'mmqr'); // Default to 'kbz'
+    $mmqrLogo = 'mmqr.png'; 
+    $kbzPayLogo = 'kbzpay_blue_icon.jpg'; 
     
-    // Set variables based on choice
-    $qrImage = ($paymentMethod === 'kbz') ? 'KBZ_Bank_logo.png' : 'MMQR.jpg';
-    $methodName = ($paymentMethod === 'kbz') ? 'KBZPay' : 'MMQR';
+    // GUIDELINE CALCULATIONS
+    $cardWidth = 350;
+    $cardHeight = ($cardWidth / 20) * 29; 
+    
+    $marginSide = $cardWidth * 0.125;      
+    $headerHeight = $cardHeight * 0.185;   
+    $qrAreaHeight = $cardHeight * 0.44;    
+    $qrAreaWidth = $cardWidth * 0.75;      
+    $lineHeight = $cardHeight * 0.03;      
+    
+    // Typography
+    $nameFontSize = $cardHeight * 0.03;    
+    $amountFontSize = $cardHeight * 0.06;  
+    $currencyFontSize = $cardHeight * 0.03; 
 @endphp
-<link rel="icon" type="image/x-icon" href="{{ asset('images/icon/Myan Run icon.png') }}">
 
-<div class="payment-container" style="max-width: 450px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #fff; position: relative;">
-    
-    <div style="margin-bottom: 20px;">
-        <h3 style="color: #1a1a1a; margin-bottom: 5px;">Scan to Pay ({{ $methodName }})</h3>
-        <div style="font-size: 28px; font-weight: bold; color: #f9a01b; margin: 10px 0;">
-            {{ number_format($ticket->price) }} MMK
-        </div>
-        <h1 style="
-            font-size: 48px;
-            font-weight: 900;
-            letter-spacing: 3px;
-            color: #333;
-            margin-bottom: 10px;
-        ">
-            {{ $methodName }}</span>
-        </h1>
-        <div style="margin: 20px 0; height: 150px; display: flex; align-items: center; justify-content: center;">
-            <img src="{{ asset('images/' . $qrImage) }}" 
-                alt="{{ $methodName }} Logo" 
-                style="max-width: 100%; max-height: 100%; object-fit: contain;">
-        </div>
+<div class="payment-card" style="
+    width: {{ $cardWidth }}px; 
+    height: {{ $cardHeight }}px; 
+    margin: 40px auto; 
+    background: #ffffff; 
+    font-family: Arial, sans-serif; 
+    position: relative; 
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;">
 
-        <p style="color: #666; font-size: 14px;">Please use your <strong>Payment App</strong> to scan</p>
-    </div>
-
-    <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; display: inline-block; border: 1px solid #eee; position: relative;">
+    <div style="height: {{ $headerHeight }}px; position: relative; display: flex; align-items: center; justify-content: center;">
         
-        <!-- QR -->
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ $qrString }}" 
-            alt="KBZPay QR" 
-            style="display: block;">
-    </div>
-
-    <div style="margin-top: 25px;">
-        <div id="loading-spinner" class="spinner"></div>
-        <p id="status-text" style="color: #555; font-size: 18px; margin-top: 15px;">
-            Waiting for payment...
-        </p>
-        <p style="color: #999; font-size: 12px; margin-top: 5px;">
-            Order ID: #{{ $ticket->id }}
-        </p>
-    </div>
-
-    <div id="success-overlay" class="success-overlay">
-        <div class="success-content">
-            <div class="checkmark-circle">
-                <div class="checkmark draw"></div>
-            </div>
-            <h2 style="margin-top: 20px; color: #28a745;">Payment Successful!</h2>
-            <p style="color: #666;">Redirecting to your dashboard...</p>
+        <div style="
+            position: absolute; 
+            width: 100%; 
+            height: {{ $lineHeight }}px; 
+            background-color: #FBD913; 
+            z-index: 1;">
+        </div>
+        
+        <div style="z-index: 2; display: flex; align-items: center;">
+            <img src="{{ asset('images/' . $mmqrLogo) }}" 
+                 style="max-height: {{ $headerHeight * 1.35 }}px; 
+                        width: auto; 
+                        object-fit: contain;
+                        /* This allows the yellow line to be seen through the white JPG background */
+                        mix-blend-mode: multiply;">
         </div>
     </div>
 
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <span style="font-size: 12px; color: #aaa;">Secure Payment Gateway</span>
+    <div style="padding: 0 {{ $marginSide }}px;">
+        <div style="font-size: {{ $nameFontSize }}px; color: #333; margin-bottom: 2px; text-transform: uppercase; font-weight: 500;">
+            MYAN RUN
+        </div>
+        <div style="font-weight: bold; color: #000; display: flex; align-items: baseline; gap: 4px; margin-bottom: 10px;">
+            <span style="font-size: {{ $amountFontSize }}px;">{{ number_format($ticket->price) }}</span>
+            <span style="font-size: {{ $currencyFontSize }}px;">MMK</span>
+        </div>
+
+        <div style="text-align: center; font-weight: bold; color: #17479E; font-size: 18px; margin-bottom: 5px;">
+            MMQR
+        </div>
+
+        <div style="
+            width: {{ $qrAreaWidth }}px; 
+            height: {{ $qrAreaHeight }}px; 
+            margin: 0 auto;
+            border: 2px solid #17479E; 
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            padding: 10px;
+            box-sizing: border-box;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data={{ $qrString }}" 
+                 style="max-width: 100%; max-height: 100%; display: block;">
+        </div>
+    </div>
+
+    <div style="position: absolute; bottom: 48px; width: 100%; display: flex; justify-content: center;">
+        <img src="{{ asset('images/payment/' . $kbzPayLogo) }}" 
+             style="height: 35px; width: auto; object-fit: contain;">
+    </div>
+
+    <div style="height: {{ $lineHeight }}px; background-color: #17479E; width: 100%; position: absolute; bottom: 0;"></div>
+
+    <div style="position: absolute; bottom: 22px; width: 100%; text-align: center;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <div class="spinner"></div>
+            <p id="status-text" style="font-size: 10px; color: #888; margin: 0;">Waiting for payment...</p>
+        </div>
+    </div>
+    <div id="success-overlay" class="success-overlay">
+        <div style="text-align: center;">
+            <div style="font-size: 50px; color: #28a745;">✓</div>
+            <h3 style="color: #28a745; margin: 0;">PAID</h3>
+        </div>
     </div>
 </div>
 
 <style>
-    /* Success Overlay Styles */
+    * { font-family: Arial, sans-serif; letter-spacing: 0; }
+    .spinner {
+        width: 12px; height: 12px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #17479E;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .success-overlay {
         display: none;
         position: absolute;
         top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(255, 255, 255, 0.98);
-        z-index: 10;
-        border-radius: 15px;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-    }
-
-    /* Animated Checkmark */
-    .checkmark-circle {
-        width: 80px; height: 80px;
-        border: 4px solid #28a745;
-        border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-    }
-    .checkmark {
-        font-size: 50px;
-        color: #28a745;
-    }
-    .checkmark:after {
-        content: "✓";
-    }
-
-    .spinner {
-        width: 30px; height: 30px;
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid #f9a01b;
-        border-radius: 50%;
-        display: inline-block;
-        animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    body.waiting-payment {
-        background-color: #f4f7f6;
+        z-index: 20;
+        align-items: center; justify-content: center;
     }
 </style>
 
 <script>
-    const ticketId =  {{ $ticket->id }};
-    const checkUrl = "{{ url('/payment/status/' . ($ticket->id)) }}";
-    const redirectUrl = "{{ route('user.dashboard') }}?success=PaymentReceived";
-
-    let elapsed = 0;
-    const pollInterval = 3000; 
-    const timeoutLimit = 15 * 60 * 1000; 
-
     const checkPayment = async () => {
         try {
-            const response = await fetch(checkUrl);
+            const response = await fetch("{{ url('/payment/status/' . $ticket->id) }}");
             const data = await response.json();
-
             if (data.paid) {
-                clearInterval(polling);
-                
-                // Show Big Success Overlay
                 document.getElementById('success-overlay').style.display = "flex";
-                
-                // Redirect after 3 seconds so they can see the message
-                setTimeout(() => window.location.href = redirectUrl, 3000);
+                setTimeout(() => window.location.href = "{{ route('user.dashboard') }}", 2500);
             }
-        } catch (err) {
-            console.log("Checking connection...");
-        }
-
-        elapsed += pollInterval;
-        if (elapsed >= timeoutLimit) {
-            clearInterval(polling);
-            document.getElementById('status-text').innerText = "⚠️ Payment timed out.";
-            document.getElementById('loading-spinner').style.display = "none";
-        }
+        } catch (e) {}
     };
-
-    const polling = setInterval(checkPayment, pollInterval);
+    setInterval(checkPayment, 3000);
 </script>

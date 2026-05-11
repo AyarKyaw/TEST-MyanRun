@@ -23,10 +23,17 @@
                     </div>
                 @endauth
             </div>
+
             <div class="address">
-                <a href="mailto:info@myanrun.com"><i class="icon-Vector"></i>info@myanrun.com</a>
-                <address><i class="icon-Vector-22"></i>No.68, Htan Ta Pin Street, Kamaryut, Yangon, Myanmar</address>
+                <a href="mailto:{{ $global_info->email ?? 'info@myanrun.com' }}">
+                    <i class="icon-Vector"></i>{{ $global_info->email ?? 'info@myanrun.com' }}
+                </a>
+
+                <address>
+                    <i class="icon-Vector-22"></i>{{ $global_info->street_address ?? 'No.68, Htan Ta Pin Street, Kamaryut, Yangon, Myanmar' }}
+                </address>
             </div>
+
             <div class="social-icon">
                 <a href="https://www.facebook.com/share/g/1G6ZtYxVfj/" target="_blank"><i class="icon-facebook"></i></a>
                 <a href="https://www.facebook.com/share/1CFptZmwGM/" target="_blank"><i class="icon-facebook"></i></a>
