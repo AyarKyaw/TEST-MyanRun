@@ -62,8 +62,55 @@
                             <button type="button" id="add-phone-btn" class="btn btn-info btn-sm mt-2">
                                 <i class="fa fa-plus"></i> Add Another Phone Number
                             </button>
-                            <button type="submit" class="btn btn-primary px-5">Save Global Settings & Event</button>
-                        </div>
+                            <hr>
+<label class="form-label text-black fw-bold">Social Media Links</label>
+<div id="social-repeater">
+    @php
+        // Decode the JSON socials: e.g., [{"platform":"facebook", "url":"..."}, {"platform":"tiktok", "url":"..."}]
+        $socials = isset($global_info->social_links) ? json_decode($global_info->social_links, true) : [];
+    @endphp
+
+    @forelse($socials as $social)
+    <div class="row mb-2 social-row">
+        <div class="col-md-3">
+            <select name="social_platforms[]" class="form-control">
+                <option value="facebook" {{ $social['platform'] == 'facebook' ? 'selected' : '' }}>Facebook</option>
+                <option value="tiktok" {{ $social['platform'] == 'tiktok' ? 'selected' : '' }}>TikTok</option>
+                <option value="instagram" {{ $social['platform'] == 'instagram' ? 'selected' : '' }}>Instagram</option>
+                <option value="youtube" {{ $social['platform'] == 'youtube' ? 'selected' : '' }}>YouTube</option>
+            </select>
+        </div>
+        <div class="col-md-7">
+            <input type="url" name="social_urls[]" class="form-control" value="{{ $social['url'] }}" placeholder="https://...">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger w-100 remove-social-btn"><i class="fa fa-trash"></i></button>
+        </div>
+    </div>
+    @empty
+    <div class="row mb-2 social-row">
+        <div class="col-md-3">
+            <select name="social_platforms[]" class="form-control">
+                <option value="facebook">Facebook</option>
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+            </select>
+        </div>
+        <div class="col-md-7">
+            <input type="url" name="social_urls[]" class="form-control" placeholder="https://...">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger w-100 remove-social-btn"><i class="fa fa-trash"></i></button>
+        </div>
+    </div>
+    @endforelse
+</div>
+<button type="button" id="add-social-btn" class="btn btn-secondary btn-sm mt-2 mb-4">
+    <i class="fa fa-plus"></i> Add Social Link
+</button>
+</div>
+<button type="submit" class="btn btn-primary px-5">Save Global Settings & Event</button>
                     </div>
                 </div>
             </div>
@@ -102,4 +149,35 @@
             }
         }
     });
+
+    // Add new social row
+document.getElementById('add-social-btn').addEventListener('click', function() {
+    const container = document.getElementById('social-repeater');
+    const newRow = document.createElement('div');
+    newRow.className = 'row mb-2 social-row';
+    newRow.innerHTML = `
+        <div class="col-md-3">
+            <select name="social_platforms[]" class="form-control">
+                <option value="facebook">Facebook</option>
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="youtube">YouTube</option>
+            </select>
+        </div>
+        <div class="col-md-7">
+            <input type="url" name="social_urls[]" class="form-control" placeholder="https://...">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-danger w-100 remove-social-btn"><i class="fa fa-trash"></i></button>
+        </div>
+    `;
+    container.appendChild(newRow);
+});
+
+// Remove social row
+document.getElementById('social-repeater').addEventListener('click', function(e) {
+    if (e.target.closest('.remove-social-btn')) {
+        e.target.closest('.social-row').remove();
+    }
+});
 </script>
