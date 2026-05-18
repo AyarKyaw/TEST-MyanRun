@@ -111,6 +111,15 @@
                     </a>
                 </li>
             @endif
+
+            @if($admin->role === 'super_admin')
+            <li>
+                <a class="ai-icon" href="{{ route('admin.settings') }}" aria-expanded="false">
+                        <i class="fa fa-cog"></i>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
+            @endif
         </ul>
     </div>
 </div>

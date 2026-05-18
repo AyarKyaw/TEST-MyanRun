@@ -35,10 +35,23 @@
             </div>
 
             <div class="social-icon">
-                <a href="https://www.facebook.com/share/g/1G6ZtYxVfj/" target="_blank"><i class="icon-facebook"></i></a>
-                <a href="https://www.facebook.com/share/1CFptZmwGM/" target="_blank"><i class="icon-facebook"></i></a>
-                <a href="http://www.youtube.com/@RUNderfulMyanmar-j9x" target="_blank"><i class="icon-youtube"></i></a>
-            </div>
+    @php
+        // Decode the JSON social links from site settings
+        $socials = json_decode($global_info->social_links ?? '[]', true);
+    @endphp
+
+    @foreach($socials as $social)
+        <a href="{{ $social['url'] }}" target="_blank">
+            {{-- Dynamically sets icon class, e.g., icon-facebook, icon-youtube, icon-tiktok --}}
+            <i class="icon-{{ strtolower($social['platform']) }}"></i>
+        </a>
+    @endforeach
+
+    {{-- Fallback: If no social links are set in admin, you can keep this or leave it empty --}}
+    @if(empty($socials))
+        <a href="https://www.facebook.com/" target="_blank"><i class="icon-facebook"></i></a>
+    @endif
+</div>
         </div>
     </div>
 </div>
