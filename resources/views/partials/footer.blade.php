@@ -12,20 +12,30 @@
                                     programs.
                                 </p> -->
                                 <div class="social-icon-footer">
+                                @php
+                                    // Decode the JSON from your site settings. 
+                                    // Fallback to an empty array if it's not set or null.
+                                    $socials = json_decode($global_info->social_links ?? '[]', true);
+                                @endphp
+
+                                @forelse($socials as $social)
+                                    <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer">
+                                        {{-- Dynamically picks the icon based on the platform name (e.g., icon-facebook, icon-youtube) --}}
+                                        <i class="icon-{{ strtolower($social['platform']) }}"></i>
+                                    </a>
+                                @empty
+                                    {{-- Fallback default links matching your original layout if the database is empty --}}
                                     <a href="https://www.facebook.com/share/g/1G6ZtYxVfj/" target="_blank" rel="noopener noreferrer">
-    <i class="icon-facebook"></i>
-</a>
-
-<a href="https://www.facebook.com/share/1CFptZmwGM/" target="_blank" rel="noopener noreferrer">
-    <i class="icon-facebook"></i>
-</a>
-
-<a href="http://www.youtube.com/@RUNderfulMyanmar-j9x" target="_blank" rel="noopener noreferrer">
-    <i class="icon-youtube"></i>
-</a>
-
-
-                                </div>
+                                        <i class="icon-facebook"></i>
+                                    </a>
+                                    <a href="https://www.facebook.com/share/1CFptZmwGM/" target="_blank" rel="noopener noreferrer">
+                                        <i class="icon-facebook"></i>
+                                    </a>
+                                    <a href="http://www.youtube.com/@RUNderfulMyanmar-j9x" target="_blank" rel="noopener noreferrer">
+                                        <i class="icon-youtube"></i>
+                                    </a>
+                                @endforelse
+                            </div>
                             </div>
                         </div><!-- /.widget -->
                     </div><!-- /.col-md-4 -->
