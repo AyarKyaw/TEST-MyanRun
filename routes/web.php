@@ -21,6 +21,7 @@ use App\Http\Controllers\SponsorController;
 use App\Models\SponsorCode;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Admin\AdminManagementController;
+use App\Http\Controllers\Admin\RaceController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -369,3 +370,16 @@ Route::get('/register/consent', [AthleteController::class, 'showConsent'])->name
 Route::post('/payment/kbz/callback', [TicketController::class, 'kbzCallback'])->name('kbz.callback');
 Route::post('/test-kbz-package', [TicketController::class, 'testPackageCallback']);
 Route::get('/payment/status/{id}', [TicketController::class, 'checkStatus']);
+
+Route::get('/race', [RaceController::class, 'showPublicRaces'])->name('public.races');
+
+Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+    
+    // Admin Management CRUD Endpoints
+    Route::get('/races', [RaceController::class, 'index'])->name('races.index');
+    Route::post('/races', [RaceController::class, 'store'])->name('races.store');
+    Route::patch('/races/{id}/toggle', [RaceController::class, 'toggleStatus'])->name('races.toggle');
+    Route::delete('/races/{id}', [RaceController::class, 'destroy'])->name('races.destroy');
+
+    // Your remaining admin routes live safely here...
+});

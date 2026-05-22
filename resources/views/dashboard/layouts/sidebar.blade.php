@@ -77,6 +77,14 @@
                     </ul>
                 </li>
 
+                <!-- NEW: Manage Races Section -->
+                <li>
+                    <a class="ai-icon" href="{{ route('admin.races.index') }}" aria-expanded="false">
+                        <i class="flaticon-381-layer"></i>
+                        <span class="nav-text">Manage Races</span>
+                    </a>
+                </li>
+
                 <li>
                     <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
                         <i class="flaticon-381-television"></i>
@@ -99,8 +107,16 @@
                          <li><a href="{{ route('admin.sponsor.index', 'past') }}">Past Sponsor</a></li>
                     </ul>
                 </li>
+
+                {{-- Settings option safely enclosed inside the Super Admin check block --}}
+                <li>
+                    <a class="ai-icon" href="{{ route('admin.settings') }}" aria-expanded="false">
+                        <i class="fa fa-cog"></i>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                </li>
                 @endif
-            @endif {{-- THIS WAS THE MISSING ENDIF FOR ADMIN GUARD --}}
+            @endif {{-- END ADMIN GUARD --}}
 
             {{-- Agent Guard Section --}}
             @if(Auth::guard('agent')->check())
@@ -111,15 +127,7 @@
                     </a>
                 </li>
             @endif
-
-            @if($admin->role === 'super_admin')
-            <li>
-                <a class="ai-icon" href="{{ route('admin.settings') }}" aria-expanded="false">
-                        <i class="fa fa-cog"></i>
-                        <span class="nav-text">Settings</span>
-                    </a>
-                </li>
-            @endif
+            
         </ul>
     </div>
 </div>
