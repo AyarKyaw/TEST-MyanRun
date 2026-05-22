@@ -20,11 +20,13 @@ class RaceController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'race_name' => 'required|string|max:255',
+            'race_name' => 'required|string|max:255|unique:races,name',
             'card_titles' => 'required|array',
             'card_titles.*' => 'required|string|max:255',
             'card_images' => 'required|array',
             'card_images.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'race_name.unique' => 'A race with this name already exists. Please choose a different name.',
         ]);
 
         // 1. Create Race Tab
@@ -34,21 +36,83 @@ class RaceController extends Controller
         ]);
 
         // 2. Upload and save multiple dynamic info cards
-        if ($request->hasFile('card_images')) {
-            foreach ($request->file('card_images') as $index => $file) {
-                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                // Store inside public storage folder
-                $file->move(public_path('uploads/races'), $filename);
+        // Loop over titles as the baseline index anchor to prevent array mismatch drops
+        if ($request->has('card_titles')) {
+            foreach ($request->card_titles as $index => $title) {
+                if ($request->hasFile("card_images.$index")) {
+                    $file = $request->file("card_images.$index");
+                    
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('uploads/races'), $filename);
 
-                RaceCard::create([
-                    'race_id' => $race->id,
-                    'title' => $request->card_titles[$index],
-                    'image' => 'uploads/races/' . $filename,
-                ]);
+                    RaceCard::create([
+                        'race_id' => $race->id,
+                        'title' => $title,
+                        'image' => 'uploads/races/' . $filename,
+                    ]);
+                }
             }
         }
 
         return redirect()->back()->with('success', 'Race and cards created successfully!');
+    }
+
+    // Update an existing race name and/or upload additional cards
+    public function update(Request $request, $id)
+    {
+        $race = Race::findOrFail($id);
+
+        // Validate incoming data (ignore current race ID for uniqueness check)
+        $request->validate([
+            'race_name' => 'required|string|max:255|unique:races,name,' . $id,
+            'card_titles' => 'nullable|array',
+            'card_titles.*' => 'required_with:card_images.*|string|max:255',
+            'card_images' => 'nullable|array',
+            'card_images.*' => 'required_with:card_titles.*|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'race_name.unique' => 'A race with this name already exists.',
+        ]);
+
+        // Update race name
+        $race->update([
+            'name' => $request->race_name
+        ]);
+
+        // Process and append additional newly uploaded cards
+        // Check for card_titles directly instead of starting with the files array
+        if ($request->has('card_titles')) {
+            foreach ($request->card_titles as $index => $title) {
+                if ($request->hasFile("card_images.$index")) {
+                    $file = $request->file("card_images.$index");
+
+                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('uploads/races'), $filename);
+
+                    RaceCard::create([
+                        'race_id' => $race->id,
+                        'title' => $title,
+                        'image' => 'uploads/races/' . $filename,
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Race updated successfully!');
+    }
+
+    // Delete a single card from a race safely
+    public function destroyCard($id)
+    {
+        $card = RaceCard::findOrFail($id);
+
+        // Delete the image file from public folder
+        if ($card->image && file_exists(public_path($card->image))) {
+            unlink(public_path($card->image));
+        }
+
+        $card->delete();
+
+        return redirect()->back()->with('success', 'Card removed successfully!');
     }
 
     // Toggle visibility status (Disable/Enable)
@@ -66,9 +130,8 @@ class RaceController extends Controller
     {
         $race = Race::with('cards')->findOrFail($id);
         
-        // Remove file fragments from filesystem storage
         foreach ($race->cards as $card) {
-            if (file_exists(public_path($card->image))) {
+            if ($card->image && file_exists(public_path($card->image))) {
                 unlink(public_path($card->image));
             }
         }
@@ -77,13 +140,10 @@ class RaceController extends Controller
         return redirect()->back()->with('success', 'Race completely deleted!');
     }
 
-    // Add this at the bottom of your controller class file
+    // Pull only active race categories and their uploaded image cards
     public function showPublicRaces()
     {
-        // Pull only active race categories and their uploaded image cards
         $races = Race::where('is_active', true)->with('cards')->get();
-
-        // Return the public-facing race blade view
         return view('race', compact('races'));
     }
 }

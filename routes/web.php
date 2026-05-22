@@ -378,8 +378,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     // Admin Management CRUD Endpoints
     Route::get('/races', [RaceController::class, 'index'])->name('races.index');
     Route::post('/races', [RaceController::class, 'store'])->name('races.store');
+    Route::put('/races/{id}', [RaceController::class, 'update'])->name('races.update'); // <-- Added for editing
     Route::patch('/races/{id}/toggle', [RaceController::class, 'toggleStatus'])->name('races.toggle');
     Route::delete('/races/{id}', [RaceController::class, 'destroy'])->name('races.destroy');
+    Route::delete('/races/cards/{id}', [RaceController::class, 'destroyCard'])->name('races.card.destroy'); // <-- Added for single card removal
 
     // Your remaining admin routes live safely here...
 });
