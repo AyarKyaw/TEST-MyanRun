@@ -22,7 +22,6 @@
             </div>
         @endif
 
-        <!-- Form Section: Create New Race Event -->
         <div class="row mb-4">
             <div class="col-xl-12">
                 <div class="card border-primary">
@@ -89,7 +88,6 @@
             </div>
         </div>
 
-        <!-- Management Listing Section -->
         <div class="row">
             <div class="col-xl-12">
                 <div class="card">
@@ -138,7 +136,6 @@
                                         </td>
                                     </tr>
 
-                                    <!-- EDIT MODAL -->
                                     <div class="modal fade" id="editRaceModal{{ $race->id }}" tabindex="-1" aria-hidden="true">
                                         <div class="modal-dialog modal-lg">
                                             <div class="modal-content">
@@ -176,7 +173,10 @@
 
                                                         <hr>
                                                         <label class="form-label text-black fw-bold mb-2">Upload Additional Cards</label>
+                                                        
+                                                        {{-- Unique ID container for this specific modal instance --}}
                                                         <div id="edit-cards-repeater-{{ $race->id }}"></div>
+                                                        
                                                         <button type="button" class="btn btn-info btn-xs mt-1" onclick="addCardRowToEdit({{ $race->id }})">
                                                             <i class="fa fa-plus"></i> Add New Field Card
                                                         </button>
@@ -214,9 +214,8 @@
 @endforeach
 
 <script>
-    // Explicit tracking of row counters to keep indexes explicit and clean
     function reindexCreateRows() {
-        const rows = document.querySelectorAll('.card-item-row');
+        const rows = document.querySelectorAll('#cards-repeater .card-item-row');
         rows.forEach((row, index) => {
             row.querySelector('input[type="text"]').setAttribute('name', `card_titles[${index}]`);
             row.querySelector('input[type="file"]').setAttribute('name', `card_images[${index}]`);
@@ -246,10 +245,10 @@
         container.appendChild(newRow);
     });
 
-    // Remove single row structure from Create Form and clean the array ordering
+    // Remove single row structure from Create Form
     document.getElementById('cards-repeater').addEventListener('click', function(e) {
         if (e.target.closest('.remove-card-btn')) {
-            const rows = document.querySelectorAll('.card-item-row');
+            const rows = document.querySelectorAll('#cards-repeater .card-item-row');
             if (rows.length > 1) {
                 e.target.closest('.card-item-row').remove();
                 reindexCreateRows();
@@ -259,7 +258,7 @@
         }
     });
 
-    // Handle Edit Mode Repeater
+    // Handle Edit Mode Repeater - Modified to use unique field names
     function addCardRowToEdit(raceId) {
         const editContainer = document.getElementById(`edit-cards-repeater-${raceId}`);
         const currentRowsCount = editContainer.querySelectorAll('.edit-card-item-row').length;
@@ -269,11 +268,11 @@
         editRow.innerHTML = `
             <div class="col-md-5">
                 <label class="form-label small">New Card Title</label>
-                <input type="text" name="card_titles[${currentRowsCount}]" class="form-control form-control-sm" placeholder="e.g., Route map" required>
+                <input type="text" name="new_card_titles[${currentRowsCount}]" class="form-control form-control-sm" placeholder="e.g., Route map" required>
             </div>
             <div class="col-md-5">
                 <label class="form-label small">Choose Image</label>
-                <input type="file" name="card_images[${currentRowsCount}]" class="form-control form-control-sm" accept="image/*" required>
+                <input type="file" name="new_card_images[${currentRowsCount}]" class="form-control form-control-sm" accept="image/*" required>
             </div>
             <div class="col-md-2 d-flex align-items-end">
                 <button type="button" class="btn btn-danger btn-sm w-100" onclick="removeEditRow(this, ${raceId})"><i class="fa fa-trash"></i></button>
@@ -288,8 +287,8 @@
         const editContainer = document.getElementById(`edit-cards-repeater-${raceId}`);
         const rows = editContainer.querySelectorAll('.edit-card-item-row');
         rows.forEach((row, index) => {
-            row.querySelector('input[type="text"]').setAttribute('name', `card_titles[${index}]`);
-            row.querySelector('input[type="file"]').setAttribute('name', `card_images[${index}]`);
+            row.querySelector('input[type="text"]').setAttribute('name', `new_card_titles[${index}]`);
+            row.querySelector('input[type="file"]').setAttribute('name', `new_card_images[${index}]`);
         });
     }
 </script>

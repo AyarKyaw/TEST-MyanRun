@@ -36,7 +36,6 @@ class RaceController extends Controller
         ]);
 
         // 2. Upload and save multiple dynamic info cards
-        // Loop over titles as the baseline index anchor to prevent array mismatch drops
         if ($request->has('card_titles')) {
             foreach ($request->card_titles as $index => $title) {
                 if ($request->hasFile("card_images.$index")) {
@@ -62,13 +61,13 @@ class RaceController extends Controller
     {
         $race = Race::findOrFail($id);
 
-        // Validate incoming data (ignore current race ID for uniqueness check)
+        // Validate incoming data (reads new_card_* keys from the edit form layout)
         $request->validate([
             'race_name' => 'required|string|max:255|unique:races,name,' . $id,
-            'card_titles' => 'nullable|array',
-            'card_titles.*' => 'required_with:card_images.*|string|max:255',
-            'card_images' => 'nullable|array',
-            'card_images.*' => 'required_with:card_titles.*|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'new_card_titles' => 'nullable|array',
+            'new_card_titles.*' => 'required_with:new_card_images.*|string|max:255',
+            'new_card_images' => 'nullable|array',
+            'new_card_images.*' => 'required_with:new_card_titles.*|image|mimes:jpeg,png,jpg,webp|max:2048',
         ], [
             'race_name.unique' => 'A race with this name already exists.',
         ]);
@@ -79,11 +78,10 @@ class RaceController extends Controller
         ]);
 
         // Process and append additional newly uploaded cards
-        // Check for card_titles directly instead of starting with the files array
-        if ($request->has('card_titles')) {
-            foreach ($request->card_titles as $index => $title) {
-                if ($request->hasFile("card_images.$index")) {
-                    $file = $request->file("card_images.$index");
+        if ($request->has('new_card_titles')) {
+            foreach ($request->new_card_titles as $index => $title) {
+                if ($request->hasFile("new_card_images.$index")) {
+                    $file = $request->file("new_card_images.$index");
 
                     $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move(public_path('uploads/races'), $filename);
