@@ -114,33 +114,59 @@
                     <hr class="my-4">
                     
                     <h5 class="font-weight-bold">Race Categories</h5>
-                    <table class="table table-borderless mt-3">
-                        <tr class="border-bottom">
-                            <td><strong>Standard Entry</strong></td>
-                            <td class="text-right text-primary font-weight-bold">
-                                {{ number_format($event->price ?? 15000) }} MMK
-                            </td>
-                        </tr>
-                        {{-- You can add more categories here or via a loop if you have a categories table --}}
-                    </table>
+<table class="table table-borderless mt-3">
+    @forelse($event->ticketTypes ?? [] as $ticketType)
+        <tr class="border-bottom">
+            <td>
+                <strong>{{ $ticketType->name ?? $ticketType->type_name }}</strong>
+                @if(!empty($ticketType->description))
+                    <small class="text-muted d-block">{{ $ticketType->description }}</small>
+                @endif
+            </td>
+            <td class="text-right">
+                <span class="text-primary font-weight-bold d-block">
+                    {{ number_format($ticketType->price ?? $ticketType->national_price) }} MMK
+                </span>
+                
+                @if(!empty($ticketType->foreign_price) && $ticketType->foreign_price > 0)
+                    <small class="text-muted d-block">
+                        Foreigner: 
+                        {{-- Append USD or MMK depending on how you store it --}}
+                        {{ is_numeric($ticketType->foreign_price) ? number_format($ticketType->foreign_price) : $ticketType->foreign_price }} MMK
+                    </small>
+                @endif
+            </td>
+        </tr>
+    @empty
+        <tr>
+            <td colspan="2" class="text-center text-muted py-3">
+                No ticket categories available for this event.
+            </td>
+        </tr>
+    @endforelse
+</table>
                 </div>
 
                 <div class="info-card mb-4">
                     <h5 class="font-weight-bold mb-3">Event Highlight Video</h5>
                     <div class="video-container">
-                        @if($event->video_url)
-                            {{-- This works if you store the YouTube ID like 'K_FvDL_anrs' --}}
-                            <iframe src="https://www.youtube.com/embed/{{ $event->video_url }}" 
+                        @if(!empty($event->video_url))
+                            @php
+                                // Robust regex pattern to extract the YouTube Video ID from any format string/URL
+                                preg_match('%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/\s]{11})%i', $event->video_url, $match);
+                                $youtube_id = $match[1] ?? $event->video_url;
+                            @endphp
+                            <iframe src="https://www.youtube.com/embed/{{ $youtube_id }}" 
                                     title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                         @else
-                            <div class="text-center p-5 bg-light">No video available for this event.</div>
+                            <div class="text-center p-5 bg-light text-muted">No video available for this event.</div>
                         @endif
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="info-card" style="margin-top: 20px;">
+                <!-- <div class="info-card mb-4" style="margin-top: 20px;">
                     <h5 class="font-weight-bold mb-4">Quick Info</h5>
                     <div class="mb-3 d-flex align-items-center">
                         <i class="fas fa-calendar-check race-icon"></i>
@@ -152,19 +178,20 @@
                     </div>
                     <div class="mb-4 d-flex align-items-center">
                         <i class="fas fa-running race-icon"></i>
-                        <span><strong>Type:</strong> {{ $status == 'past' ? 'Road Run' : 'City Run' }}</span>
+                        <span><strong>Type:</strong> {{ $event->type ?? 'Trail Run' }}</span>
                     </div>
+                </div> -->
 
-
-                <div class="info-card mt-4" style="margin-top: 20px;">
+                <!-- {{-- Cleaned up and uncommented your inclusions card layout inside the layout grid --}}
+                <div class="info-card mb-4">
                     <h5 class="font-weight-bold mb-3">What's Included</h5>
-                    <ul class="list-unstyled">
+                    <ul class="list-unstyled mb-0">
                         <li class="mb-2"><i class="fas fa-check text-success mr-2"></i> Quality Event Shirt</li>
                         <li class="mb-2"><i class="fas fa-check text-success mr-2"></i> Personalized Bib</li>
                         <li class="mb-2"><i class="fas fa-check text-success mr-2"></i> Finisher Medal</li>
                         <li><i class="fas fa-check text-success mr-2"></i> Refreshments</li>
                     </ul>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -179,7 +206,7 @@
     @if($status == 'live')
         <a href="{{ $event->reg_link ?? '#' }}" class="btn btn-danger font-weight-bold px-4 py-2 text-uppercase">Join Now</a>
     @elseif($status == 'coming')
-        <span class="badge badge-success">Coming Soon</span>
+        <span class="badge badge-success px-4 py-2 text-uppercase font-weight-bold">Coming Soon</span>
     @else
         <a href="#" class="btn btn-secondary font-weight-bold px-4 py-2 text-uppercase">Results</a>
     @endif
