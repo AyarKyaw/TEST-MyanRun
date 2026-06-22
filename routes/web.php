@@ -22,6 +22,7 @@ use App\Models\SponsorCode;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\Admin\AdminManagementController;
 use App\Http\Controllers\Admin\RaceController;
+use App\Http\Controllers\PhotoOcrController;
 /*
 |--------------------------------------------------------------------------
 | Public Routes
@@ -384,4 +385,18 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::delete('/races/cards/{id}', [RaceController::class, 'destroyCard'])->name('races.card.destroy'); // <-- Added for single card removal
 
     // Your remaining admin routes live safely here...
+});
+
+// 1. Search Submission Endpoint Matrix
+Route::post('/admin/photos/upload-test', [PhotoOcrController::class, 'uploadAndProcess']);
+
+// 2. Compilation Endpoint to process and view your face-api compiler engine layout page
+Route::get('/admin/photos/compile-index', [PhotoOcrController::class, 'compileIndex']);
+
+// 🌟 NEW: Endpoint target used by the browser script to push the completed matrix straight to your disk
+Route::post('/admin/photos/save-compiled-index', [PhotoOcrController::class, 'saveCompiledIndex'])->name('admin.photos.save-index');
+
+// 3. Ultra-clean Blade page injection mapping
+Route::get('/admin/photos/upload-test-page', function () {
+    return view('photos.upload-test');
 });
