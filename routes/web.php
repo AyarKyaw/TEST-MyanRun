@@ -28,7 +28,27 @@ use App\Http\Controllers\PhotoOcrController;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () { return view('index'); });
+use Illuminate\Support\Facades\DB;
+
+Route::get('/', function () {
+    // 1. Fetch the single row from site_settings where key is 'home-banner'
+    $bannersSetting = DB::table('site_settings')->where('key', 'home-banner')->first();
+
+    // 2. Decode the JSON string into an array, or default to an empty array if not found
+    $banners = $bannersSetting ? json_decode($bannersSetting->value, true) : [];
+    if (!is_array($banners)) {
+        $banners = [];
+    }
+
+    // 3. Fix: Use the full namespace path to ensure it hits your database model
+    $activeEvents = \App\Models\Event::where('is_active', '!=', 0)
+                        ->orderBy('id', 'desc')
+                        ->take(3)
+                        ->get();
+
+    // 4. Pass both variables down to your frontend index view matrix safely
+    return view('index', compact('banners', 'activeEvents'));
+});
 Route::get('/about', function () { return view('about'); });
 Route::get('/contact', function () { return view('contact'); });
 Route::get('/race', function () { return view('race'); });
@@ -262,46 +282,57 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
 
     Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('admin.settings');
     Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('admin.settings.update');
+
+    Route::get('/settings/home', [App\Http\Controllers\Admin\SettingsController::class, 'homeindex'])->name('admin.settings.home');
+    // 🎯 ADD THIS LINE BELOW:
+    Route::post('/settings/home', [App\Http\Controllers\Admin\SettingsController::class, 'homeupdate'])->name('admin.home-settings.update');
     
     Route::get('/ticket-management', [TicketController::class, 'index'])->name('dashboard.tickets.index');
     Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');
     Route::get('/events/{status}', [EventController::class, 'index'])
-          ->where('status', 'now|past|coming')
-          ->name('events.index');
+    ->where('status', 'now|past|coming')
+    ->name('events.index');
 
-          
-          Route::resource('events', EventController::class)->except(['index', 'show']);
-          Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
-          
-          // Dinner Management
-          Route::get('/dinner-management/{timeframe}', [DinnerController::class, 'manageDinners'])->name('admin.dinner.manage');
-          Route::get('/dinner/create', [DinnerController::class, 'create'])->name('admin.dinner.create');
-          Route::post('/dinner/store', [DinnerController::class, 'store'])->name('admin.dinner.store');
-          Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
-          Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
-          Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
-          Route::post('/dinner/{id}/toggle-scan', [App\Http\Controllers\DinnerController::class, 'toggleScanning'])
-          ->name('admin.dinner.toggle-scan');
-          
-          // Dinner Tickets (Master/Detail)
-          Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
-          Route::get('/dinner-tickets/{id}', [DinnerController::class, 'showDinnerTickets'])->name('admin.dinner.tickets.show');
-          Route::post('/dinner-tickets/{id}/approve', [DinnerController::class, 'adminApprove'])->name('admin.dinner.approve');
-          Route::post('/dinner-tickets/reject/{id}', [DinnerController::class, 'adminReject'])->name('admin.dinner.reject');
-          
-          Route::get('/sponsors/{status}', [SponsorController::class, 'index'])
-          ->where('status', 'now|past') // Only allow these two words
-          ->name('admin.sponsor.index');
-          Route::get('/sponsors/create', [SponsorController::class, 'create'])->name('admin.sponsor.create');
-          Route::post('/sponsors/store', [SponsorController::class, 'store'])->name('admin.sponsor.store');
-          Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
-          Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
-          Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
-          Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
-          Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
-          Route::post('/tickets/{id}/mark-printed', [TicketController::class, 'markPrinted'])->name('tickets.markPrinted');
-          Route::post('/tickets/{id}/reprint', [TicketController::class, 'reprint']);
-          }); 
+    
+    Route::resource('events', EventController::class)->except(['index', 'show']);
+    Route::delete('/events/{id}', [EventController::class, 'destroy'])->name('events.destroy');
+    
+    // Dinner Management
+    Route::get('/dinner-management/{timeframe}', [DinnerController::class, 'manageDinners'])->name('admin.dinner.manage');
+    Route::get('/dinner/create', [DinnerController::class, 'create'])->name('admin.dinner.create');
+    Route::post('/dinner/store', [DinnerController::class, 'store'])->name('admin.dinner.store');
+    Route::get('/dinner/{id}/edit', [DinnerController::class, 'edit'])->name('admin.dinner.edit');
+    Route::put('/dinner/update/{id}', [DinnerController::class, 'update'])->name('admin.dinner.update');
+    Route::delete('/dinner/{id}', [DinnerController::class, 'destroy'])->name('admin.dinner.destroy');
+    Route::post('/dinner/{id}/toggle-scan', [App\Http\Controllers\DinnerController::class, 'toggleScanning'])
+    ->name('admin.dinner.toggle-scan');
+    
+    // Dinner Tickets (Master/Detail)
+    Route::get('/dinner-tickets', [DinnerController::class, 'dinnerTicketsIndex'])->name('admin.dinner.tickets.index');
+    Route::get('/dinner-tickets/{id}', [DinnerController::class, 'showDinnerTickets'])->name('admin.dinner.tickets.show');
+    Route::post('/dinner-tickets/{id}/approve', [DinnerController::class, 'adminApprove'])->name('admin.dinner.approve');
+    Route::post('/dinner-tickets/reject/{id}', [DinnerController::class, 'adminReject'])->name('admin.dinner.reject');
+    
+    Route::get('/sponsors/{status}', [SponsorController::class, 'index'])
+    ->where('status', 'now|past') // Only allow these two words
+    ->name('admin.sponsor.index');
+    Route::get('/sponsors/create', [SponsorController::class, 'create'])->name('admin.sponsor.create');
+    Route::post('/sponsors/store', [SponsorController::class, 'store'])->name('admin.sponsor.store');
+    Route::get('/sponsors/details/{id}', [SponsorController::class, 'show'])->name('admin.sponsor.show');
+    Route::post('/sponsors/toggle/{id}', [SponsorController::class, 'toggleStatus'])->name('admin.sponsor.toggle');
+    Route::get('/sponsor/{id}/batch-print', [SponsorController::class, 'batchPrint'])->name('admin.sponsor.batchPrint');
+    Route::post('/tickets/approve/{id}', [TicketController::class, 'approve'])->name('tickets.approve');
+    Route::post('/tickets/reject/{id}', [TicketController::class, 'reject'])->name('tickets.reject');
+    Route::post('/tickets/{id}/mark-printed', [TicketController::class, 'markPrinted'])->name('tickets.markPrinted');
+    Route::post('/tickets/{id}/reprint', [TicketController::class, 'reprint']);
+            // Admin Management CRUD Endpoints
+    Route::get('/races', [RaceController::class, 'index'])->name('admin.races.index');
+    Route::post('/races', [RaceController::class, 'store'])->name('admin.races.store');
+    Route::put('/races/{id}', [RaceController::class, 'update'])->name('admin.races.update'); // <-- Added for editing
+    Route::patch('/races/{id}/toggle', [RaceController::class, 'toggleStatus'])->name('admin.races.toggle');
+    Route::delete('/races/{id}', [RaceController::class, 'destroy'])->name('admin.races.destroy');
+    Route::delete('/races/cards/{id}', [RaceController::class, 'destroyCard'])->name('admin.races.card.destroy');
+}); 
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth:admin']], function () {
     
@@ -376,13 +407,7 @@ Route::get('/race', [RaceController::class, 'showPublicRaces'])->name('public.ra
 
 Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
     
-    // Admin Management CRUD Endpoints
-    Route::get('/races', [RaceController::class, 'index'])->name('races.index');
-    Route::post('/races', [RaceController::class, 'store'])->name('races.store');
-    Route::put('/races/{id}', [RaceController::class, 'update'])->name('races.update'); // <-- Added for editing
-    Route::patch('/races/{id}/toggle', [RaceController::class, 'toggleStatus'])->name('races.toggle');
-    Route::delete('/races/{id}', [RaceController::class, 'destroy'])->name('races.destroy');
-    Route::delete('/races/cards/{id}', [RaceController::class, 'destroyCard'])->name('races.card.destroy'); // <-- Added for single card removal
+ // <-- Added for single card removal
 
     // Your remaining admin routes live safely here...
 });

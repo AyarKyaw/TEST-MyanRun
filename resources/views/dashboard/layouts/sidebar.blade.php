@@ -77,7 +77,6 @@
                     </ul>
                 </li>
 
-                <!-- NEW: Manage Races Section -->
                 <li>
                     <a class="ai-icon" href="{{ route('admin.races.index') }}" aria-expanded="false">
                         <i class="flaticon-381-layer"></i>
@@ -108,12 +107,16 @@
                     </ul>
                 </li>
 
-                {{-- Settings option safely enclosed inside the Super Admin check block --}}
+                {{-- CHANGED: Settings option converted into a standard dropdown structure --}}
                 <li>
-                    <a class="ai-icon" href="{{ route('admin.settings') }}" aria-expanded="false">
+                    <a class="has-arrow ai-icon" href="javascript:void(0);" aria-expanded="false">
                         <i class="fa fa-cog"></i>
                         <span class="nav-text">Settings</span>
                     </a>
+                    <ul aria-expanded="false">
+                        <li><a href="{{ route('admin.settings') }}">Global Settings</a></li>
+                        <li><a href="{{ route('admin.settings.home') }}">Home Settings</a></li>
+                    </ul>
                 </li>
                 @endif
             @endif {{-- END ADMIN GUARD --}}
