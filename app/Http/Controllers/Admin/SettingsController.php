@@ -46,6 +46,53 @@ class SettingsController extends Controller
         return view('dashboard.settings.home', compact('global_info', 'banners', 'tickets', 'activeEvents'));
     }
 
+    public function about()
+    {
+        $settings = SiteSetting::pluck('value', 'key')->all();
+        
+        // Safely decode about-metrics schema object array if it exists in the database
+        $aboutSettings = isset($settings['about-metrics']) ? json_decode($settings['about-metrics'], true) : [];
+        if (!is_array($aboutSettings)) {
+            $aboutSettings = [];
+        }
+
+        return view('dashboard.settings.about', compact('aboutSettings'));
+    }
+
+    /**
+     * Update fixed About Us Core Metrics (Awards, Followers, Events, Miles)
+     */
+    public function aboutupdate(Request $request)
+    {
+        // 1. Strict structural validation mapping for your fixed parameters
+        $validated = $request->validate([
+            'metrics' => 'required|array|size:4',
+            
+            'metrics.awards.value'    => 'required|string|max:50',
+            'metrics.awards.title'    => 'required|string|max:255',
+            
+            'metrics.followers.value' => 'required|string|max:50',
+            'metrics.followers.title' => 'required|string|max:255',
+            
+            'metrics.events.value'    => 'required|string|max:50',
+            'metrics.events.title'    => 'required|string|max:255',
+            
+            'metrics.miles.value'     => 'required|string|max:50',
+            'metrics.miles.title'     => 'required|string|max:255',
+        ]);
+
+        // 2. Persist metrics configurations payload down to database using target schema key
+        SiteSetting::updateOrCreate(
+            ['key' => 'about-metrics'],
+            ['value' => json_encode($validated['metrics'])]
+        );
+
+        // 3. Clear system global configuration cache flags
+        Cache::forget('site_settings');
+
+        return redirect()->back()->with('success', 'About Us achievement metric parameters synchronized successfully!');
+    }
+
     public function update(Request $request)
     {
         // 1. Validation

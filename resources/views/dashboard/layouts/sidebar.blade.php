@@ -116,6 +116,7 @@
                     <ul aria-expanded="false">
                         <li><a href="{{ route('admin.settings') }}">Global Settings</a></li>
                         <li><a href="{{ route('admin.settings.home') }}">Home Settings</a></li>
+                        <li><a href="{{ route('admin.settings.about') }}">About Settings</a></li>
                     </ul>
                 </li>
                 @endif

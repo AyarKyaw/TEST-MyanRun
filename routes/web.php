@@ -29,6 +29,7 @@ use App\Http\Controllers\PhotoOcrController;
 |--------------------------------------------------------------------------
 */
 use Illuminate\Support\Facades\DB;
+use App\Models\SiteSetting;
 
 Route::get('/', function () {
     // 1. Fetch settings from the site_settings table
@@ -59,7 +60,19 @@ Route::get('/', function () {
 
 
 
-Route::get('/about', function () { return view('about'); });
+Route::get('/about', function () {
+    // 1. Fetch all settings as key => value pairs
+    $settings = SiteSetting::pluck('value', 'key')->all();
+    
+    // 2. Decode the metrics JSON string cleanly, default to an empty array if not set
+    $aboutSettings = isset($settings['about-metrics']) ? json_decode($settings['about-metrics'], true) : [];
+    if (!is_array($aboutSettings)) {
+        $aboutSettings = [];
+    }
+
+    // 3. Pass the metrics data array down to your public front-end blade view
+    return view('about', compact('aboutSettings'));
+});
 Route::get('/contact', function () { return view('contact'); });
 Route::get('/race', function () { return view('race'); });
 Route::get('/term', function () { return view('term'); });
@@ -296,6 +309,8 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::get('/settings/home', [App\Http\Controllers\Admin\SettingsController::class, 'homeindex'])->name('admin.settings.home');
     // 🎯 ADD THIS LINE BELOW:
     Route::post('/settings/home', [App\Http\Controllers\Admin\SettingsController::class, 'homeupdate'])->name('admin.home-settings.update');
+    Route::get('/settings/about', [App\Http\Controllers\Admin\SettingsController::class, 'about'])->name('admin.settings.about');
+    Route::post('/settings/about', [App\Http\Controllers\Admin\SettingsController::class, 'aboutupdate'])->name('admin.settings.about.update');
     
     Route::get('/ticket-management', [TicketController::class, 'index'])->name('dashboard.tickets.index');
     Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');
