@@ -31,24 +31,34 @@ use App\Http\Controllers\PhotoOcrController;
 use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
-    // 1. Fetch the single row from site_settings where key is 'home-banner'
+    // 1. Fetch settings from the site_settings table
     $bannersSetting = DB::table('site_settings')->where('key', 'home-banner')->first();
+    $ticketsSetting = DB::table('site_settings')->where('key', 'home-tickets')->first();
 
-    // 2. Decode the JSON string into an array, or default to an empty array if not found
+    // 2. Decode the JSON arrays safely (with fallbacks)
     $banners = $bannersSetting ? json_decode($bannersSetting->value, true) : [];
     if (!is_array($banners)) {
         $banners = [];
     }
 
-    // 3. Fix: Use the full namespace path to ensure it hits your database model
+    // ADDED: Process your dynamic ticketing configuration records
+    $tickets = $ticketsSetting ? json_decode($ticketsSetting->value, true) : [];
+    if (!is_array($tickets)) {
+        $tickets = [];
+    }
+
+    // 3. Keep your active events configuration mapping metrics
     $activeEvents = \App\Models\Event::where('is_active', '!=', 0)
                         ->orderBy('id', 'desc')
                         ->take(3)
                         ->get();
 
-    // 4. Pass both variables down to your frontend index view matrix safely
-    return view('index', compact('banners', 'activeEvents'));
+    // 4. Pass everything ('banners', 'tickets', 'activeEvents') down to your 'index' layout template
+    return view('index', compact('banners', 'tickets', 'activeEvents'));
 });
+
+
+
 Route::get('/about', function () { return view('about'); });
 Route::get('/contact', function () { return view('contact'); });
 Route::get('/race', function () { return view('race'); });

@@ -5,9 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\SiteSetting;
-use App\Models\Event; // Import your Event model here
+use App\Models\Event;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
@@ -29,16 +28,22 @@ class SettingsController extends Controller
             $banners = [];
         }
 
+        // NEW: Safely decode home-tickets array if it exists as a string in the DB
+        $tickets = isset($settings['home-tickets']) ? json_decode($settings['home-tickets'], true) : [];
+        if (!is_array($tickets)) {
+            $tickets = [];
+        }
+
         // Fetch non-past events so the template sidebar loop functions correctly
-        $activeEvents = Event::where('is_active', '!=', 0) // Fetches non-past items
+        $activeEvents = Event::where('is_active', '!=', 0)
                             ->orderBy('id', 'desc')
-                            ->take(2) // Grabs the top 2 events
+                            ->take(2)
                             ->get();
 
         $global_info = (object) $settings->all();
         
-        // Pass activeEvents down to the blade view matrix
-        return view('dashboard.settings.home', compact('global_info', 'banners', 'activeEvents'));
+        // Pass activeEvents and tickets down to the blade view matrix
+        return view('dashboard.settings.home', compact('global_info', 'banners', 'tickets', 'activeEvents'));
     }
 
     public function update(Request $request)
@@ -93,92 +98,160 @@ class SettingsController extends Controller
     }
 
     /**
-     * Update Home Settings & Banners
-     */
-    /**
-     * Update Home Settings & Banners
+     * Update Home Settings, Banners & Tickets
      */
     public function homeupdate(Request $request)
     {
-        // 1. Validate incoming arrays and files
+        // 1. Combined Validation for both Banners and Tickets structural payloads
         $request->validate([
             'banner_images'             => 'nullable|array',
             'banner_images.*'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
             'existing_banner_images'    => 'nullable|array',
             'existing_banner_images.*'  => 'nullable|string',
+
+            // Ticket Fields Validation Matrix
+            'ticket_images'             => 'nullable|array',
+            'ticket_images.*'           => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10240',
+            'existing_ticket_images'    => 'nullable|array',
+            'existing_ticket_images.*'  => 'nullable|string',
+            'ticket_titles'             => 'nullable|array',
+            'ticket_titles.*'           => 'required_with:ticket_titles|string|max:255',
+            'ticket_locations'          => 'nullable|array',
+            'ticket_locations.*'        => 'required_with:ticket_locations|string|max:255',
+            'ticket_dates'              => 'nullable|array',
+            'ticket_dates.*'            => 'required_with:ticket_dates|date',
+            'ticket_times'              => 'nullable|array',
+            'ticket_times.*'            => 'required_with:ticket_times|string',
+            'ticket_prices'             => 'nullable|array',
+            'ticket_prices.*'           => 'required_with:ticket_prices|string|max:100',
         ]);
 
-        // 2. Fetch current record from SiteSetting to manage server storage cleanup later
-        $setting = SiteSetting::where('key', 'home-banner')->first();
-        $currentBanners = $setting ? json_decode($setting->value, true) : [];
-        if (!is_array($currentBanners)) {
-            $currentBanners = [];
-        }
+        // ==========================================
+        // PROCESS BLOCK A: HERO BANNER REPEATER
+        // ==========================================
+        $bannerSetting = SiteSetting::where('key', 'home-banner')->first();
+        $currentBanners = $bannerSetting ? json_decode($bannerSetting->value, true) : [];
+        if (!is_array($currentBanners)) { $currentBanners = []; }
 
         $finalBanners = [];
-        
-        // Grab files and existing text paths
-        $uploadedFiles = $request->file('banner_images', []);
+        $uploadedBannerFiles = $request->file('banner_images', []);
         $existingBannersInput = $request->input('existing_banner_images', []);
+        $maxBannerIndex = max(count($existingBannersInput), count($uploadedBannerFiles));
 
-        // Find the maximum index between existing paths and new file uploads
-        $maxIndex = max(count($existingBannersInput), count($uploadedFiles));
-
-        // 3. Process all indexes sequentially up to the absolute highest index submitted
-        for ($i = 0; $i < $maxIndex; $i++) {
+        for ($i = 0; $i < $maxBannerIndex; $i++) {
             $path = $existingBannersInput[$i] ?? null;
 
-            // Check if a new file upload exists for this specific index
             if ($request->hasFile("banner_images.{$i}")) {
                 $file = $request->file("banner_images.{$i}");
                 if ($file->isValid()) {
-                    // Generate clean file name
-                    $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                    
-                    // Move file straight to public/images/home_banner directory
+                    $filename = time() . '_banner_' . uniqid() . '.' . $file->getClientOriginalExtension();
                     $file->move(public_path('images/home_banner'), $filename);
                     $newPath = 'images/home_banner/' . $filename;
 
-                    // Clean up the old file replaced at this position if it exists
                     if (!empty($path)) {
                         $absoluteOldPath = public_path($path);
-                        if (file_exists($absoluteOldPath)) {
-                            @unlink($absoluteOldPath);
-                        }
+                        if (file_exists($absoluteOldPath)) { @unlink($absoluteOldPath); }
                     }
-
                     $path = $newPath;
                 }
             }
 
-            // Save row into final array if a path is present
             if (!empty($path)) {
-                $finalBanners[] = [
-                    'image_path' => $path
-                ];
+                $finalBanners[] = ['image_path' => $path];
             }
         }
 
-        // 4. Garbage Collection: Delete old files that were completely removed from the UI matrix
-        $savedPaths = array_column($finalBanners, 'image_path');
+        // Garbage collection for removed banners
+        $savedBannerPaths = array_column($finalBanners, 'image_path');
         foreach ($currentBanners as $oldBanner) {
             $oldPath = is_array($oldBanner) ? ($oldBanner['image_path'] ?? '') : '';
-            if (!empty($oldPath) && !in_array($oldPath, $savedPaths)) {
+            if (!empty($oldPath) && !in_array($oldPath, $savedBannerPaths)) {
                 $absolutePath = public_path($oldPath);
-                if (file_exists($absolutePath)) {
-                    @unlink($absolutePath);
-                }
+                if (file_exists($absolutePath)) { @unlink($absolutePath); }
             }
         }
 
-        // 5. Commit structured updates back to Database row entry
         SiteSetting::updateOrCreate(
             ['key' => 'home-banner'],
             ['value' => json_encode(array_values($finalBanners))]
         );
 
+
+        // ==========================================
+        // PROCESS BLOCK B: EVENT TICKETS REPEATER
+        // ==========================================
+        $ticketSetting = SiteSetting::where('key', 'home-tickets')->first();
+        $currentTickets = $ticketSetting ? json_decode($ticketSetting->value, true) : [];
+        if (!is_array($currentTickets)) { $currentTickets = []; }
+
+        $finalTickets = [];
+        $uploadedTicketFiles = $request->file('ticket_images', []);
+        $existingTicketsInput = $request->input('existing_ticket_images', []);
+        
+        $titles    = $request->input('ticket_titles', []);
+        $locations = $request->input('ticket_locations', []);
+        $dates     = $request->input('ticket_dates', []);
+        $times     = $request->input('ticket_times', []);
+        $prices    = $request->input('ticket_prices', []);
+
+        // The exact total submission rows is evaluated dynamically by counting titles sent from UI layout
+        $maxTicketIndex = max(count($existingTicketsInput), count($uploadedTicketFiles), count($titles));
+
+        for ($i = 0; $i < $maxTicketIndex; $i++) {
+            // If the title row structural map component layout was intentionally omitted/deleted, bypass saving it
+            if (!isset($titles[$i])) {
+                continue;
+            }
+
+            $imgPath = $existingTicketsInput[$i] ?? null;
+
+            // Handle unique image upload mapping mechanics for each row node index
+            if ($request->hasFile("ticket_images.{$i}")) {
+                $file = $request->file("ticket_images.{$i}");
+                if ($file->isValid()) {
+                    $filename = time() . '_ticket_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('images/tickets'), $filename);
+                    $newImgPath = 'images/tickets/' . $filename;
+
+                    // Erase obsolete configuration media asset file cleanly from public directory
+                    if (!empty($imgPath)) {
+                        $absoluteOldTicketPath = public_path($imgPath);
+                        if (file_exists($absoluteOldTicketPath)) { @unlink($absoluteOldTicketPath); }
+                    }
+                    $imgPath = $newImgPath;
+                }
+            }
+
+            // Bind structured context to target storage matrix
+            $finalTickets[] = [
+                'image_path' => $imgPath ?? '',
+                'title'      => $titles[$i] ?? '',
+                'location'   => $locations[$i] ?? '',
+                'date'       => $dates[$i] ?? '',
+                'time'       => $times[$i] ?? '',
+                'price'      => $prices[$i] ?? '',
+            ];
+        }
+
+        // Garbage collection for completely deleted ticket configurations
+        $savedTicketPaths = array_filter(array_column($finalTickets, 'image_path'));
+        foreach ($currentTickets as $oldTicket) {
+            $oldTicketPath = is_array($oldTicket) ? ($oldTicket['image_path'] ?? '') : '';
+            if (!empty($oldTicketPath) && !in_array($oldTicketPath, $savedTicketPaths)) {
+                $absoluteTicketPath = public_path($oldTicketPath);
+                if (file_exists($absoluteTicketPath)) { @unlink($absoluteTicketPath); }
+            }
+        }
+
+        // Save Ticket parameters serialized via json configuration schema
+        SiteSetting::updateOrCreate(
+            ['key' => 'home-tickets'],
+            ['value' => json_encode(array_values($finalTickets))]
+        );
+
+        // Clear dynamic system cache dependencies
         Cache::forget('site_settings');
 
-        return redirect()->back()->with('success', 'Home banner slide system modified successfully!');
+        return redirect()->back()->with('success', 'Homepage layout configurations and tickets system modified successfully!');
     }
 }
