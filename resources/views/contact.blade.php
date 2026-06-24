@@ -58,10 +58,15 @@
     <!-- PHONE -->
     <div class="contact">
         <span class="label">Phone:</span>
+        @php
+            // Decode the JSON phone field. Fallback to defaults if empty.
+            $phones = json_decode($global_info->phone_numbers, true) ?: ['09 540 5026', '09 513 5324'];
+        @endphp
         <div class="address phone-row">
-            <a href="tel:095405026" class="phone-link">09 540 5026</a>
+            @foreach($phones as $phone)
+            <a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}" class="phone-link">{{ $phone }}</a>
             <span class="separator">|</span>
-            <a href="tel:095135324" class="phone-link">09 513 5324</a>
+            @endforeach
         </div>
     </div>
 
@@ -69,8 +74,8 @@
     <div class="contact">
         <span class="label">Email:</span>
         <div class="address">
-            <a href="mailto:info@myanrun.com" class="contact-link">
-                info@myanrun.com
+            <a href="mailto:{{ $global_info->email ?? 'info@myanrun.com' }}" class="contact-link">
+                {{ $global_info->email ?? 'info@myanrun.com' }}
             </a>
         </div>
     </div>
@@ -79,30 +84,25 @@
     <div class="contact">
         <span class="label">Location:</span>
         <div class="address">
-            No.68, Htan Ta Pin Street, Aung Myay Thar Si Housing,<br>
-            No(1) Quarter ,Kamaryut, Yangon 11041
+            {{ $global_info->street_address ?? 'No.68, Htan Ta Pin Street, Aung Myay Thar Si Housing, No(1) Quarter, Kamaryut, Yangon 11041' }}
         </div>
     </div>
 
 </div>
 
-                        <div class="social-contact">
-                           <ul class="social-media wow fadeInUp animated">
+    <div class="social-contact">
+        <ul class="social-media wow fadeInUp animated">
+    @php
+        // Decode the JSON social links from site settings
+        $socials = json_decode($global_info->social_links ?? '[]', true);
+    @endphp
+    @foreach($socials as $social)
     <li>
-        <a href="http://www.youtube.com/@RUNderfulMyanmar-j9x" target="_blank" rel="noopener noreferrer">
-            <i class="icon-youtube"></i>
+        <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer">
+            <i class="icon-{{ strtolower($social['platform']) }}"></i>
         </a>
     </li>
-    <li>
-        <a href="https://www.facebook.com/share/g/1G6ZtYxVfj/" target="_blank" rel="noopener noreferrer">
-            <i class="icon-facebook"></i>
-        </a>
-    </li>
-    <li>
-        <a href="https://www.facebook.com/share/1CFptZmwGM/" target="_blank" rel="noopener noreferrer">
-            <i class="icon-facebook"></i>
-        </a>
-    </li>
+    @endforeach
 </ul>
                         </div>
                     </div>

@@ -248,17 +248,19 @@ class EventController extends Controller
         $event = \App\Models\Event::findOrFail($id);
 
         $request->validate([
-            'name'             => 'required|string|max:255',
-            'date'             => 'nullable|date',
-            'is_active'        => 'required',
-            'company'          => 'nullable|string',
-            'location'         => 'nullable|string',
-            'video_url'        => 'nullable|string',
-            'description'      => 'nullable|string',
-            'early_bird_limit' => 'nullable|integer|min:0', 
-            'image'            => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tickets'          => 'nullable|array',
-            'admin_ids'        => 'nullable|array' // Added validation for admins
+            'name'                 => 'required|string|max:255',
+            'date'                 => 'nullable|date',
+            'is_active'            => 'required',
+            'company'              => 'nullable|string',
+            'location'             => 'nullable|string',
+            'video_url'            => 'nullable|string',
+            'description'          => 'nullable|string',
+            'early_bird_limit'     => 'nullable|integer|min:0', 
+            'image'                => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'tickets'              => 'nullable|array',
+            'admin_ids'            => 'nullable|array',
+            'agent_ids'            => 'nullable|array',
+            'consent_blade_file'   => 'nullable|file|max:2048', // Added validation rule
         ]);
 
         // Update Event Details
@@ -279,6 +281,37 @@ class EventController extends Controller
 
         if ($request->hasFile('image')) {
             $event->image_path = $request->file('image')->store('events', 'public');
+        }
+
+        // --- Process Dynamic Consent Blade Template Upload ---
+        if ($request->hasFile('consent_blade_file')) {
+            $file = $request->file('consent_blade_file');
+            
+            // Define the target view directory safely path matrix
+            $destinationPath = resource_path('views/consent/events');
+            
+            // Ensure directory exists structural fallback
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            // Clean up previous template file if it exists to maintain file health
+            if ($event->consent_view_path) {
+                $oldFilePath = $destinationPath . '/' . $event->consent_view_path . '.blade.php';
+                if (file_exists($oldFilePath)) {
+                    @unlink($oldFilePath);
+                }
+            }
+
+            // Generate an individual reference target signature name
+            $viewReferenceName = 'consent_event_' . $event->id . '_' . time();
+            $fileName = $viewReferenceName . '.blade.php';
+            
+            // Move file physical mapping target
+            $file->move($destinationPath, $fileName);
+            
+            // Save string view path destination key to model schema pointer column
+            $event->consent_view_path = $viewReferenceName;
         }
 
         $event->save();
@@ -335,7 +368,7 @@ class EventController extends Controller
         $statusKey = $statusMap[$request->is_active] ?? 'now';
 
         return redirect()->route('events.index', $statusKey)
-                         ->with('success', 'Event and Ticket Types updated successfully!');
+                        ->with('success', 'Event and Ticket Types updated successfully!');
     }
 
     /**

@@ -386,20 +386,27 @@ class AthleteController extends Controller
             return redirect()->route('athlete.register')->with('error', 'Session expired. Please fill the form again.');
         }
 
-        // Get the event name from the session or via the event_id
-        // If you don't have 'event_name' in session, we fetch it from the DB using event_id
+        // Fetch the event using the event_id stored in the session
         $eventId = session('event_id');
         $event = \App\Models\Event::find($eventId);
-        $eventName = $event ? $event->name : (session('event_name') ?? 'Official Race');
 
-        // --- Event Specific Consent Routing ---
+        // 1. Check if the event exists and has a dynamic consent blade path configured
+        if ($event && !empty($event->consent_view_path)) {
+            $viewPath = 'consent.events.' . $event->consent_view_path;
+
+            // Verify that the uploaded physical file actually exists before trying to render it
+            if (view()->exists($viewPath)) {
+                return view($viewPath, compact('data', 'event'));
+            }
+        }
+
+        // 2. Fallback hardcoded handling for older events if needed
+        $eventName = $event ? $event->name : (session('event_name') ?? 'Official Race');
         if ($eventName === 'Alaingni Monsoon Duathlon 2026') {
-            // Returns resources/views/ticket/consent_alaingni.blade.php
             return view('ticket.consent_alaingni', compact('data', 'event'));
         }
 
-        // Default consent page
-        // Returns resources/views/ticket/consent.blade.php
+        // 3. Default fallback consent page (resources/views/ticket/consent.blade.php)
         return view('ticket.consent', compact('data', 'event'));
     }
 }

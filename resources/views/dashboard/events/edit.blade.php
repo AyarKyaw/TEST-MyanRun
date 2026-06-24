@@ -226,6 +226,38 @@
                     </div>
                 </div>
             </div>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4 class="card-title">Event Waiver & Consent Configuration</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Upload a custom Laravel Blade template file (e.g., <code>event_terms.blade.php</code>) containing the registration terms or HTML formatting for this specific event.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label text-black fw-bold">Upload Consent Blade File (.blade.php)</label>
+                        <input type="file" name="consent_blade_file" class="form-control" accept=".php">
+                        <small class="text-muted d-block mt-1">
+                            Must be a valid Laravel template file ending with <code>.blade.php</code> or <code>.php</code>.
+                        </small>
+                    </div>
+
+                    @if(!empty($event->consent_view_path))
+                        <div class="mt-2 alert alert-light border py-2 small d-flex align-items-center justify-content-between">
+                            <span>
+                                <i class="fa fa-code text-primary merchandising-icon me-2"></i> Active Blade File: 
+                                <strong class="text-dark">{{ basename($event->consent_view_path) }}.blade.php</strong>
+                            </span>
+                            @if(view()->exists('consent.events.' . $event->consent_view_path))
+                                <span class="badge bg-success">✓ Template Loaded</span>
+                            @else
+                                <span class="badge bg-danger">⚠ File Missing on Server</span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            </div>
         </form>
     </div>
 </div>
