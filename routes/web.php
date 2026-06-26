@@ -79,7 +79,15 @@ Route::get('/term', function () { return view('term'); });
 Route::get('/pp', function () { return view('pp'); });
 Route::get('/result', function () { return view('result'); });
 Route::get('/forgot_password', function () { return view('password.forgot'); });
-Route::get('/race_guide', function () { return view('race_guide'); });
+Route::get('/race_guide', function () {
+    // Look up the database record
+    $setting = SiteSetting::where('key', 'race_guide')->first();
+    
+    // Decode the JSON string paths array or fall back to empty if it doesn't exist
+    $raceGuides = $setting && $setting->value ? json_decode($setting->value, true) : [];
+
+    return view('race_guide', compact('raceGuides'));
+});
 Route::get('/blog', [StoryController::class, 'index'])->name('blog.index');
 Route::get('/event', [EventController::class, 'showPublicEvents'])->name('public.events');
 Route::get('/event/{id}', [EventController::class, 'show'])->name('events.show');
@@ -311,6 +319,8 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
     Route::post('/settings/home', [App\Http\Controllers\Admin\SettingsController::class, 'homeupdate'])->name('admin.home-settings.update');
     Route::get('/settings/about', [App\Http\Controllers\Admin\SettingsController::class, 'about'])->name('admin.settings.about');
     Route::post('/settings/about', [App\Http\Controllers\Admin\SettingsController::class, 'aboutupdate'])->name('admin.settings.about.update');
+    Route::get('/admin/settings/stories', [App\Http\Controllers\Admin\SettingsController::class, 'storiesIndex'])->name('admin.settings.stories');
+    Route::post('/admin/settings/stories/update', [SettingsController::class, 'storiesUpdate'])->name('admin.settings.stories.update');
     
     Route::get('/ticket-management', [TicketController::class, 'index'])->name('dashboard.tickets.index');
     Route::post('/update-ticket-info', [TicketController::class, 'updateId'])->name('tickets.updateId');
@@ -353,10 +363,15 @@ Route::middleware(['admin'])->prefix('dashboard')->group(function () {
             // Admin Management CRUD Endpoints
     Route::get('/races', [RaceController::class, 'index'])->name('admin.races.index');
     Route::post('/races', [RaceController::class, 'store'])->name('admin.races.store');
-    Route::put('/races/{id}', [RaceController::class, 'update'])->name('admin.races.update'); // <-- Added for editing
+    Route::put('/races/{id}', [RaceController::class, 'update'])->name('admin.races.update');
     Route::patch('/races/{id}/toggle', [RaceController::class, 'toggleStatus'])->name('admin.races.toggle');
     Route::delete('/races/{id}', [RaceController::class, 'destroy'])->name('admin.races.destroy');
     Route::delete('/races/cards/{id}', [RaceController::class, 'destroyCard'])->name('admin.races.card.destroy');
+
+    // Standalone Race Guide (Pointing to unique method names inside RaceController)
+    // Standalone Race Guide (Multi-page management)
+    Route::post('/race-guide', [RaceController::class, 'updateGuide'])->name('admin.race-guide.update');
+    Route::delete('/race-guide/page', [RaceController::class, 'destroyGuidePage'])->name('admin.race-guide.page.destroy');
 }); 
 
 Route::group(['prefix' => 'dashboard', 'middleware' => ['auth:admin']], function () {

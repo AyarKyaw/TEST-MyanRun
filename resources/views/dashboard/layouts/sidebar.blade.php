@@ -117,6 +117,7 @@
                         <li><a href="{{ route('admin.settings') }}">Global Settings</a></li>
                         <li><a href="{{ route('admin.settings.home') }}">Home Settings</a></li>
                         <li><a href="{{ route('admin.settings.about') }}">About Settings</a></li>
+                        <li><a href="{{ route('admin.settings.stories') }}">Stories Settings</a></li>
                     </ul>
                 </li>
                 @endif

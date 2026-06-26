@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Story;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class StoryController extends Controller
 {
@@ -69,9 +73,35 @@ class StoryController extends Controller
     /**
      * Optional: Display all stories in the Content List
      */
-    public function index()
+    public function index(Request $request)
     {
-        $stories = Story::latest()->paginate(10); 
+        $settings = Cache::remember('site_settings', 3600, function() {
+            return DB::table('site_settings')->pluck('value', 'key')->all();
+        });
+
+        // 2. Decode the JSON string array into standard objects for the blade loops ($story->property)
+        $rawStories = isset($settings['about-stories']) ? json_decode($settings['about-stories']) : [];
+        if (!is_array($rawStories)) {
+            $rawStories = [];
+        }
+
+        // 3. Reverse them so the newest added items appear first
+        $storiesCollection = collect(array_reverse($rawStories));
+
+        // 4. Manually construct Laravel Pagination structure out of the array
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+        $currentItems = $storiesCollection->slice(($currentPage - 1) * $perPage, $perPage)->all();
+
+        $stories = new LengthAwarePaginator(
+            $currentItems, 
+            $storiesCollection->count(), 
+            $perPage, 
+            $currentPage, 
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        // 5. Return the public frontend view you provided
         return view('blog', compact('stories'));
     }
 }

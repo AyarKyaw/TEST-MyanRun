@@ -7,13 +7,19 @@ use App\Models\Race;
 use App\Models\RaceCard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\SiteSetting;
 
 class RaceController extends Controller
 {
     // Display races in the admin panel
     public function index() {
         $races = Race::with('cards')->get();
-        return view('dashboard.races.index', compact('races'));
+        
+        // Fetch and decode the multiple guide images array
+        $setting = SiteSetting::where('key', 'race_guide')->first();
+        $raceGuides = $setting && $setting->value ? json_decode($setting->value, true) : [];
+
+        return view('dashboard.races.index', compact('races', 'raceGuides'));
     }
 
     // Save a new race with its custom dynamic cards
@@ -143,5 +149,62 @@ class RaceController extends Controller
     {
         $races = Race::where('is_active', true)->with('cards')->get();
         return view('race', compact('races'));
+    }
+
+    public function updateGuide(Request $request)
+    {
+        $request->validate([
+            'new_race_guides' => 'nullable|array',
+            'new_race_guides.*' => 'required|image|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        $setting = SiteSetting::firstOrCreate(['key' => 'race_guide']);
+        // Get existing pages if any, or start fresh array
+        $currentGuides = $setting->value ? json_decode($setting->value, true) : [];
+
+        if ($request->hasFile('new_race_guides')) {
+            foreach ($request->file('new_race_guides') as $file) {
+                $filename = 'race_guide_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/guides'), $filename);
+                
+                // Append new page path to the array
+                $currentGuides[] = 'uploads/guides/' . $filename;
+            }
+
+            // Save the updated array back as JSON
+            $setting->value = json_encode($currentGuides);
+            $setting->save();
+
+            return redirect()->back()->with('success', 'Race guide pages added successfully!');
+        }
+
+        return redirect()->back()->withErrors(['race_guide' => 'No images selected to upload.']);
+    }
+
+    public function destroyGuidePage(Request $request)
+    {
+        $request->validate(['image_path' => 'required|string']);
+        $pathToRemove = $request->image_path;
+
+        $setting = SiteSetting::where('key', 'race_guide')->first();
+        if ($setting && $setting->value) {
+            $currentGuides = json_decode($setting->value, true);
+
+            // Filter out the deleted image path
+            $updatedGuides = array_filter($currentGuides, function($path) use ($pathToRemove) {
+                return $path !== $pathToRemove;
+            });
+
+            // Delete the physical file
+            if (file_exists(public_path($pathToRemove))) {
+                @unlink(public_path($pathToRemove));
+            }
+
+            // Re-index array keys and update database
+            $setting->value = empty($updatedGuides) ? null : json_encode(array_values($updatedGuides));
+            $setting->save();
+        }
+
+        return redirect()->back()->with('success', 'Guide page removed successfully.');
     }
 }

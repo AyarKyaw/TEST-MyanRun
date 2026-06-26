@@ -60,6 +60,100 @@ class SettingsController extends Controller
     }
 
     /**
+     * Display standalone success stories interface
+     */
+    public function storiesIndex()
+    {
+        $settings = SiteSetting::pluck('value', 'key')->all();
+        
+        // Fetch and parse the dynamic array JSON string cleanly
+        $stories = isset($settings['about-stories']) ? json_decode($settings['about-stories'], true) : [];
+        if (!is_array($stories)) {
+            $stories = [];
+        }
+
+        return view('dashboard.settings.story', compact('stories'));
+    }
+
+    /**
+     * Update dynamic success stories array structures and handle asset cleanups
+     */
+    public function storiesUpdate(Request $request)
+    {
+        $request->validate([
+            'story_titles'             => 'nullable|array',
+            'story_titles.*'           => 'required_with:story_titles|string|max:255',
+            'story_companies'          => 'nullable|array',
+            'story_companies.*'        => 'required_with:story_companies|string|max:255',
+            'existing_story_images'    => 'nullable|array',
+            'existing_story_images.*'  => 'nullable|string',
+            'story_images'             => 'nullable|array',
+            'story_images.*'           => 'nullable|image|mimes:jpeg,png,jpg,webp,svg|max:10240',
+        ]);
+
+        $storySetting = SiteSetting::where('key', 'about-stories')->first();
+        $currentStories = $storySetting ? json_decode($storySetting->value, true) : [];
+        if (!is_array($currentStories)) { $currentStories = []; }
+
+        $finalStories = [];
+        $titles = $request->input('story_titles', []);
+        $companies = $request->input('story_companies', []);
+        $existingImages = $request->input('existing_story_images', []);
+        $uploadedFiles = $request->file('story_images', []);
+
+        $maxIndex = max(count($existingImages), count($uploadedFiles), count($titles));
+
+        for ($i = 0; $i < $maxIndex; $i++) {
+            if (!isset($titles[$i])) {
+                continue;
+            }
+
+            $imgPath = $existingImages[$i] ?? null;
+
+            if ($request->hasFile("story_images.{$i}")) {
+                $file = $request->file("story_images.{$i}");
+                if ($file->isValid()) {
+                    $filename = time() . '_story_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                    $file->move(public_path('images/stories'), $filename);
+                    $newImgPath = 'images/stories/' . $filename;
+
+                    // Garbage collection for single altered media file row
+                    if (!empty($imgPath)) {
+                        $absoluteOldPath = public_path($imgPath);
+                        if (file_exists($absoluteOldPath)) { @unlink($absoluteOldPath); }
+                    }
+                    $imgPath = $newImgPath;
+                }
+            }
+
+            $finalStories[] = [
+                'title'      => $titles[$i],
+                'company'    => $companies[$i],
+                'image_path' => $imgPath ?? '',
+            ];
+        }
+
+        // Global structural dynamic garbage collection: Delete assets of items dropped completely
+        $savedImagePaths = array_filter(array_column($finalStories, 'image_path'));
+        foreach ($currentStories as $oldStory) {
+            $oldStoryPath = is_array($oldStory) ? ($oldStory['image_path'] ?? '') : '';
+            if (!empty($oldStoryPath) && !in_array($oldStoryPath, $savedImagePaths)) {
+                $absolutePath = public_path($oldStoryPath);
+                if (file_exists($absolutePath)) { @unlink($absolutePath); }
+            }
+        }
+
+        SiteSetting::updateOrCreate(
+            ['key' => 'about-stories'],
+            ['value' => json_encode(array_values($finalStories))]
+        );
+
+        Cache::forget('site_settings');
+
+        return redirect()->back()->with('success', 'Success stories records modified and synced successfully!');
+    }
+
+    /**
      * Update fixed About Us Core Metrics (Awards, Followers, Events, Miles)
      */
     public function aboutupdate(Request $request)

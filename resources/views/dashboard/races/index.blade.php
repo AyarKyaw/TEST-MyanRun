@@ -22,6 +22,93 @@
             </div>
         @endif
 
+        {{-- ========================================================================== --}}
+        {{-- SECTION 1: STANDALONE RACE GUIDE MANAGEMENT                                --}}
+        {{-- ========================================================================== --}}
+        <div class="row mb-5">
+            <div class="col-xl-12">
+                <div class="card border-info bg-light-subtle">
+                    <div class="card-header bg-info py-2">
+                        <h4 class="card-title text-white"><i class="fa fa-book me-2"></i>Global Race Guide Management (Multi-Page)</h4>
+                    </div>
+                    <div class="card-body bg-white">
+                        <div class="row">
+                            {{-- Left: View / Manage Uploaded Pages --}}
+                            <div class="col-md-7 mb-4 mb-md-0 border-end">
+                                <h5 class="text-black fw-bold mb-1">Current Guide Pages</h5>
+                                <p class="text-muted small mb-3">Manage and arrange all independent pages uploaded for the general guide booklet.</p>
+                                
+                                @if(!empty($raceGuides))
+                                    <div class="row">
+                                        @foreach($raceGuides as $index => $path)
+                                            <div class="col-md-4 col-sm-6 mb-3 text-center">
+                                                <div class="border p-2 rounded bg-light position-relative">
+                                                    <span class="badge bg-dark position-absolute top-0 start-0 m-1">Page {{ $index + 1 }}</span>
+                                                    <img src="{{ asset($path) }}" class="img-fluid rounded mb-2 border" style="max-height: 120px; object-fit: contain; width: 100%;">
+                                                    
+                                                    <div class="d-flex gap-1 justify-content-center">
+                                                        <a href="{{ asset($path) }}" target="_blank" class="btn btn-xs btn-info text-white w-50">
+                                                            <i class="fa fa-eye"></i> View
+                                                        </a>
+                                                        <button type="button" class="btn btn-xs btn-danger w-50" 
+                                                                onclick="if(confirm('Delete this guide page completely?')){ 
+                                                                    document.getElementById('delete-page-path').value = '{{ $path }}';
+                                                                    document.getElementById('delete-page-form').submit(); 
+                                                                }">
+                                                            <i class="fa fa-trash"></i> Drop
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="py-4 text-center border rounded border-dashed bg-light text-muted">
+                                        <i class="fa fa-book-open fa-2x mb-2 text-secondary"></i>
+                                        <p class="mb-0 small fw-bold">No guide papers uploaded to site settings yet.</p>
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            {{-- Right: Add More Papers --}}
+                            <div class="col-md-5 ps-md-4">
+                                <h5 class="text-black fw-bold mb-2">Upload Additional Guide Papers</h5>
+                                <form action="{{ route('admin.race-guide.update') }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="mb-3 p-3 border rounded bg-light" id="guide-repeater">
+                                        <div class="guide-input-row mb-2">
+                                            <label class="form-label small text-dark fw-bold">Select Image Paper(s)</label>
+                                            <input type="file" name="new_race_guides[]" class="form-control mb-1" accept="image/*" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="button" class="btn btn-xs btn-secondary mb-3" id="add-guide-field">
+                                        <i class="fa fa-plus"></i> Add Another Page Field
+                                    </button>
+                                    <div>
+                                        <button type="submit" class="btn btn-info text-white px-4 btn-sm">
+                                            <i class="fa fa-upload me-1"></i> Upload & Append Pages
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form id="delete-page-form" action="{{ route('admin.race-guide.page.destroy') }}" method="POST" style="display: none;">
+            @csrf
+            @method('DELETE')
+            <input type="hidden" name="image_path" id="delete-page-path">
+        </form>
+
+        <hr class="my-4">
+
+        {{-- ========================================================================== --}}
+        {{-- SECTION 2: RACE EVENTS MANAGEMENT                                         --}}
+        {{-- ========================================================================== --}}
         <div class="row mb-4">
             <div class="col-xl-12">
                 <div class="card border-primary">
@@ -174,7 +261,6 @@
                                                         <hr>
                                                         <label class="form-label text-black fw-bold mb-2">Upload Additional Cards</label>
                                                         
-                                                        {{-- Unique ID container for this specific modal instance --}}
                                                         <div id="edit-cards-repeater-{{ $race->id }}"></div>
                                                         
                                                         <button type="button" class="btn btn-info btn-xs mt-1" onclick="addCardRowToEdit({{ $race->id }})">
@@ -258,7 +344,7 @@
         }
     });
 
-    // Handle Edit Mode Repeater - Modified to use unique field names
+    // Handle Edit Mode Repeater
     function addCardRowToEdit(raceId) {
         const editContainer = document.getElementById(`edit-cards-repeater-${raceId}`);
         const currentRowsCount = editContainer.querySelectorAll('.edit-card-item-row').length;
@@ -291,5 +377,15 @@
             row.querySelector('input[type="file"]').setAttribute('name', `new_card_images[${index}]`);
         });
     }
+    document.getElementById('add-guide-field').addEventListener('click', function() {
+        const container = document.getElementById('guide-repeater');
+        const newRow = document.createElement('div');
+        newRow.className = 'guide-input-row mb-2 d-flex gap-2 align-items-center';
+        newRow.innerHTML = `
+            <input type="file" name="new_race_guides[]" class="form-control" accept="image/*" required>
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove()"><i class="fa fa-times"></i></button>
+        `;
+        container.appendChild(newRow);
+    });
 </script>
 @endsection

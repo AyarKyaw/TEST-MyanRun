@@ -32,7 +32,7 @@
                         <article class="entry format-standard wow fadeInUp animated">
                             {{-- Story Image --}}
                             <div class="feature-post">
-                                <img src="{{ asset($story->image) }}" alt="image">
+                                <img src="{{ asset($story->image_path ?? $story->image) }}" alt="image">
                             </div>
 
                             <div class="main-post">
